@@ -11,18 +11,24 @@
     (should= -1 (init-game)))
 
   (it "tie game"
-    (should (tie-game? [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["o"] ["x"]]))
-    (should-not (tie-game? [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] [""] [""]])))
+    (should (tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["O"] ["X"]]))
+    (should-not (tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""] [""]])))
 
   (it "someone made winning move"
-    (should= "x" (winner? [["x"] ["x"] ["x"] ["o"] ["x"] ["x"] [""] [""] [""]]))
-    (should-not (winner? [["o"] ["x"] ["x"] ["o"] ["x"] ["x"] [""] [""] [""]]))
-    (should= "x" (winner? [["o"] ["x"] ["x"] ["o"] ["x"] ["x"] ["x"] [""] [""]]))
-    (should= "o" (winner? [["o"] ["x"] ["x"] ["o"] ["o"] ["x"] [""] [""] ["o"]]))
-    (should (winner? [["x"] ["x"] ["o"]
-                           ["o"] ["o"] ["x"]
-                           ["x"] ["o"] ["x"]]))
+    (should= "X" (check-winner [["X"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
+    (should-not (check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
+    (should= "X" (check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] ["X"] [""] [""]]))
+    (should= "O" (check-winner [["O"] ["X"] ["X"] ["O"] ["O"] ["X"] [""] [""] ["O"]]))
+    (should= "tie" (check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]]))
     )
+
+  (it "minimaX"
+    (should= -1 (minimax [["X"] ["O"] ["O"]
+                          ["O"] ["X"] ["X"]
+                          ["X"] ["X"] ["X"]] true 0))
+    (should= -1 (minimax [["X"] [""] ["O"]
+                          ["O"] ["X"] ["X"]
+                          ["O"] ["X"] [""]] true 0)))
 
   #_(it "ai turn : currently returns index of random space"
     (should= -1
