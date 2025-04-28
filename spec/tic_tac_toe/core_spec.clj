@@ -16,20 +16,20 @@
 
   (it "someone made winning move"
     (should= "X" (check-winner [["X"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
-    ;(should-not (check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
-    ;(should= "X" (check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] ["X"] [""] [""]]))
-    ;(should= "O" (check-winner [["O"] ["X"] ["X"] ["O"] ["O"] ["X"] [""] [""] ["O"]]))
-    ;(should= "tie" (check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]]))
+    (should-not (check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
+    (should= "X" (check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] ["X"] [""] [""]]))
+    (should= "O" (check-winner [["O"] ["X"] ["X"] ["O"] ["O"] ["X"] [""] [""] ["O"]]))
+    (should= "tie" (check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]]))
     )
 
   (it "minimax : return -1 0 1"
-    (should= -1 (minimax [["X"] ["O"] ["O"]
+    (should= -10 (minimax [["X"] ["O"] ["O"]
                           ["O"] ["X"] ["X"]
                           ["X"] ["X"] ["X"]] false 0))
-    (should= -2 (minimax [["X"] [""] ["O"]
+    (should= -11 (minimax [["X"] [""] ["O"]
                           ["O"] ["X"] ["X"]
                           ["O"] ["X"] ["O"]] false 0))
-    (should= -4 (minimax [["X"] ["O"] [""]
+    (should= -13 (minimax [["X"] ["O"] [""]
                          [""] ["X"] [""]
                          [""] [""] ["O"]] false 0)))
 

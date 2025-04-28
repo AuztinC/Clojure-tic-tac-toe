@@ -21,7 +21,7 @@
         (first winner-result)
         (if (tie-game? b) "tie" nil))))
   )
-(def scores {"X" -1 "O" 1 "tie" 0})
+(def scores  {"X" -10 "O" 10 "tie" 0})
 
 (def open-positions (fn [b] (filter #(not= nil %)
                               (map-indexed
@@ -48,21 +48,23 @@
                   score (minimax new-b true (inc depth))]
               (recur (rest positions) (min best-score score)))))))))
 
+(def winning-move (fn [open b] (some (fn [pos]
+                          (let [new-b (assoc b pos ["O"])]
+                            (when (= "O" (check-winner new-b))
+                              pos)))
+                    open)))
+
+(def block-move (fn [open b] (some (fn [pos]
+                        (let [new-b (assoc b pos ["X"])]
+                          (when (= "X" (check-winner new-b))
+                            pos)))
+                  open)))
+
 (defn ai-turn [b]
   (let [open (open-positions b)]
-    (if-let [winning-move
-             (some (fn [pos]
-                     (let [new-b (assoc b pos ["O"])]
-                       (when (= "O" (check-winner new-b))
-                         pos)))
-               open)]
+    (if-let [winning-move (winning-move open b)]
       winning-move
-      (if-let [block-move
-               (some (fn [pos]
-                       (let [new-b (assoc b pos ["X"])]
-                         (when (= "X" (check-winner new-b))
-                           pos)))
-                 open)]
+      (if-let [block-move (block-move open b)]
         block-move
         (loop [positions open
                best-pos -1
@@ -80,7 +82,9 @@
   (loop [b board turn "player" winner (check-winner b)]
     (run! println (partition 3 b))
     (if winner
-      (println (str winner " is the winner!"))
+      (if (= "O" winner)
+        (println (str winner " is the winner!"))
+        (println "tie game"))
       (if (= "player" turn)
         (let [move (Integer/parseInt (read-line))
               new-b (assoc b move ["X"])]
