@@ -10,9 +10,10 @@
 (defn tie-game? [b]
   (every? false? (map #(empty? (first %)) b)))
 
-(def winner-result (fn [b] (first (filter #(and
-                                             (not= "" (first %))
-                                             (every? #{(first %)} %)) b))))
+(defn winner-result [b]
+  (first (filter #(and
+                    (not= "" (first %))
+                    (every? #{(first %)} %)) b)))
 
 (defn check-winner [b]
   (let [wm->board (for [wm winning-moves] (map #(first (nth b %)) wm))]
@@ -82,9 +83,11 @@
     (println (str winner " is the winner!"))
     (println "tie game")))
 
+(defn display-board [b] (run! println (partition 3 b)))
+
 (defn init-game []
   (loop [b board turn "player" winner (check-winner b)]
-    (run! println (partition 3 b))
+    (display-board b)
     (if winner
       (output-result winner)
       (if (= "player" turn)
@@ -95,7 +98,22 @@
               new-b (assoc b ai-move ["O"])]
           (recur new-b "player" (check-winner new-b)))))))
 
+(defn simulate-game [b turn]
+  (if-let [winner (check-winner b)]
+    winner
+    (let [next-move (if (= turn "player")
+                      (first (open-positions b))
+                      (ai-turn b))
+          next-b (assoc b next-move [(if (= turn "player") "X" "O")])]
+      (simulate-game next-b (if (= turn "player") "ai" "player")))))
 
+(defn simulate-all-first-moves []
+  (doseq [pos (open-positions board)]
+    (let [new-b (assoc board pos ["X"])
+          result (simulate-game new-b "ai")]
+      (println "X started at" pos ", result:" result)
+      (when (= result "X")
+        (println "Something is wrong, X won!")))))
 
 (defn -main [& args]
   (init-game))

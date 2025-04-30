@@ -62,6 +62,11 @@
                   [""] [""] ["X"]
                   [""] ["O"] [""]]))
     )
+
+  #_(it "test all starts"
+    (should-not= "X" (simulate-game [[""] [""] [""] [""] [""] [""] [""] [""] [""]] "player"))
+    (should-not (simulate-all-first-moves))
+    )
   )
 
 
