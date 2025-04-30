@@ -10,81 +10,83 @@
 (defn tie-game? [b]
   (every? false? (map #(empty? (first %)) b)))
 
+(def winner-result (fn [b] (first (filter #(and
+                                             (not= "" (first %))
+                                             (every? #{(first %)} %)) b))))
+
 (defn check-winner [b]
   (let [wm->board (for [wm winning-moves] (map #(first (nth b %)) wm))]
-    (let [winner-result
-          (first (filter #(and
-                            (not= "" (first %))
-                            (every? #{(first %)} %))
-                   wm->board))]
+    (let [winner-result (winner-result wm->board)]
       (if winner-result
         (first winner-result)
         (if (tie-game? b) "tie" nil))))
   )
-(def scores  {"X" -10 "O" 10 "tie" 0})
+(def scores {"X" -10 "O" 10 "tie" 0})
 
-(def open-positions (fn [b] (filter #(not= nil %)
-                              (map-indexed
-                                (fn [idx itm] (when (= "" (first itm)) idx)) b))))
+(defn open-positions [b]
+  (filter #(not= nil %)
+    (map-indexed
+      (fn [idx itm] (when (= "" (first itm)) idx)) b)))
 
-(defn minimax [b isMax? depth]
-  (let [result (check-winner b)]
-    (if result
-      (let [score (get scores result)]
-        (if (= score 0)
-          0
-          (- score depth)))
-      (if isMax?
-        (loop [positions (open-positions b) best-score ##-Inf]
-          (if (empty? positions)
-            best-score
-            (let [new-b (assoc b (first positions) ["O"])
-                  score (minimax new-b false (inc depth))]
-              (recur (rest positions) (max best-score score)))))
-        (loop [positions (open-positions b) best-score ##Inf]
-          (if (empty? positions)
-            best-score
-            (let [new-b (assoc b (first positions) ["X"])
-                  score (minimax new-b true (inc depth))]
-              (recur (rest positions) (min best-score score)))))))))
+(declare score-board)
+(defn- minimax [b maximizing? depth]
+  (let [spec {true  {:extrema-fn max :extreme ##-Inf :marker "O"}
+              false {:extrema-fn min :extreme ##Inf :marker "X"}}
+        {:keys [extrema-fn extreme marker]} (spec maximizing?)
+        ]
+    (loop [positions (open-positions b) best-score extreme]
+      (if (empty? positions)
+        best-score
+        (let [new-b (assoc b (first positions) [marker])
+              score (score-board new-b (not maximizing?) (inc depth))]
+          (recur (rest positions) (extrema-fn best-score score)))))))
 
-(def winning-move (fn [open b] (some (fn [pos]
-                          (let [new-b (assoc b pos ["O"])]
-                            (when (= "O" (check-winner new-b))
-                              pos)))
-                    open)))
+(defn score-game [result depth]
+  (let [score (get scores result)]
+    (if (= score 0)
+      0
+      (- score depth))))
 
-(def block-move (fn [open b] (some (fn [pos]
-                        (let [new-b (assoc b pos ["X"])]
-                          (when (= "X" (check-winner new-b))
-                            pos)))
-                  open)))
+(defn score-board [b maximizing? depth]
+  (if-let [result (check-winner b)]
+    (score-game result depth)
+    (minimax b maximizing? depth)))
+
+(defn winner->block [b]
+  (some (fn [m]
+          (some (fn [pos]
+                  (let [new-b (assoc b pos [m])]
+                    (when (= m (check-winner new-b))
+                      pos)))
+            (open-positions b)))
+    ["O" "X"]))
 
 (defn ai-turn [b]
   (let [open (open-positions b)]
-    (if-let [winning-move (winning-move open b)]
-      winning-move
-      (if-let [block-move (block-move open b)]
-        block-move
-        (loop [positions open
-               best-pos -1
-               best-score ##-Inf]
-          (if (empty? positions)
-            best-pos
-            (let [pos (first positions)
-                  new-b (assoc b pos ["O"])
-                  score (minimax new-b false 0)]
-              (if (> score best-score)
-                (recur (rest positions) pos score)
-                (recur (rest positions) best-pos best-score)))))))))
+    (if-let [best-move (winner->block b)]
+      best-move
+      (loop [positions open
+             best-pos -1
+             best-score ##-Inf]
+        (if (empty? positions)
+          best-pos
+          (let [pos (first positions)
+                new-b (assoc b pos ["O"])
+                score (score-board new-b false 0)]
+            (if (> score best-score)
+              (recur (rest positions) pos score)
+              (recur (rest positions) best-pos best-score))))))))
+
+(defn output-result [winner]
+  (if (= "O" winner)
+    (println (str winner " is the winner!"))
+    (println "tie game")))
 
 (defn init-game []
   (loop [b board turn "player" winner (check-winner b)]
     (run! println (partition 3 b))
     (if winner
-      (if (= "O" winner)
-        (println (str winner " is the winner!"))
-        (println "tie game"))
+      (output-result winner)
       (if (= "player" turn)
         (let [move (Integer/parseInt (read-line))
               new-b (assoc b move ["X"])]
@@ -92,6 +94,8 @@
         (let [ai-move (ai-turn b)
               new-b (assoc b ai-move ["O"])]
           (recur new-b "player" (check-winner new-b)))))))
+
+
 
 (defn -main [& args]
   (init-game))
