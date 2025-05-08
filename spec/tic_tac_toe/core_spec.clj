@@ -1,103 +1,137 @@
 (ns tic-tac-toe.core-spec
   (:require [speclj.core :refer :all]
-            [tic-tac-toe.core :refer :all]))
+            [tic-tac-toe.core :as sut]))
 
 (describe "tic tac toe"
   (with-stubs)
-
   ;(redefs-around [read-line (stub :read-line {:return "X"})])
 
-  (context "ui and game loop"
-    (redefs-around [read-line (constantly "8")])
+  #_(context "ui and game loop"
+      (redefs-around [read-line (constantly "8")])
+      (it "prints board"
+        (should= "([] [] [])\n([] [] [])\n([] [] [])\nPlayer X, enter your move:\n" (with-out-str (human-vs-computer board))))
+      (it "read user input"
+        (with-out-str
+          (should= ["X"] (nth (human-vs-computer board) 8))))
+      (it "let ai respond"
+        (with-out-str
+          (should= ["O"] (nth (human-vs-computer board) 4))))
+      (it "check's player choice"
+        (with-redefs [read-line (fn [] "8")]
+          (should= 8 (human-turn [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""]] "X"))))
+      )
+  (context "updated game loop using init-game"
+    #_(it "bad input"
+        (with-out-str
+          (should= 0 (with-in-str "-1\n0" (human-turn board "X")))))
+    (it "Human-vs-ai"
+      (should (clojure.string/includes? (with-out-str (with-in-str "0\n3\n7\n2" (sut/init-game sut/board [:human :ai] ["X" "O"]))) "O wins!\n")))
+    (it "ai-vs-ai"
+      (should (clojure.string/includes? (with-out-str (sut/init-game sut/board [:ai :ai] ["X" "O"])) "tie"))))
+
+  (context "select-game"
+    (redefs-around [sut/init-game (stub :init-game {:return :init})])
 
     (it "prints board"
-      (should= "([] [] [])\n([] [] [])\n([] [] [])\n" (with-out-str (human-vs-computer board))))
-    (it "read user input"
-      (with-out-str
-        (should= ["X"] (nth (human-vs-computer board) 8))))
-    (it "let ai respond"
-      (with-out-str
-        (should= ["O"] (nth (human-vs-computer board) 4))))
-    (it "check's player choice"
-      (with-redefs [read-line (fn [] "8")]
-        (should= 8 (check-position [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""]] "X"))))
+      (with-redefs [read-line (fn [] "1")]
+        (should= "Choose your game
+  1: Human vs Computer
+  2: Computer vs Human
+  3: Human vs Human
+  4: Computer vs Computer\n" (with-out-str (sut/select-game)))))
+
+    (it "retries for bad input"
+      (with-redefs [sut/select-game (stub :select-game {:invoke sut/select-game})]
+        (let [out (with-out-str (with-in-str "5\n1" (sut/select-game)))]
+          (should-contain "Not a game-mode, retry.\n" out)
+          (should-have-invoked :select-game {:times 2}))))
+
+    (it "selects human v ai"
+      (with-out-str (with-in-str "1\n" (sut/select-game)))
+      (should-have-invoked :init-game {:with [sut/board [:human :ai] ["X" "O"]]}))
+
+    (it "selects ai vs human"
+      (with-out-str (with-in-str "2\n" (sut/select-game)))
+      (should-have-invoked :init-game {:with [sut/board [:ai :human] ["X" "O"]]}))
+
+    (it "selects human v human"
+      (with-out-str (with-in-str "3\n" (sut/select-game)))
+      (should-have-invoked :init-game {:with [sut/board [:human :human] ["X" "O"]]}))
+
+    (it "selects ai v ai"
+      (with-out-str (with-in-str "4\n" (sut/select-game)))
+      (should-have-invoked :init-game {:with [sut/board [:ai :ai] ["X" "O"]]}))
     )
 
-  (it "bad input"
-      (with-out-str
-        (should= 0 (with-in-str "-1\n0"(check-position board "X")))))
-
   (context "won or tie?"
-   (it "tie game"
-    (should (tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["O"] ["X"]]))
-    (should-not (tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""] [""]])))
+    (it "tie game"
+      (should (sut/tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["O"] ["X"]]))
+      (should-not (sut/tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""] [""]])))
 
-  (it "someone made winning move"
-    (should= "X" (check-winner [["X"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
-    (should-not (check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
-    (should= "X" (check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] ["X"] [""] [""]]))
-    (should= "O" (check-winner [["O"] ["X"] ["X"] ["O"] ["O"] ["X"] [""] [""] ["O"]]))
-    (should= "tie" (check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]]))
-    ))
+    (it "someone made winning move"
+      (should= "X" (sut/check-winner [["X"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
+      (should-not (sut/check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
+      (should= "X" (sut/check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] ["X"] [""] [""]]))
+      (should= "O" (sut/check-winner [["O"] ["X"] ["X"] ["O"] ["O"] ["X"] [""] [""] ["O"]]))
+      (should= "tie" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]]))
+      ))
 
   (context "minimax"
     (it "tie game"
-      (should= 0 (score-board [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["X"] ["X"] ["O"]] false 0))
-      (should= 0 (score-board [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"] ["O"]] false 0))
-      (should= 0 (score-board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] true 0))
+      (should= 0 (sut/score-board [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["X"] ["X"] ["O"]] false 0))
+      (should= 0 (sut/score-board [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"] ["O"]] false 0))
+      (should= 0 (sut/score-board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] true 0))
       )
     (it "Player will win"
-      (should= -15 (score-board [["X"] ["X"] [""] [""] [""] [""] [""] [""] [""]] false 0))
-      (should= -15 (score-board [["X"] [""] [""] ["X"] [""] [""] [""] [""] [""]] false 0))
-      (should= -15 (score-board [["X"] [""] [""] ["X"] [""] ["O"] [""] [""] [""]] false 0))
+      (should= -15 (sut/score-board [["X"] ["X"] [""] [""] [""] [""] [""] [""] [""]] false 0))
+      (should= -15 (sut/score-board [["X"] [""] [""] ["X"] [""] [""] [""] [""] [""]] false 0))
+      (should= -15 (sut/score-board [["X"] [""] [""] ["X"] [""] ["O"] [""] [""] [""]] false 0))
       )
     (it "player has fork to win"
-      (should= -13 (score-board [["X"] ["X"] [""] ["X"] ["O"] ["O"] [""] [""] [""]] false 0))
-      (should= 9 (score-board [[""] ["O"] [""] ["X"] [""] ["X"] ["X"] ["O"] ["O"]] true 0))
+      (should= -13 (sut/score-board [["X"] ["X"] [""] ["X"] ["O"] ["O"] [""] [""] [""]] false 0))
+      (should= 9 (sut/score-board [[""] ["O"] [""] ["X"] [""] ["X"] ["X"] ["O"] ["O"]] true 0))
       )
     (it "ai will win"
-      (should= 6 (score-board [[""] [""] [""] [""] [""] [""] ["O"] ["O"] [""]] false 0))
+      (should= 6 (sut/score-board [[""] [""] [""] [""] [""] [""] ["O"] ["O"] [""]] false 0))
       )
     (it "ai has fork to win"
-      (should= 8 (score-board [["O"] ["X"] [""] ["O"] ["O"] [""] ["X"] [""] [""]] false 0))
-      (should= 8 (score-board [["O"] ["O"] [""] ["O"] [""] ["X"] ["X"] ["O"] ["O"]] false 0))
+      (should= 8 (sut/score-board [["O"] ["X"] [""] ["O"] ["O"] [""] ["X"] [""] [""]] false 0))
+      (should= 8 (sut/score-board [["O"] ["O"] [""] ["O"] [""] ["X"] ["X"] ["O"] ["O"]] false 0))
       )
     )
 
-  (it "ai turn : return index for chosen position"
-    (should= 6
-      (ai-turn [["X"] ["O"] [""]
-                ["X"] [""] [""]
-                [""] [""] [""]] "O")))
+  (context "ai-moves"
+    (it "ai turn : return index for chosen position"
+      (should= 6
+        (sut/ai-turn [["X"] ["O"] [""]
+                      ["X"] [""] [""]
+                      [""] [""] [""]] "O")))
 
-  (it "give winning move over block"
-    (should= 6 (winner->block
-                 [["X"] ["O"] [""]
-                  [""] ["X"] ["X"]
-                  [""] ["O"] ["O"]]))
-    (should= 4 (winner->block
-                 [["X"] ["O"] ["X"]
-                  [""] [""] ["X"]
-                  [""] ["O"] [""]]))
+    (it "give winning move over block"
+      (should= 6 (sut/winner->block
+                   [["X"] ["O"] [""]
+                    [""] ["X"] ["X"]
+                    [""] ["O"] ["O"]]))
+      (should= 4 (sut/winner->block
+                   [["X"] ["O"] ["X"]
+                    [""] [""] ["X"]
+                    [""] ["O"] [""]]))
+      ))
+  (it "simulate starts"
+    (should-not= "X" (sut/simulate-game [[""] [""] [""] [""] [""] [""] [""] [""] [""]] "player"))
+    (should-not (sut/simulate-all-first-moves))
     )
 
-  #_(it "init"
-    (should= -1 (init-game human-vs-computer)))
+  (it "makes a move"
+    (should= ["X" nil nil
+              nil nil nil
+              nil nil nil]
+      (sut/make-move (vec (repeat 9 nil)) 0))
+    (should= [nil "X" nil
+              nil nil nil
+              nil nil nil]
+      (sut/make-move (vec (repeat 9 nil)) 1)))
 
-  #_(it "simulate starts"
-    (should-not= "X" (simulate-game [[""] [""] [""] [""] [""] [""] [""] [""] [""]] "player"))
-    (should-not (simulate-all-first-moves))
-    )
-  #_(it "human vs computer"
-      (should= -1 (computer-vs-human)))
-  #_(it "computer vs human"
-      (should= "tie" (computer-vs-human)))
-  #_(it "computer vs computer"
-    (should= "tie" (comp-vs-comp [[""] [""] [""] [""] [""] [""] [""] [""] [""]] "X"))
-    (should= "tie" (comp-vs-comp [[""] [""] [""] [""] [""] [""] [""] [""] [""]] "O")))
-  #_(it "human vs human"
-      (should= -1 (human-vs-human)))
-  ;(redefs-around [read-line (stub :read-line {:return "X"})])
   )
 
 
