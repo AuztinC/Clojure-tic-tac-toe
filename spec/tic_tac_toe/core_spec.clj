@@ -4,22 +4,7 @@
 
 (describe "tic tac toe"
   (with-stubs)
-  ;(redefs-around [read-line (stub :read-line {:return "X"})])
 
-  #_(context "ui and game loop"
-      (redefs-around [read-line (constantly "8")])
-      (it "prints board"
-        (should= "([] [] [])\n([] [] [])\n([] [] [])\nPlayer X, enter your move:\n" (with-out-str (human-vs-computer board))))
-      (it "read user input"
-        (with-out-str
-          (should= ["X"] (nth (human-vs-computer board) 8))))
-      (it "let ai respond"
-        (with-out-str
-          (should= ["O"] (nth (human-vs-computer board) 4))))
-      (it "check's player choice"
-        (with-redefs [read-line (fn [] "8")]
-          (should= 8 (human-turn [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""]] "X"))))
-      )
   (context "updated game loop using init-game"
     #_(it "bad input"
         (with-out-str
@@ -77,37 +62,44 @@
       ))
 
   (context "minimax"
+    (it "empty"
+      (should= 0 (sut/score-board sut/board false 0 "O")))
     (it "tie game"
-      (should= 0 (sut/score-board [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["X"] ["X"] ["O"]] false 0))
-      (should= 0 (sut/score-board [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"] ["O"]] false 0))
-      (should= 0 (sut/score-board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] true 0))
-      )
+      (should= 0 (sut/score-board [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["X"] ["X"] ["O"]] false 0 "O")))
     (it "Player will win"
-      (should= -15 (sut/score-board [["X"] ["X"] [""] [""] [""] [""] [""] [""] [""]] false 0))
-      (should= -15 (sut/score-board [["X"] [""] [""] ["X"] [""] [""] [""] [""] [""]] false 0))
-      (should= -15 (sut/score-board [["X"] [""] [""] ["X"] [""] ["O"] [""] [""] [""]] false 0))
-      )
+      (should= -9 (sut/score-board [["X"] ["X"] [""] [""] [""] [""] [""] [""] [""]] false 0 "O")))
     (it "player has fork to win"
-      (should= -13 (sut/score-board [["X"] ["X"] [""] ["X"] ["O"] ["O"] [""] [""] [""]] false 0))
-      (should= 9 (sut/score-board [[""] ["O"] [""] ["X"] [""] ["X"] ["X"] ["O"] ["O"]] true 0))
-      )
+      (should= -9 (sut/score-board [["X"] ["X"] [""] ["X"] ["O"] ["O"] [""] [""] [""]] false 0 "O"))
+      (should= 9 (sut/score-board [[""] ["O"] [""] ["X"] [""] ["X"] ["X"] ["O"] ["O"]] true 0 "O")))
     (it "ai will win"
-      (should= 6 (sut/score-board [[""] [""] [""] [""] [""] [""] ["O"] ["O"] [""]] false 0))
-      )
+      (should= 6 (sut/score-board [[""] [""] [""] [""] [""] [""] ["O"] ["O"] [""]] false 0 "O")))
     (it "ai has fork to win"
-      (should= 8 (sut/score-board [["O"] ["X"] [""] ["O"] ["O"] [""] ["X"] [""] [""]] false 0))
-      (should= 8 (sut/score-board [["O"] ["O"] [""] ["O"] [""] ["X"] ["X"] ["O"] ["O"]] false 0))
-      )
+      (should= 8 (sut/score-board [["O"] ["X"] [""] ["O"] ["O"] [""] ["X"] [""] [""]] false 0 "O"))
+      (should= 8 (sut/score-board [["O"] ["O"] [""] ["O"] [""] ["X"] ["X"] ["O"] ["O"]] false 0 "O")))
     )
 
   (context "ai-moves"
-    (it "ai turn : return index for chosen position"
+    (it "blank board gives 0"
+      (should= 0 (sut/ai-turn sut/board "O")))
+    (it "plays center asap"
+      (should= 4 (sut/ai-turn (sut/play-turn sut/board "X" (constantly 0)) "O")))
+    (it "defends against player win"
+      (should= 2 (sut/ai-turn [["X"] ["X"] [""]
+                               [""] ["O"] [""]
+                               [""] [""] [""]] "O"))
+      (should= 6 (sut/ai-turn [["X"] [""] [""]
+                               ["X"] ["O"] [""]
+                               [""] [""] [""]] "O"))
+      (should= 5 (sut/ai-turn [["O"] [""] [""]
+                               ["X"] ["X"] [""]
+                               [""] [""] [""]] "O")))
+    #_(it "ai turn : return index for chosen position"
       (should= 6
         (sut/ai-turn [["X"] ["O"] [""]
                       ["X"] [""] [""]
                       [""] [""] [""]] "O")))
 
-    (it "give winning move over block"
+    #_(it "give winning move over block"
       (should= 6 (sut/winner->block
                    [["X"] ["O"] [""]
                     [""] ["X"] ["X"]

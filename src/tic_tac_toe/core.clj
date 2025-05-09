@@ -39,31 +39,31 @@
       (fn [idx itm] (when (= "" (first itm)) idx)) b)))
 
 (declare score-board)
-(defn- minimax [b maximizing? depth]
-  (let [spec {true  {:extrema-fn max :extreme ##-Inf :marker "O"}
-              false {:extrema-fn min :extreme ##Inf :marker "X"}}
-        {:keys [extrema-fn extreme marker]} (spec maximizing?)]
+(defn- minimax [b maximizing? depth ai-marker]
+  (let [p1-marker ai-marker
+        p2-marker (if (= "O" p1-marker) "X" "O")
+        spec {true  {:extrema-fn max :extreme ##-Inf :current-marker p1-marker}
+              false {:extrema-fn min :extreme ##Inf :current-marker p2-marker}}
+        {:keys [extrema-fn extreme current-marker]} (spec maximizing?)]
     (loop [positions (open-positions b) best-score extreme]
       (if (empty? positions)
         best-score
-        (let [new-b (assoc b (first positions) [marker])
-              score (score-board new-b (not maximizing?) (inc depth))]
+        (let [new-b (assoc b (first positions) [current-marker])
+              score (score-board new-b (not maximizing?) (inc depth) ai-marker)]
           (recur (rest positions) (extrema-fn best-score score)))))))
 
-(def scores {"X" -10 "O" 10 "tie" 0})
+(defn score-game [result depth ai-marker]
+  (cond
+    (= result ai-marker) (- 10 depth)
+    (= result "tie") 0
+    :else (+ depth -10)))
 
-(defn score-game [result depth]
-  (let [score (get scores result)]
-    (if (= score 0)
-      0
-      (- score depth))))
-
-(defn score-board [b maximizing? depth]
+(defn score-board [b maximizing? depth ai-marker]
   (if-let [result (check-winner b)]
-    (score-game result depth)
-    (minimax b maximizing? depth)))
+    (score-game result depth ai-marker)
+    (minimax b maximizing? depth ai-marker)))
 
-(defn winner->block [b]
+#_(defn winner->block [b]
   (some (fn [m]
           (some (fn [pos]
                   (let [new-b (assoc b pos [m])]
@@ -73,7 +73,25 @@
     ["O" "X"]))
 
 (defn ai-turn [b marker]
-  (let [open (open-positions b)]
+  (let [open (open-positions b)
+        possible-boards (map #(assoc b % [marker]) open)
+        board-scores (map #(score-board % false 0 marker) possible-boards)]
+    (first (first (sort-by second > (zipmap open board-scores)))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  #_(let [open (open-positions b)]
     (if-let [best-move (winner->block b)]
       best-move
       (loop [positions open
@@ -188,18 +206,5 @@
 (defn -main [& args]
   (select-game))
 
-
 (defn make-move [board move]
   (assoc board move "X"))
-
-; Scores a player win as terrible
-; Implement minimax on TTT board
-; Computer has to determine what the BEST move is
-; Computer has to determine which move to make
-; Computer has to respond to one of my moves
-
-; Play single move in the terminal
-; Play in the terminal
-; Implement unbeatable TTT
-;
-; Make a move on an empty board
