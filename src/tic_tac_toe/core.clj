@@ -63,11 +63,26 @@
     (score-game result depth ai-marker)
     (minimax b maximizing? depth ai-marker)))
 
-(defn ai-turn [b marker]
-  (let [open (open-positions b)
-        possible-boards (map #(assoc b % [marker]) open)
+(defn hard [board marker open]
+  (let [possible-boards (map #(assoc board % [marker]) open)
         board-scores (map #(score-board % false 0 marker) possible-boards)]
     (first (first (sort-by second > (zipmap open board-scores))))))
+
+(defn easy [open]
+  (rand-nth open))
+
+(defn medium [board marker open]
+  (let [chance (rand-int 2)]
+    (cond
+      (= 0 chance) (hard board marker open)
+      (= 1 chance) (easy open))))
+
+(defn ai-turn [board marker difficulty]
+  (let [open (open-positions board)]
+    (cond
+      (= :hard difficulty) (hard board marker open)
+      (= :medium difficulty) (medium board marker open)
+      (= :easy difficulty) (easy open))))
 
 (defn empty-space? [board move]
   (= [""] (get board move)))
@@ -94,7 +109,7 @@
   (if (= "p1" turn) "p2" "p1"))
 
 (defn init-game
-  [board [player1-type player2-type] [player1-marker player2-marker]]
+  [board [player1-type player2-type] [player1-marker player2-marker] difficulties]
   (loop [board board result (check-winner board) turn "p1"]
     (display-board board)
     (if result
@@ -105,7 +120,10 @@
             player-fn (cond
                         (= :human player-type) human-turn
                         (= :ai player-type) ai-turn)
-            new-board (play-turn board marker player-fn)]
+            difficulty (cond
+                         (and (= "p1" turn) (= :ai player-type)) (first difficulties)
+                         (and (= "p2" turn) (= :ai player-type)) (second difficulties))
+            new-board (play-turn board marker (player-fn difficulty))]
         (recur new-board
           (check-winner new-board)
           (set-turn turn))))))
@@ -116,22 +134,23 @@
   (select-difficulty iterations))
 
 (defn print-difficulty []
-  (println "Choose AI difficulty
+  (println "Choose AI difficulties
   1: Easy
   2: Medium
   3: Hard"))
 
 (defn select-difficulty [iterations]
   (print-difficulty)
-  (loop [out [] player-choice (read-line)]
+  (loop [out []]
     (if (= iterations (count out))
       out
-      (let [option (cond
+      (let [player-choice (read-line)
+            option (cond
                      (= "1" player-choice) :easy
                      (= "2" player-choice) :medium
                      (= "3" player-choice) :hard
                      :else (retry-difficulty iterations))]
-        (recur (conj out option) (read-line))))))
+        (recur (conj out option))))))
 
 (defn- print-game-options []
   (println "Choose your game
@@ -149,10 +168,10 @@
   (print-game-options)
   (let [game (read-line)]
     (cond
-      (= "1" game) (init-game board [:human :ai] ["X" "O"])
-      (= "2" game) (init-game board [:ai :human] ["X" "O"])
-      (= "3" game) (init-game board [:human :human] ["X" "O"])
-      (= "4" game) (init-game board [:ai :ai] ["X" "O"])
+      (= "1" game) (init-game board [:human :ai] ["X" "O"] (select-difficulty 1))
+      (= "2" game) (init-game board [:ai :human] ["X" "O"] (select-difficulty 1))
+      (= "3" game) (init-game board [:human :human] ["X" "O"] (select-difficulty 0))
+      (= "4" game) (init-game board [:ai :ai] ["X" "O"] (select-difficulty 2))
       :else (retry-select-game))))
 
 (defn print-simulated [result]
@@ -164,7 +183,7 @@
     winner
     (let [next-move (if (= turn "player")
                       (first (open-positions b))
-                      (ai-turn b "O"))
+                      (ai-turn b "O" :easy))
           next-b (assoc b next-move [(if (= turn "player") "X" "O")])]
       (simulate-game next-b (if (= turn "player") "ai" "player")))))
 
@@ -172,8 +191,7 @@
   (doseq [pos (open-positions board)]
     (let [new-b (assoc board pos ["X"])
           result (simulate-game new-b "ai")]
-      (print-simulated result)
-      )))
+      (print-simulated result))))
 
 (defn -main [& args]
   (select-game))
