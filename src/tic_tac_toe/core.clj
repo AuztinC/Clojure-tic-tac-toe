@@ -1,5 +1,5 @@
 (ns tic-tac-toe.core
-  (:require [clojure.string :as str]))
+  (:require [tic-tac-toe.play-turn :as pt]))
 
 (def board [[""] [""] [""] [""] [""] [""] [""] [""] [""]])
 
@@ -14,7 +14,7 @@
     (println "tie game")
     (println (str result " wins!"))))
 
-(def print-bad-move (println "oops bad move, try again"))
+(defn print-bad-move [] (println "oops bad move, try again"))
 
 (defn print-player-prompt [marker] (println (str "Player " marker ", enter your move:")))
 
@@ -90,7 +90,7 @@
 (declare human-turn)
 (defn bad-move [board marker]
   (do
-    print-bad-move
+    #_(print-bad-move)
     (display-board board)
     (human-turn board marker)))
 
@@ -101,12 +101,39 @@
       move
       (bad-move board marker))))
 
-(defn play-turn [b marker move-fn]
-  (let [move (move-fn b marker)]
-    (assoc b move [marker])))
+;(defmulti play-turn
+;  (fn [board marker move-fn & [diff]]
+;    (if (some? diff)
+;      :ai
+;      :human)))
+;
+;(defmethod play-turn :human [board marker move-fn _]
+;  (let [move (move-fn board marker)]
+;    (assoc board move [marker])))
+;
+;(defmethod play-turn :ai [board marker move-fn diff]
+;  (let [move (move-fn board marker diff)]
+;    (assoc board move [marker])))
 
 (defn set-turn [turn]
   (if (= "p1" turn) "p2" "p1"))
+
+(defn set-players [turn player1-marker player1-type player2-marker player2-type]
+  (if (= "p1" turn)
+    [player1-marker player1-type]
+    [player2-marker player2-type]))
+
+(defn set-player-fn [player-type]
+  (cond
+    (= :human player-type) human-turn
+    (= :ai player-type) ai-turn))
+
+(defn set-difficulties [turn player-type difficulties]
+  (if (= 1 (count difficulties))
+    (if(= :ai player-type)(first difficulties))
+    (cond
+      (and (= "p1" turn) (= :ai player-type)) (first difficulties)
+      (and (= "p2" turn) (= :ai player-type)) (second difficulties))))
 
 (defn init-game
   [board [player1-type player2-type] [player1-marker player2-marker] difficulties]
@@ -114,16 +141,10 @@
     (display-board board)
     (if result
       (output-result result)
-      (let [[marker player-type] (if (= "p1" turn)
-                                   [player1-marker player1-type]
-                                   [player2-marker player2-type])
-            player-fn (cond
-                        (= :human player-type) human-turn
-                        (= :ai player-type) ai-turn)
-            difficulty (cond
-                         (and (= "p1" turn) (= :ai player-type)) (first difficulties)
-                         (and (= "p2" turn) (= :ai player-type)) (second difficulties))
-            new-board (play-turn board marker (player-fn difficulty))]
+      (let [[marker player-type] (set-players turn player1-marker player1-type player2-marker player2-type)
+            player-fn (set-player-fn player-type)
+            difficulty (set-difficulties turn player-type difficulties)
+            new-board (pt/play-turn board marker player-fn difficulty)]
         (recur new-board
           (check-winner new-board)
           (set-turn turn))))))
@@ -174,27 +195,6 @@
       (= "4" game) (init-game board [:ai :ai] ["X" "O"] (select-difficulty 2))
       :else (retry-select-game))))
 
-(defn print-simulated [result]
-  (when (= result "X")
-    (println "Something is wrong, X won!")))
-
-(defn simulate-game [b turn]
-  (if-let [winner (check-winner b)]
-    winner
-    (let [next-move (if (= turn "player")
-                      (first (open-positions b))
-                      (ai-turn b "O" :easy))
-          next-b (assoc b next-move [(if (= turn "player") "X" "O")])]
-      (simulate-game next-b (if (= turn "player") "ai" "player")))))
-
-(defn simulate-all-first-moves []
-  (doseq [pos (open-positions board)]
-    (let [new-b (assoc board pos ["X"])
-          result (simulate-game new-b "ai")]
-      (print-simulated result))))
-
 (defn -main [& args]
   (select-game))
 
-(defn make-move [board move]
-  (assoc board move "X"))

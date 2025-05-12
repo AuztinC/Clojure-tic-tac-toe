@@ -5,21 +5,27 @@
 (describe "tic tac toe"
   (with-stubs)
 
-  #_(context "updated game loop using init-game"
-      (it "Human-vs-ai"
-        (should (clojure.string/includes? (with-out-str (with-in-str "0\n3\n7\n" (sut/init-game sut/board [:human :ai] ["X" "O"]))) "O wins!\n")))
-      (it "ai-vs-ai"
-        (should (clojure.string/includes? (with-out-str (sut/init-game sut/board [:ai :ai] ["X" "O"])) "tie")))
-      )
+  (context "updated game loop using init-game"
+    (it "prints board first"
+      (with-redefs [sut/display-board (stub :display-board)]
+        (with-out-str
+          (with-in-str "0\n3\n7"
+            (sut/init-game sut/board [:human :ai] ["X" "O"] [:hard])))
+        (should-have-invoked :display-board)))
+
+    (it "Human-vs-ai"
+      (should (clojure.string/includes? (with-out-str (with-in-str "0\n3\n7\n" (sut/init-game sut/board [:human :ai] ["X" "O"] [:hard]))) "O wins!\n")))
+    (it "ai-vs-ai"
+      (should (clojure.string/includes? (with-out-str (sut/init-game sut/board [:ai :ai] ["X" "O"] [:hard :hard])) "tie")))
+    )
 
   (context "select-game"
     (redefs-around [sut/init-game (stub :init-game {:return :init})])
 
     (it "prints game options"
       (with-redefs [read-line (fn [] "1")]
-        (should= "Choose your game\n1: Human vs Computer\n2: Computer vs Human\n3: Human vs Human
-  4: Computer vs Computer\nChoose AI difficulties
-  1: Easy\n2: Medium\n3: Hard\n" (with-out-str (sut/select-game)))))
+        (should= "Choose your game\n  1: Human vs Computer\n  2: Computer vs Human\n  3: Human vs Human\n  4: Computer vs Computer\nChoose AI difficulties\n  1: Easy\n  2: Medium\n  3: Hard\n"
+          (with-out-str (sut/select-game)))))
 
     (it "game-mode retries for bad input"
       (with-redefs [sut/select-game (stub :select-game {:invoke sut/select-game})]
@@ -44,7 +50,7 @@
       (should-have-invoked :init-game {:with [sut/board [:ai :ai] ["X" "O"] [:easy :hard]]}))
     )
 
-  (focus-context "difficulty functions"
+  (context "difficulty functions"
     (it "hard runs minimax, returns best position"
       (let [temp-board [["X"] ["X"] [""] [""] ["O"] [""] [""] [""] [""]]]
         (should= 2 (sut/hard temp-board "O" (sut/open-positions temp-board)))))
@@ -52,9 +58,9 @@
       (with-redefs [rand-nth (constantly 1)]
         (should= 1 (sut/easy (sut/open-positions sut/board)))))
     (it "medium can give hard"
-    (with-redefs [rand-int (fn [& _] 0)
-                  sut/hard (fn [& _] 5)]
-     (should= 5 (sut/medium sut/board "O" (sut/open-positions sut/board)))))
+      (with-redefs [rand-int (fn [& _] 0)
+                    sut/hard (fn [& _] 5)]
+        (should= 5 (sut/medium sut/board "O" (sut/open-positions sut/board)))))
     (it "medium can give easy"
       (with-redefs [rand-int (fn [& _] 1)
                     sut/easy (fn [& _] 3)]
@@ -89,7 +95,7 @@
       (with-redefs [sut/medium (stub :medium {:invoke sut/medium})]
         (sut/ai-turn sut/board "O" :medium)
         (should-have-invoked :medium)))
-    (it "can invoke medium"
+    (it "can invoke easy"
       (with-redefs [sut/easy (stub :easy {:invoke sut/easy})]
         (sut/ai-turn sut/board "O" :easy)
         (should-have-invoked :easy))))
@@ -128,7 +134,9 @@
     (it "blank board gives 0"
       (should= 0 (sut/ai-turn sut/board "O" :hard)))
     (it "plays center asap"
-      (should= 4 (sut/ai-turn (sut/play-turn sut/board "X" (constantly 0)) "O" :hard)))
+      (should= 4 (sut/ai-turn [["X"] [""] [""]
+                               [""] [""] [""]
+                               [""] [""] [""]] "O" :hard)))
     (it "defends against player win"
       (should= 2 (sut/ai-turn [["X"] ["X"] [""]
                                [""] ["O"] [""]
@@ -139,21 +147,6 @@
       (should= 5 (sut/ai-turn [["O"] [""] [""]
                                ["X"] ["X"] [""]
                                [""] [""] [""]] "O" :hard))))
-
-  #_(it "simulate starts"
-      (should-not= "X" (sut/simulate-game [[""] [""] [""] [""] [""] [""] [""] [""] [""]] "player"))
-      (should-not (sut/simulate-all-first-moves))
-      )
-
-  (it "makes a move"
-    (should= ["X" nil nil
-              nil nil nil
-              nil nil nil]
-      (sut/make-move (vec (repeat 9 nil)) 0))
-    (should= [nil "X" nil
-              nil nil nil
-              nil nil nil]
-      (sut/make-move (vec (repeat 9 nil)) 1)))
 
   )
 
