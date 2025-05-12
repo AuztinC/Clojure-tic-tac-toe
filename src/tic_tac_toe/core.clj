@@ -1,5 +1,6 @@
 (ns tic-tac-toe.core
-  (:require [tic-tac-toe.play-turn :as pt]))
+  (:require [tic-tac-toe.play-turn :as pt]
+            [tic-tac-toe.printer :as printer]))
 
 (def board [[""] [""] [""] [""] [""] [""] [""] [""] [""]])
 
@@ -8,15 +9,6 @@
 (def winning-moves [[0 1 2] [3 4 5] [6 7 8]
                     [0 3 6] [1 4 7] [2 5 8]
                     [0 4 8] [2 4 6]])
-
-(defn output-result [result]
-  (if (= "tie" result)
-    (println "tie game")
-    (println (str result " wins!"))))
-
-(defn print-bad-move [] (println "oops bad move, try again"))
-
-(defn print-player-prompt [marker] (println (str "Player " marker ", enter your move:")))
 
 (defn tie-game? [b]
   (every? false? (map #(empty? (first %)) b)))
@@ -90,30 +82,16 @@
 (declare human-turn)
 (defn bad-move [board marker]
   (do
-    #_(print-bad-move)
+    (printer/print-bad-move)
     (display-board board)
     (human-turn board marker)))
 
 (defn human-turn [board marker]
-  (print-player-prompt marker)
+  (printer/print-player-prompt marker)
   (let [move (Integer/parseInt (read-line))]
     (if (empty-space? board move)
       move
       (bad-move board marker))))
-
-;(defmulti play-turn
-;  (fn [board marker move-fn & [diff]]
-;    (if (some? diff)
-;      :ai
-;      :human)))
-;
-;(defmethod play-turn :human [board marker move-fn _]
-;  (let [move (move-fn board marker)]
-;    (assoc board move [marker])))
-;
-;(defmethod play-turn :ai [board marker move-fn diff]
-;  (let [move (move-fn board marker diff)]
-;    (assoc board move [marker])))
 
 (defn set-turn [turn]
   (if (= "p1" turn) "p2" "p1"))
@@ -140,7 +118,7 @@
   (loop [board board result (check-winner board) turn "p1"]
     (display-board board)
     (if result
-      (output-result result)
+      (printer/output-result result)
       (let [[marker player-type] (set-players turn player1-marker player1-type player2-marker player2-type)
             player-fn (set-player-fn player-type)
             difficulty (set-difficulties turn player-type difficulties)
@@ -154,14 +132,8 @@
   (println "Not a difficulty, retry.")
   (select-difficulty iterations))
 
-(defn print-difficulty []
-  (println "Choose AI difficulties
-  1: Easy
-  2: Medium
-  3: Hard"))
-
 (defn select-difficulty [iterations]
-  (print-difficulty)
+  (printer/print-difficulty)
   (loop [out []]
     (if (= iterations (count out))
       out
@@ -173,20 +145,13 @@
                      :else (retry-difficulty iterations))]
         (recur (conj out option))))))
 
-(defn- print-game-options []
-  (println "Choose your game
-  1: Human vs Computer
-  2: Computer vs Human
-  3: Human vs Human
-  4: Computer vs Computer"))
-
 (declare select-game)
 (defn- retry-select-game []
   (println "Not a game-mode, retry.")
   (select-game))
 
 (defn select-game []
-  (print-game-options)
+  (printer/print-game-options)
   (let [game (read-line)]
     (cond
       (= "1" game) (init-game board [:human :ai] ["X" "O"] (select-difficulty 1))
