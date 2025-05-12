@@ -1,5 +1,7 @@
 (ns tic-tac-toe.printer)
 
+(defn display-board [board] (run! println (partition 3 board)))
+
 (defn print-game-options []
   (println "Choose your game
   1: Human vs Computer

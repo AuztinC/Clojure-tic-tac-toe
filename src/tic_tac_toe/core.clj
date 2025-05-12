@@ -1,80 +1,9 @@
 (ns tic-tac-toe.core
   (:require [tic-tac-toe.play-turn :as pt]
-            [tic-tac-toe.printer :as printer]))
+            [tic-tac-toe.printer :as printer]
+            [tic-tac-toe.ai-turn :as ai]))
 
 (def board [[""] [""] [""] [""] [""] [""] [""] [""] [""]])
-
-(defn display-board [b] (run! println (partition 3 b)))
-
-(def winning-moves [[0 1 2] [3 4 5] [6 7 8]
-                    [0 3 6] [1 4 7] [2 5 8]
-                    [0 4 8] [2 4 6]])
-
-(defn tie-game? [b]
-  (every? false? (map #(empty? (first %)) b)))
-
-(defn winner-result [b]
-  (first (filter #(and
-                    (not= "" (first %))
-                    (every? #{(first %)} %)) b)))
-
-(defn check-winner [b]
-  (let [wm->board (for [wm winning-moves] (map #(first (nth b %)) wm))]
-    (let [winner-result (winner-result wm->board)]
-      (if winner-result
-        (first winner-result)
-        (if (tie-game? b) "tie" nil)))))
-
-(defn open-positions [b]
-  (filter #(not= nil %)
-    (map-indexed
-      (fn [idx itm] (when (= "" (first itm)) idx)) b)))
-
-(declare score-board)
-(defn- minimax [b maximizing? depth ai-marker]
-  (let [p1-marker ai-marker
-        p2-marker (if (= "O" p1-marker) "X" "O")
-        spec {true  {:extrema-fn max :extreme ##-Inf :current-marker p1-marker}
-              false {:extrema-fn min :extreme ##Inf :current-marker p2-marker}}
-        {:keys [extrema-fn extreme current-marker]} (spec maximizing?)]
-    (loop [positions (open-positions b) best-score extreme]
-      (if (empty? positions)
-        best-score
-        (let [new-b (assoc b (first positions) [current-marker])
-              score (score-board new-b (not maximizing?) (inc depth) ai-marker)]
-          (recur (rest positions) (extrema-fn best-score score)))))))
-
-(defn score-game [result depth ai-marker]
-  (cond
-    (= result ai-marker) (- 10 depth)
-    (= result "tie") 0
-    :else (+ depth -10)))
-
-(defn score-board [b maximizing? depth ai-marker]
-  (if-let [result (check-winner b)]
-    (score-game result depth ai-marker)
-    (minimax b maximizing? depth ai-marker)))
-
-(defn hard [board marker open]
-  (let [possible-boards (map #(assoc board % [marker]) open)
-        board-scores (map #(score-board % false 0 marker) possible-boards)]
-    (first (first (sort-by second > (zipmap open board-scores))))))
-
-(defn easy [open]
-  (rand-nth open))
-
-(defn medium [board marker open]
-  (let [chance (rand-int 2)]
-    (cond
-      (= 0 chance) (hard board marker open)
-      (= 1 chance) (easy open))))
-
-(defn ai-turn [board marker difficulty]
-  (let [open (open-positions board)]
-    (cond
-      (= :hard difficulty) (hard board marker open)
-      (= :medium difficulty) (medium board marker open)
-      (= :easy difficulty) (easy open))))
 
 (defn empty-space? [board move]
   (= [""] (get board move)))
@@ -83,7 +12,7 @@
 (defn bad-move [board marker]
   (do
     (printer/print-bad-move)
-    (display-board board)
+    (printer/display-board board)
     (human-turn board marker)))
 
 (defn human-turn [board marker]
@@ -104,7 +33,7 @@
 (defn set-player-fn [player-type]
   (cond
     (= :human player-type) human-turn
-    (= :ai player-type) ai-turn))
+    (= :ai player-type) ai/ai-turn))
 
 (defn set-difficulties [turn player-type difficulties]
   (if (= 1 (count difficulties))
@@ -115,8 +44,8 @@
 
 (defn init-game
   [board [player1-type player2-type] [player1-marker player2-marker] difficulties]
-  (loop [board board result (check-winner board) turn "p1"]
-    (display-board board)
+  (loop [board board result (ai/check-winner board) turn "p1"]
+    (printer/display-board board)
     (if result
       (printer/output-result result)
       (let [[marker player-type] (set-players turn player1-marker player1-type player2-marker player2-type)
@@ -124,7 +53,7 @@
             difficulty (set-difficulties turn player-type difficulties)
             new-board (pt/play-turn board marker player-fn difficulty)]
         (recur new-board
-          (check-winner new-board)
+          (ai/check-winner new-board)
           (set-turn turn))))))
 
 (declare select-difficulty)
