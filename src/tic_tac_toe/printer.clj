@@ -23,3 +23,13 @@
 (defn print-bad-move [] (println "oops bad move, try again"))
 
 (defn print-player-prompt [marker] (println (str "Player " marker ", enter your move:")))
+
+(declare select-game)
+(defn retry-select-game []
+  (println "Not a game-mode, retry.")
+  (select-game))
+
+(declare select-difficulty)
+(defn retry-difficulty [iterations]
+  (println "Not a difficulty, retry.")
+  (select-difficulty iterations))

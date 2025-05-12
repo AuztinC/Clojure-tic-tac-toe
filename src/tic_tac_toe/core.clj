@@ -1,26 +1,10 @@
 (ns tic-tac-toe.core
   (:require [tic-tac-toe.play-turn :as pt]
+            [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.ai-turn :as ai]))
 
 (def board [[""] [""] [""] [""] [""] [""] [""] [""] [""]])
-
-(defn empty-space? [board move]
-  (= [""] (get board move)))
-
-(declare human-turn)
-(defn bad-move [board marker]
-  (do
-    (printer/print-bad-move)
-    (printer/display-board board)
-    (human-turn board marker)))
-
-(defn human-turn [board marker]
-  (printer/print-player-prompt marker)
-  (let [move (Integer/parseInt (read-line))]
-    (if (empty-space? board move)
-      move
-      (bad-move board marker))))
 
 (defn set-turn [turn]
   (if (= "p1" turn) "p2" "p1"))
@@ -32,7 +16,7 @@
 
 (defn set-player-fn [player-type]
   (cond
-    (= :human player-type) human-turn
+    (= :human player-type) ht/human-turn
     (= :ai player-type) ai/ai-turn))
 
 (defn set-difficulties [turn player-type difficulties]
