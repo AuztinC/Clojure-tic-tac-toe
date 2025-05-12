@@ -63,61 +63,28 @@
     (score-game result depth ai-marker)
     (minimax b maximizing? depth ai-marker)))
 
-#_(defn winner->block [b]
-  (some (fn [m]
-          (some (fn [pos]
-                  (let [new-b (assoc b pos [m])]
-                    (when (= m (check-winner new-b))
-                      pos)))
-            (open-positions b)))
-    ["O" "X"]))
-
 (defn ai-turn [b marker]
   (let [open (open-positions b)
         possible-boards (map #(assoc b % [marker]) open)
         board-scores (map #(score-board % false 0 marker) possible-boards)]
-    (first (first (sort-by second > (zipmap open board-scores)))))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  #_(let [open (open-positions b)]
-    (if-let [best-move (winner->block b)]
-      best-move
-      (loop [positions open
-             best-pos -1
-             best-score ##-Inf]
-        (if (empty? positions)
-          best-pos
-          (let [pos (first positions)
-                new-b (assoc b pos [marker])
-                score (score-board new-b false 0)]
-            (if (> score best-score)
-              (recur (rest positions) pos score)
-              (recur (rest positions) best-pos best-score))))))))
+    (first (first (sort-by second > (zipmap open board-scores))))))
 
 (defn empty-space? [board move]
   (= [""] (get board move)))
+
+(declare human-turn)
+(defn bad-move [board marker]
+  (do
+    print-bad-move
+    (display-board board)
+    (human-turn board marker)))
 
 (defn human-turn [board marker]
   (print-player-prompt marker)
   (let [move (Integer/parseInt (read-line))]
     (if (empty-space? board move)
       move
-      (do
-        print-bad-move
-        (display-board board)
-        (human-turn board marker)))))
+      (bad-move board marker))))
 
 (defn play-turn [b marker move-fn]
   (let [move (move-fn b marker)]
@@ -143,23 +110,28 @@
           (check-winner new-board)
           (set-turn turn))))))
 
-#_(defn human-vs-computer [board]
-    (display-board board)
-    (let [input (human-turn board "X")
-          new-b (assoc board input ["X"])
-          ai-move (ai-turn new-b "O")]
-      (assoc new-b ai-move ["O"]))
-    #_(loop [b board turn "player" winner (check-winner b)]
-        (display-board b)
-        (if winner
-          (output-result winner)
-          (if (= "player" turn)
-            (let [move (human-turn b)
-                  new-b (assoc b move ["X"])]
-              (recur new-b "ai" (check-winner new-b)))
-            (let [ai-move (ai-turn b "O")
-                  new-b (assoc b ai-move ["O"])]
-              (recur new-b "player" (check-winner new-b)))))))
+(declare select-difficulty)
+(defn- retry-difficulty [iterations]
+  (println "Not a difficulty, retry.")
+  (select-difficulty iterations))
+
+(defn print-difficulty []
+  (println "Choose AI difficulty
+  1: Easy
+  2: Medium
+  3: Hard"))
+
+(defn select-difficulty [iterations]
+  (print-difficulty)
+  (loop [out [] player-choice (read-line)]
+    (if (= iterations (count out))
+      out
+      (let [option (cond
+                     (= "1" player-choice) :easy
+                     (= "2" player-choice) :medium
+                     (= "3" player-choice) :hard
+                     :else (retry-difficulty iterations))]
+        (recur (conj out option) (read-line))))))
 
 (defn- print-game-options []
   (println "Choose your game

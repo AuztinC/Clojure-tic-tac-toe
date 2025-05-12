@@ -6,18 +6,16 @@
   (with-stubs)
 
   (context "updated game loop using init-game"
-    #_(it "bad input"
-        (with-out-str
-          (should= 0 (with-in-str "-1\n0" (human-turn board "X")))))
     (it "Human-vs-ai"
-      (should (clojure.string/includes? (with-out-str (with-in-str "0\n3\n7\n2" (sut/init-game sut/board [:human :ai] ["X" "O"]))) "O wins!\n")))
+      (should (clojure.string/includes? (with-out-str (with-in-str "0\n3\n7\n" (sut/init-game sut/board [:human :ai] ["X" "O"]))) "O wins!\n")))
     (it "ai-vs-ai"
-      (should (clojure.string/includes? (with-out-str (sut/init-game sut/board [:ai :ai] ["X" "O"])) "tie"))))
+      (should (clojure.string/includes? (with-out-str (sut/init-game sut/board [:ai :ai] ["X" "O"])) "tie")))
+    )
 
   (context "select-game"
     (redefs-around [sut/init-game (stub :init-game {:return :init})])
 
-    (it "prints board"
+    (it "prints game options"
       (with-redefs [read-line (fn [] "1")]
         (should= "Choose your game
   1: Human vs Computer
@@ -25,7 +23,7 @@
   3: Human vs Human
   4: Computer vs Computer\n" (with-out-str (sut/select-game)))))
 
-    (it "retries for bad input"
+    (it "game-mode retries for bad input"
       (with-redefs [sut/select-game (stub :select-game {:invoke sut/select-game})]
         (let [out (with-out-str (with-in-str "5\n1" (sut/select-game)))]
           (should-contain "Not a game-mode, retry.\n" out)
@@ -47,8 +45,26 @@
       (with-out-str (with-in-str "4\n" (sut/select-game)))
       (should-have-invoked :init-game {:with [sut/board [:ai :ai] ["X" "O"]]}))
     )
+  (focus-context "difficulty"
+    (it "prints difficulty"
+      (should= "Choose AI difficulty\n  1: Easy\n  2: Medium\n  3: Hard\n"
+        (with-out-str (with-in-str "1\n" (sut/select-difficulty 1)))))
 
-  (context "won or tie?"
+    (it "difficulty retries for bad input"
+      (with-redefs [sut/select-difficulty (stub :select-difficulty {:invoke sut/select-difficulty})]
+        (let [out (with-out-str (with-in-str "5\n1" (sut/select-difficulty 1)))]
+          (should-contain "Not a difficulty, retry.\n" out)
+          (should-have-invoked :select-difficulty {:times 2}))))
+
+    (it "selects one difficulty for human vs ai"
+      (with-out-str (should= [:easy] (with-in-str "1" (sut/select-difficulty 1)))))
+    (it "selects two difficulty for ai vs ai"
+      (with-out-str (should= [:easy :hard] (with-in-str "1\n3" (sut/select-difficulty 2)))))
+    (it "none human vs human"
+      (with-out-str (should= [] (with-in-str "" (sut/select-difficulty 0)))))
+    )
+
+  (context "win or tie?"
     (it "tie game"
       (should (sut/tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["O"] ["X"]]))
       (should-not (sut/tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""] [""]])))
@@ -92,23 +108,8 @@
                                [""] [""] [""]] "O"))
       (should= 5 (sut/ai-turn [["O"] [""] [""]
                                ["X"] ["X"] [""]
-                               [""] [""] [""]] "O")))
-    #_(it "ai turn : return index for chosen position"
-      (should= 6
-        (sut/ai-turn [["X"] ["O"] [""]
-                      ["X"] [""] [""]
-                      [""] [""] [""]] "O")))
+                               [""] [""] [""]] "O"))))
 
-    #_(it "give winning move over block"
-      (should= 6 (sut/winner->block
-                   [["X"] ["O"] [""]
-                    [""] ["X"] ["X"]
-                    [""] ["O"] ["O"]]))
-      (should= 4 (sut/winner->block
-                   [["X"] ["O"] ["X"]
-                    [""] [""] ["X"]
-                    [""] ["O"] [""]]))
-      ))
   (it "simulate starts"
     (should-not= "X" (sut/simulate-game [[""] [""] [""] [""] [""] [""] [""] [""] [""]] "player"))
     (should-not (sut/simulate-all-first-moves))
