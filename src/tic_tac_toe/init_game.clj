@@ -5,8 +5,8 @@
             [tic-tac-toe.board :as board]))
 
 (defmulti play-turn
-  (fn [board marker move-fn & [diff]]
-    (if (some? diff)
+  (fn [board marker move-fn & [difficulty]]
+    (if (some? difficulty)
       :ai
       :human)))
 

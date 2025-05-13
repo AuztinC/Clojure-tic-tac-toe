@@ -5,7 +5,7 @@
   (= [""] (get board move)))
 
 (declare human-turn)
-(defn- bad-move [board marker]
+(defn bad-move [board marker]
   (do
     (printer/print-bad-move)
     (printer/display-board board)

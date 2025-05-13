@@ -36,7 +36,7 @@
 
   (context "difficulty functions"
     (it "hard runs minimax, returns best position"
-      (with-redefs [sut/score-board (stub :score-board {:invoke sut/score-board})]
+      (with-redefs [sut/score-board (stub :score-board {:return 0})]
         (sut/hard board/get-board "O" (board/open-positions board/get-board))
         (should-have-invoked :score-board)))
 
