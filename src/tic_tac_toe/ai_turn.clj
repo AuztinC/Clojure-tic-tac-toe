@@ -1,23 +1,30 @@
 (ns tic-tac-toe.ai-turn
-  (:require [tic-tac-toe.ai-util :as util]))
+  (:require [tic-tac-toe.board :as board]))
 
-(defn check-winner [board]
-  (let [wm->board (for [wm util/winning-moves] (map #(first (nth board %)) wm))]
-    (let [winner-result (util/winner-result wm->board)]
-      (if winner-result
-        (first winner-result)
-        (if (util/tie-game? board) "tie" nil)))))
+(declare score-board)
+(defn minimax [b maximizing? depth ai-marker]
+  (let [p1-marker ai-marker
+        p2-marker (if (= "O" p1-marker) "X" "O")
+        spec {true  {:extrema-fn max :extreme ##-Inf :current-marker p1-marker}
+              false {:extrema-fn min :extreme ##Inf :current-marker p2-marker}}
+        {:keys [extrema-fn extreme current-marker]} (spec maximizing?)]
+    (loop [positions (board/open-positions b) best-score extreme]
+      (if (empty? positions)
+        best-score
+        (let [new-b (assoc b (first positions) [current-marker])
+              score (score-board new-b (not maximizing?) (inc depth) ai-marker)]
+          (recur (rest positions) (extrema-fn best-score score)))))))
 
-(defn open-positions [board]
-  (filter #(not= nil %)
-    (map-indexed
-      (fn [idx itm] (when (= "" (first itm)) idx)) board)))
+(defn score-minimax-result [result depth ai-marker]
+  (cond
+    (= result ai-marker) (- 10 depth)
+    (= result "tie") 0
+    :else (+ depth -10)))
 
-(defn score-board [b maximizing? depth ai-marker]
-  (if-let [result (util/check-winner b)]
-    (util/score-game result depth ai-marker)
-    (util/minimax b maximizing? depth ai-marker)))
-
+(defn score-board [board maximizing? depth ai-marker]
+  (if-let [result (board/check-winner board)]
+    (score-minimax-result result depth ai-marker)
+    (minimax board maximizing? depth ai-marker)))
 
 (defn hard [board marker open]
   (let [possible-boards (map #(assoc board % [marker]) open)
@@ -34,7 +41,7 @@
       (= 1 chance) (easy open))))
 
 (defn ai-turn [board marker difficulty]
-  (let [open (open-positions board)]
+  (let [open (board/open-positions board)]
     (cond
       (= :hard difficulty) (hard board marker open)
       (= :medium difficulty) (medium board marker open)
