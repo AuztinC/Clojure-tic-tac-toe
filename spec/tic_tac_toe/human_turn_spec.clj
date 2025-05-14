@@ -15,8 +15,10 @@
 
   (it "invoke 'bad-move' for bad input"
     (with-redefs [sut/bad-move (stub :bad-move)]
+      (with-out-str (with-in-str "f\n" (sut/human-turn board/get-board "O")))
       (with-out-str (with-in-str "9\n" (sut/human-turn board/get-board "O")))
       (should-have-invoked :bad-move)))
+
   (it "prints message to retry"
     (with-redefs [printer/print-bad-move (fn [& _] (println "oops"))]
       (should-contain "oops"
