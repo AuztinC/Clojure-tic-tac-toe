@@ -9,7 +9,7 @@
 (defn tie-game? [board]
   (every? false? (map #(empty? (first %)) board)))
 
-(defn winner-result [board]
+(defn- winner-result [board]
   (first (filter #(and
                     (not= "" (first %))
                     (every? #{(first %)} %)) board)))
@@ -25,5 +25,3 @@
   (filter #(not= nil %)
     (map-indexed
       (fn [idx itm] (when (= "" (first itm)) idx)) board)))
-
-

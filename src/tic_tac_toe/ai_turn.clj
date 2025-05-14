@@ -1,34 +1,34 @@
 (ns tic-tac-toe.ai-turn
   (:require [tic-tac-toe.board :as board]))
 
-(declare score-board)
-(defn minimax [b maximizing? depth ai-marker]
+(declare score-move)
+(defn minimax [board maximizing? depth ai-marker]
   (let [p1-marker ai-marker
         p2-marker (if (= "O" p1-marker) "X" "O")
         spec {true  {:extrema-fn max :extreme ##-Inf :current-marker p1-marker}
               false {:extrema-fn min :extreme ##Inf :current-marker p2-marker}}
         {:keys [extrema-fn extreme current-marker]} (spec maximizing?)]
-    (loop [positions (board/open-positions b) best-score extreme]
+    (loop [positions (board/open-positions board) best-score extreme]
       (if (empty? positions)
         best-score
-        (let [new-b (assoc b (first positions) [current-marker])
-              score (score-board new-b (not maximizing?) (inc depth) ai-marker)]
+        (let [new-board (assoc board (first positions) [current-marker])
+              score (score-move new-board (not maximizing?) (inc depth) ai-marker)]
           (recur (rest positions) (extrema-fn best-score score)))))))
 
-(defn score-minimax-result [result depth ai-marker]
+(defn score-minimax-result [result depth marker]
   (cond
-    (= result ai-marker) (- 10 depth)
+    (= result marker) (- 10 depth)
     (= result "tie") 0
     :else (+ depth -10)))
 
-(defn score-board [board maximizing? depth ai-marker]
+(defn score-move [board maximizing? depth ai-marker]
   (if-let [result (board/check-winner board)]
     (score-minimax-result result depth ai-marker)
     (minimax board maximizing? depth ai-marker)))
 
 (defn hard [board marker open]
   (let [possible-boards (map #(assoc board % [marker]) open)
-        board-scores (map #(score-board % false 0 marker) possible-boards)]
+        board-scores (map #(score-move % false 0 marker) possible-boards)]
     (first (first (sort-by second > (zipmap open board-scores))))))
 
 (defn easy [open]

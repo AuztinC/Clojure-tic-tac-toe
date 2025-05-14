@@ -6,11 +6,17 @@
 
 (describe "human-turn"
   (with-stubs)
+  (it "oops bad move"
+    (should= "oops bad move, try again\n" (with-out-str (printer/print-bad-move))))
+
+  (it "print player prompt"
+    (let [marker "X"]
+     (should= (str "Player " marker ", enter your move:\n") (with-out-str (printer/print-player-prompt marker)))))
+
   (it "invoke 'bad-move' for bad input"
     (with-redefs [sut/bad-move (stub :bad-move)]
       (with-out-str (with-in-str "9\n" (sut/human-turn board/get-board "O")))
       (should-have-invoked :bad-move)))
-
   (it "prints message to retry"
     (with-redefs [printer/print-bad-move (fn [& _] (println "oops"))]
       (should-contain "oops"

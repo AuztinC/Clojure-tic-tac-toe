@@ -3,13 +3,14 @@
             [tic-tac-toe.board :as sut]))
 
 (describe "board"
-
   (context "open-positions"
     (it "returns all moves for open board"
       (should= (range 9) (sut/open-positions sut/get-board)))
+
     (it "returns empty for full board"
       (let [full-board (map #(assoc % 0 "X") sut/get-board)]
        (should= () (sut/open-positions full-board))))
+
     (it "returns only open positions - mixed board"
       (let [temp-board [["X"][""]["X"] ["X"]["O"]["X"] ["X"][""][""]]]
        (should= '(1 7 8) (sut/open-positions temp-board))))

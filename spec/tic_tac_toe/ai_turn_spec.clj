@@ -6,24 +6,24 @@
 (describe "ai-turn"
   (with-stubs)
   (context "score a board through minimax"
-    (it "score-board calls minimax"
+    (it "score-move calls minimax"
       (with-redefs [sut/minimax (stub :minimax {:invoke sut/minimax})]
-        (sut/score-board board/get-board true 0 "X")
+        (sut/score-move board/get-board true 0 "X")
         (should-have-invoked :minimax)))
     (it "empty"
-      (should= 0 (sut/score-board board/get-board false 0 "O")))
+      (should= 0 (sut/score-move board/get-board false 0 "O")))
     (it "tie game"
-      (should= 0 (sut/score-board [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["X"] ["X"] ["O"]] false 0 "O")))
+      (should= 0 (sut/score-move [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["X"] ["X"] ["O"]] false 0 "O")))
     (it "Player will win"
-      (should= -9 (sut/score-board [["X"] ["X"] [""] [""] [""] [""] [""] [""] [""]] false 0 "O")))
+      (should= -9 (sut/score-move [["X"] ["X"] [""] [""] [""] [""] [""] [""] [""]] false 0 "O")))
     (it "player has fork to win"
-      (should= -9 (sut/score-board [["X"] ["X"] [""] ["X"] ["O"] ["O"] [""] [""] [""]] false 0 "O"))
-      (should= 9 (sut/score-board [[""] ["O"] [""] ["X"] [""] ["X"] ["X"] ["O"] ["O"]] true 0 "O")))
+      (should= -9 (sut/score-move [["X"] ["X"] [""] ["X"] ["O"] ["O"] [""] [""] [""]] false 0 "O"))
+      (should= 9 (sut/score-move [[""] ["O"] [""] ["X"] [""] ["X"] ["X"] ["O"] ["O"]] true 0 "O")))
     (it "ai will win"
-      (should= 6 (sut/score-board [[""] [""] [""] [""] [""] [""] ["O"] ["O"] [""]] false 0 "O")))
+      (should= 6 (sut/score-move [[""] [""] [""] [""] [""] [""] ["O"] ["O"] [""]] false 0 "O")))
     (it "ai has fork to win"
-      (should= 8 (sut/score-board [["O"] ["X"] [""] ["O"] ["O"] [""] ["X"] [""] [""]] false 0 "O"))
-      (should= 8 (sut/score-board [["O"] ["O"] [""] ["O"] [""] ["X"] ["X"] ["O"] ["O"]] false 0 "O")))
+      (should= 8 (sut/score-move [["O"] ["X"] [""] ["O"] ["O"] [""] ["X"] [""] [""]] false 0 "O"))
+      (should= 8 (sut/score-move [["O"] ["O"] [""] ["O"] [""] ["X"] ["X"] ["O"] ["O"]] false 0 "O")))
     )
 
   (context "score-minimax-result"
@@ -36,9 +36,9 @@
 
   (context "difficulty functions"
     (it "hard runs minimax, returns best position"
-      (with-redefs [sut/score-board (stub :score-board {:return 0})]
+      (with-redefs [sut/score-move (stub :score-move {:return 0})]
         (sut/hard board/get-board "O" (board/open-positions board/get-board))
-        (should-have-invoked :score-board)))
+        (should-have-invoked :score-move)))
 
     (it "easy returns random open position"
       (with-redefs [rand-nth (constantly 1)]

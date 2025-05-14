@@ -8,6 +8,9 @@
   (with-stubs)
 
   (context "Game-loop"
+    (it "displays a board"
+      (should= "([] [] [])\n([] [] [])\n([] [] [])\n" (with-out-str (printer/display-board board/get-board))))
+
     (it "prints board first"
       (with-redefs [printer/display-board (stub :display-board)]
         (with-out-str
