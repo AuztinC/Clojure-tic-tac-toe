@@ -9,10 +9,10 @@
     (tags :slow)
     (it "score-move calls minimax"
       (with-redefs [sut/minimax (stub :minimax {:invoke sut/minimax})]
-        (sut/score-move board/get-board true 0 "X")
+        (sut/score-move (board/get-board :3x3) true 0 "X")
         (should-have-invoked :minimax)))
     (it "empty"
-      (should= 0 (sut/score-move board/get-board false 0 "O")))
+      (should= 0 (sut/score-move (board/get-board :3x3) false 0 "O")))
     (it "tie game"
       (should= 0 (sut/score-move [["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["X"] ["X"] ["O"]] false 0 "O")))
     (it "Player will win"
@@ -38,29 +38,29 @@
   (context "difficulty functions"
     (it "hard runs minimax, returns best position"
       (with-redefs [sut/score-move (stub :score-move {:return 0})]
-        (sut/hard board/get-board "O" (board/open-positions board/get-board))
+        (sut/hard (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3)))
         (should-have-invoked :score-move)))
 
     (it "easy returns random open position"
       (with-redefs [rand-nth (constantly 1)]
-        (should= 1 (sut/easy (board/open-positions board/get-board)))))
+        (should= 1 (sut/easy (board/open-positions (board/get-board :3x3))))))
 
     (it "medium can give hard"
       (with-redefs [rand-int (fn [& _] 0)
                     sut/hard (fn [& _] 5)]
-        (should= 5 (sut/medium board/get-board "O" (board/open-positions board/get-board)))))
+        (should= 5 (sut/medium (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3))))))
 
     (it "medium can give easy"
       (with-redefs [rand-int (fn [& _] 1)
                     sut/easy (fn [& _] 3)]
-        (should= 3 (sut/medium board/get-board "O" (board/open-positions board/get-board)))))
+        (should= 3 (sut/medium (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3))))))
     )
 
   (context "ai-moves"
     (tags :slow)
 
     (it "blank board gives 0"
-      (should= 0 (sut/ai-turn board/get-board "O" :hard)))
+      (should= 0 (sut/ai-turn (board/get-board :3x3) "O" :hard)))
 
     (it "plays center asap"
       (should= 4 (sut/ai-turn [["X"] [""] [""]

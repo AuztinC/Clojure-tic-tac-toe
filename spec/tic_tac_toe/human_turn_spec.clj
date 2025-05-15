@@ -15,23 +15,23 @@
 
   (it "invoke 'bad-move' for bad input"
     (with-redefs [sut/bad-move (stub :bad-move)]
-      (with-out-str (with-in-str "f\n" (sut/human-turn board/get-board "O")))
-      (with-out-str (with-in-str "9\n" (sut/human-turn board/get-board "O")))
+      (with-out-str (with-in-str "f\n" (sut/human-turn (board/get-board :3x3) "O")))
+      (with-out-str (with-in-str "9\n" (sut/human-turn (board/get-board :3x3) "O")))
       (should-have-invoked :bad-move)))
 
   (it "prints message to retry"
     (with-redefs [printer/print-bad-move (fn [& _] (println "oops"))]
       (should-contain "oops"
-        (with-out-str (with-in-str "9\n2" (sut/human-turn board/get-board "O")))))
+        (with-out-str (with-in-str "9\n2" (sut/human-turn (board/get-board :3x3) "O")))))
     )
   (it "prints board to retry"
     (with-redefs [printer/display-board (fn [& _] (println "board"))]
       (should-contain "board"
-        (with-out-str (with-in-str "9\n2" (sut/human-turn board/get-board "O")))))
+        (with-out-str (with-in-str "9\n2" (sut/human-turn (board/get-board :3x3) "O")))))
     )
   (it "invokes human-turn again"
     (with-redefs [sut/human-turn (stub :human-turn)]
-      (with-out-str (with-in-str "9" (sut/human-turn board/get-board "O")))
+      (with-out-str (with-in-str "9" (sut/human-turn (board/get-board :3x3) "O")))
       (should-have-invoked :human-turn))
     )
   )

@@ -1,9 +1,9 @@
 (ns tic-tac-toe.printer)
 
-(defn display-board [board]
+(defn ->3x3 [board]
   (let [indexed-board (map-indexed
                         (fn [idx cell]
-                          (if (= (first cell) "")
+                          (if (= "" (first cell))
                             (str idx)
                             (first cell)))
                         board)
@@ -14,6 +14,24 @@
         (println "  -----------")))
     (println "----------------")))
 
+(defn ->4x4 [board]
+  (let [indexed-board (map-indexed
+                        (fn [idx cell]
+                          (if (= "" (first cell))
+                            (str idx)
+                            (first cell)))
+                        board)
+        rows (partition 4 indexed-board)]
+    (doseq [[idx row] (map-indexed vector rows)]
+      (println (str "   " (nth row 0) " | " (nth row 1) " | " (nth row 2) " | " (nth row 3) ))
+      (when (or (< idx (dec (count rows))))
+        (println "  -----------")))
+    (println "----------------")))
+
+(defn display-board [board]
+  (cond
+    (= 9 (count board)) (->3x3 board)
+    (= 16 (count board)) (->4x4 board)))
 
 (defn print-game-options []
   (println "Choose your game

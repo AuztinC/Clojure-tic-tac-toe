@@ -22,19 +22,19 @@
 
     (it "selects human v ai"
       (with-out-str (with-in-str "1\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [board/get-board [:human :ai] ["X" "O"] [:easy]]}))
+      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:human :ai] ["X" "O"] [:easy]]}))
 
     (it "selects ai vs human"
       (with-out-str (with-in-str "2\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [board/get-board [:ai :human] ["X" "O"] [:easy]]}))
+      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:ai :human] ["X" "O"] [:easy]]}))
 
     (it "selects human v human"
       (with-out-str (with-in-str "3\n" (sut/select-game)))
-      (should-have-invoked :init-game {:with [board/get-board [:human :human] ["X" "O"] []]}))
+      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:human :human] ["X" "O"] []]}))
 
     (it "selects ai v ai"
       (with-out-str (with-in-str "4\n1\n3" (sut/select-game)))
-      (should-have-invoked :init-game {:with [board/get-board [:ai :ai] ["X" "O"] [:easy :hard]]}))
+      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:ai :ai] ["X" "O"] [:easy :hard]]}))
     )
 
   (context "selecting difficulty"
