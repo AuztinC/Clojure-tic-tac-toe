@@ -1,4 +1,4 @@
-(ns tic-tac-toe.core
+(ns tic-tac-toe.main
   (:require [tic-tac-toe.game-options :as opt]))
 
 (defn -main [& args]

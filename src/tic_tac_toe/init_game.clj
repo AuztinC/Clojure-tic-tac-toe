@@ -5,7 +5,7 @@
             [tic-tac-toe.board :as board]))
 
 (defmulti play-turn
-  (fn [board marker move-fn & [difficulty]]
+  (fn [_board _marker _move-fn & [difficulty]]
     (if (some? difficulty)
       :ai
       :human)))
@@ -18,21 +18,23 @@
   (let [move (move-fn board marker diff)]
     (assoc board move [marker])))
 
-(defn- set-turn [turn]
+(defn- next-player [turn]
   (if (= "p1" turn) "p2" "p1"))
 
-(defn- set-players
+(defn- ->players
   [turn player1-marker player1-type player2-marker player2-type]
   (if (= "p1" turn)
     [player1-marker player1-type]
     [player2-marker player2-type]))
 
-(defn- set-player-fn [player-type]
+(defn- ->player-fn [player-type]
   (cond
     (= :human player-type) ht/human-turn
     (= :ai player-type) ai/ai-turn))
 
-(defn- set-difficulties [turn player-type difficulties]
+;(defmulti make-move (fn [_board [_ _player-type]] player-type))
+
+(defn- ->difficulties [turn player-type difficulties]
   (if (= 1 (count difficulties))
     (if (= :ai player-type) (first difficulties))
     (cond
@@ -41,16 +43,18 @@
 
 (defn init-game
   [board [player1-type player2-type] [player1-marker player2-marker] difficulties]
-  (loop [board board result (board/check-winner board) turn "p1"]
+  (loop [board board turn "p1"]
     (printer/display-board board)
-    (if result
-      (printer/output-result result)
-      (let [[marker player-type] (set-players turn
+    (if (board/check-winner board)
+      (printer/output-result (board/check-winner board))
+      (let [[marker player-type :as player] (->players turn
                                    player1-marker player1-type
                                    player2-marker player2-type)
-            player-fn (set-player-fn player-type)
-            difficulty (set-difficulties turn player-type difficulties)
-            new-board (play-turn board marker player-fn difficulty)]
+            player-fn (->player-fn player-type)
+            difficulty (->difficulties turn player-type difficulties)
+            new-board (play-turn board marker player-fn difficulty)
+            ;new-board (play-fn board marker difficulty)
+            ;new-board (make-move board player)
+            ]
         (recur new-board
-          (board/check-winner new-board)
-          (set-turn turn))))))
+          (next-player turn))))))

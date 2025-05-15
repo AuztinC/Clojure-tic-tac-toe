@@ -7,17 +7,19 @@
 (describe "tic tac toe"
   (with-stubs)
 
-  (context "Game-loop"
+  (context "prints-game"
     (it "displays a board"
-      (should= "([] [] [])\n([] [] [])\n([] [] [])\n" (with-out-str (printer/display-board board/get-board))))
+      (should=  "   0 | 1 | 2\n  -----------\n   3 | 4 | 5\n  -----------\n   6 | 7 | 8\n----------------\n" (with-out-str (printer/display-board board/get-board))))
 
     (it "prints board first"
       (with-redefs [printer/display-board (stub :display-board)]
         (with-out-str
           (with-in-str "0\n3\n7"
             (init/init-game board/get-board [:human :ai] ["X" "O"] [:hard])))
-        (should-have-invoked :display-board)))
+        (should-have-invoked :display-board))))
 
+  (context "Game-loop"
+    (tags :slow)
     (it "Human-vs-ai"
       (should (clojure.string/includes? (with-out-str (with-in-str "0\n3\n7\n" (init/init-game board/get-board [:human :ai] ["X" "O"] [:hard]))) "O wins!\n")))
     (it "ai-vs-human"

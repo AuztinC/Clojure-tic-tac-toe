@@ -8,6 +8,7 @@
         spec {true  {:extrema-fn max :extreme ##-Inf :current-marker p1-marker}
               false {:extrema-fn min :extreme ##Inf :current-marker p2-marker}}
         {:keys [extrema-fn extreme current-marker]} (spec maximizing?)]
+    ;; TODO ARC - use reduce?
     (loop [positions (board/open-positions board) best-score extreme]
       (if (empty? positions)
         best-score

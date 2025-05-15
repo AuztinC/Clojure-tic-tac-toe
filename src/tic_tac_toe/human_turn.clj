@@ -1,6 +1,5 @@
 (ns tic-tac-toe.human-turn
-  (:require [clojure.string :as str]
-            [tic-tac-toe.printer :as printer]))
+  (:require [tic-tac-toe.printer :as printer]))
 
 (defn- empty-space? [board move]
   (= [""] (get board move)))

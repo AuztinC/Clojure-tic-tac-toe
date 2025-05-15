@@ -6,6 +6,7 @@
 (describe "ai-turn"
   (with-stubs)
   (context "score a board through minimax"
+    (tags :slow)
     (it "score-move calls minimax"
       (with-redefs [sut/minimax (stub :minimax {:invoke sut/minimax})]
         (sut/score-move board/get-board true 0 "X")
@@ -56,6 +57,8 @@
     )
 
   (context "ai-moves"
+    (tags :slow)
+
     (it "blank board gives 0"
       (should= 0 (sut/ai-turn board/get-board "O" :hard)))
 
