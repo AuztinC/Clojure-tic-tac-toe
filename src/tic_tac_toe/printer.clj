@@ -28,6 +28,11 @@
         (println "  -----------")))
     (println "----------------")))
 
+(defn print-board-selection []
+  (println "Choose your board
+  1: 3x3
+  2: 4x4"))
+
 (defn display-board [board]
   (cond
     (= 9 (count board)) (->3x3 board)

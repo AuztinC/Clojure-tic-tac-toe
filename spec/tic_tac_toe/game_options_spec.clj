@@ -2,7 +2,8 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe.game-options :as sut]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.init-game :as init]))
+            [tic-tac-toe.init-game :as init]
+            [tic-tac-toe.printer :as printer]))
 
 (describe "game-options"
   (with-stubs)
@@ -21,8 +22,9 @@
           (should-have-invoked :select-game {:times 2}))))
 
     (it "selects human v ai"
-      (with-out-str (with-in-str "1\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:human :ai] ["X" "O"] [:easy]]}))
+      (with-redefs [board/get-board (stub :get-board {:return [[""] [""] [""] [""] [""] [""] [""] [""] [""]]})]
+       (with-out-str (with-in-str "1\n1" (sut/select-game)))
+      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:human :ai] ["X" "O"] [:easy]]})))
 
     (it "selects ai vs human"
       (with-out-str (with-in-str "2\n1" (sut/select-game)))
@@ -54,4 +56,13 @@
       (with-out-str (should= [:easy :hard] (with-in-str "1\n3" (sut/select-difficulty 2)))))
     (it "empty for human vs human"
       (with-out-str (should= [] (with-in-str "1" (sut/select-difficulty 0)))))
-    ))
+    )
+  (context "select board size"
+    (it "prints board options"
+      (should= "Choose your board\n  1: 3x3\n  2: 4x4\n" (with-out-str (printer/print-board-selection))))
+    (it "can select both sizes"
+      (with-out-str (should= :3x3 (with-in-str "1" (sut/select-board))))
+      (with-out-str (should= :4x4 (with-in-str "2" (sut/select-board)))))
+    #_(it "retry for bad input"
+      ((with-out-str (should= :4x4 (with-in-str "2" (sut/select-board)))))))
+  )

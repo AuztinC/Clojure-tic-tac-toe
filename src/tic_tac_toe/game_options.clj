@@ -3,6 +3,20 @@
             [tic-tac-toe.init-game :as init]
             [tic-tac-toe.board :as board]))
 
+(declare select-board)
+(defn- retry-select-board []
+  (do
+    (println "Oops, try again.")
+    (select-board)))
+
+(defn select-board []
+  (printer/print-board-selection)
+  (let [player-choice (read-line)]
+    (cond
+      (= "1" player-choice) :3x3
+      (= "2" player-choice) :4x4
+      :else (retry-select-board))))
+
 (declare select-difficulty)
 (defn- retry-difficulty [iterations]
   (println "Not a difficulty, retry.")

@@ -45,8 +45,8 @@
   [board [player1-type player2-type] [player1-marker player2-marker] difficulties]
   (loop [board board turn "p1"]
     (printer/display-board board)
-    (if (board/check-winner board)
-      (printer/output-result (board/check-winner board))
+    (if (board/check-winner board :3x3)
+      (printer/output-result (board/check-winner board :3x3))
       (let [[marker player-type :as player] (->players turn
                                    player1-marker player1-type
                                    player2-marker player2-type)
