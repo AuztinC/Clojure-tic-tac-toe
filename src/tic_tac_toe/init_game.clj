@@ -41,12 +41,12 @@
       (and (= "p1" turn) (= :ai player-type)) (first difficulties)
       (and (= "p2" turn) (= :ai player-type)) (second difficulties))))
 
-(defn init-game
-  [board [player1-type player2-type] [player1-marker player2-marker] difficulties]
-  (loop [board board turn "p1"]
+(defn init-game [state]
+  (let [{board :size, [player1-type player2-type] :players, [player1-marker player2-marker] :markers, difficulties :difficulties} state]
+   (loop [board board turn "p1"]
     (printer/display-board board)
-    (if (board/check-winner board :3x3)
-      (printer/output-result (board/check-winner board :3x3))
+    (if (board/check-winner board)
+      (printer/output-result (board/check-winner board))
       (let [[marker player-type :as player] (->players turn
                                    player1-marker player1-type
                                    player2-marker player2-type)
@@ -57,4 +57,4 @@
             ;new-board (make-move board player)
             ]
         (recur new-board
-          (next-player turn))))))
+          (next-player turn)))))))

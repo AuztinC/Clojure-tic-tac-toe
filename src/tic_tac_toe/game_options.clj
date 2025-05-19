@@ -44,8 +44,8 @@
   (printer/print-game-options)
   (let [game (read-line)]
     (cond
-      (= "1" game) (init/init-game (board/get-board :3x3) [:human :ai] ["X" "O"] (select-difficulty 1))
-      (= "2" game) (init/init-game (board/get-board :3x3) [:ai :human] ["X" "O"] (select-difficulty 1))
-      (= "3" game) (init/init-game (board/get-board :3x3) [:human :human] ["X" "O"] (select-difficulty 0))
-      (= "4" game) (init/init-game (board/get-board :3x3) [:ai :ai] ["X" "O"] (select-difficulty 2))
+      (= "1" game) (init/init-game {:size (board/get-board (select-board)) :players [:human :ai] :markers ["X" "O"] :difficulties (select-difficulty 1)})
+      (= "2" game) (init/init-game {:size (board/get-board (select-board)) :players [:ai :human] :markers ["X" "O"] :difficulties (select-difficulty 1)})
+      (= "3" game) (init/init-game {:size (board/get-board (select-board)) :players [:human :human] :markers ["X" "O"] :difficulties (select-difficulty 0)})
+      (= "4" game) (init/init-game {:size (board/get-board (select-board)) :players [:ai :ai] :markers ["X" "O"] :difficulties (select-difficulty 2)})
       :else (retry-select-game))))

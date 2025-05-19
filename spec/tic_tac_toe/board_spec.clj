@@ -34,16 +34,16 @@
       (should-not (sut/tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""] [""]])))
 
     (it "someone made winning move"
-      (should= "X" (sut/check-winner [["X"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]] :3x3))
-      (should-not (sut/check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]] :3x3))
-      (should= "X" (sut/check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] ["X"] [""] [""]] :3x3))
-      (should= "O" (sut/check-winner [["O"] ["X"] ["X"] ["O"] ["O"] ["X"] [""] [""] ["O"]] :3x3))
-      (should= "tie" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]] :3x3)))
+      (should= "X" (sut/check-winner [["X"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
+      (should-not (sut/check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))
+      (should= "X" (sut/check-winner [["O"] ["X"] ["X"] ["O"] ["X"] ["X"] ["X"] [""] [""]]))
+      (should= "O" (sut/check-winner [["O"] ["X"] ["X"] ["O"] ["O"] ["X"] [""] [""] ["O"]]))
+      (should= "tie" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]])))
 
     (it "4x4 winning moves"
-      (should= "X" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["X"] ["X"] ["X"] ["O"] ["X"] ["O"] ["X"] ["O"] ["O"] ["X"] [""] ["X"]] :4x4))
-      (should= "O" (sut/check-winner [["X"] ["X"] ["O"] ["O"]["X"] ["X"] ["X"] ["O"]["X"] ["O"] ["X"] ["O"]["O"] ["X"] [""] ["O"]] :4x4))
-      (should= "tie" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]] :4x4))
+      (should= "X" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["X"] ["X"] ["X"] ["O"] ["X"] ["O"] ["X"] ["O"] ["O"] ["X"] [""] ["X"]]))
+      (should= "O" (sut/check-winner [["X"] ["X"] ["O"] ["O"]["X"] ["X"] ["X"] ["O"]["X"] ["O"] ["X"] ["O"]["O"] ["X"] [""] ["O"]]))
+      (should= "tie" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]]))
       )
     )
   )

@@ -12,31 +12,31 @@
 
     (it "prints game options"
       (with-redefs [read-line (fn [] "1")]
-        (should= "Choose your game\n  1: Human vs Computer\n  2: Computer vs Human\n  3: Human vs Human\n  4: Computer vs Computer\nChoose AI difficulties\n  1: Easy\n  2: Medium\n  3: Hard\n"
+        (should-contain "Choose your game\n  1: Human vs Computer\n  2: Computer vs Human\n  3: Human vs Human\n  4: Computer vs Computer\nChoose your board\n  1: 3x3\n  2: 4x4\nChoose AI difficulties\n  1: Easy\n  2: Medium\n  3: Hard\n"
           (with-out-str (sut/select-game)))))
 
     (it "game-mode retries for bad input"
       (with-redefs [sut/select-game (stub :select-game {:invoke sut/select-game})]
-        (let [out (with-out-str (with-in-str "5\n1\n1" (sut/select-game)))]
+        (let [out (with-out-str (with-in-str "5\n1\n1\n1" (sut/select-game)))]
           (should-contain "Not a game-mode, retry.\n" out)
           (should-have-invoked :select-game {:times 2}))))
 
     (it "selects human v ai"
-      (with-redefs [board/get-board (stub :get-board {:return [[""] [""] [""] [""] [""] [""] [""] [""] [""]]})]
-       (with-out-str (with-in-str "1\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:human :ai] ["X" "O"] [:easy]]})))
+      (with-redefs [board/get-board (stub :get-board)]
+        (with-out-str (with-in-str "1\n1\n1" (sut/select-game)))
+        (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:easy])]})))
 
     (it "selects ai vs human"
-      (with-out-str (with-in-str "2\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:ai :human] ["X" "O"] [:easy]]}))
+      (with-out-str (with-in-str "2\n1\n1" (sut/select-game)))
+      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:ai :human] :markers ["X" "O"] :difficulties [:easy])]}))
 
     (it "selects human v human"
-      (with-out-str (with-in-str "3\n" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:human :human] ["X" "O"] []]}))
+      (with-out-str (with-in-str "3\n0\n1" (sut/select-game)))
+      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:human :human] :markers ["X" "O"] :difficulties [])]}))
 
     (it "selects ai v ai"
-      (with-out-str (with-in-str "4\n1\n3" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(board/get-board :3x3) [:ai :ai] ["X" "O"] [:easy :hard]]}))
+      (with-out-str (with-in-str "4\n1\n1\n3" (sut/select-game)))
+      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:ai :ai] :markers ["X" "O"] :difficulties [:easy :hard])]}))
     )
 
   (context "selecting difficulty"
@@ -63,6 +63,9 @@
     (it "can select both sizes"
       (with-out-str (should= :3x3 (with-in-str "1" (sut/select-board))))
       (with-out-str (should= :4x4 (with-in-str "2" (sut/select-board)))))
-    #_(it "retry for bad input"
-      ((with-out-str (should= :4x4 (with-in-str "2" (sut/select-board)))))))
+    (it "retry for bad input"
+      (with-redefs [sut/select-board (stub :select-board {:invoke sut/select-board})]
+        (let [out (with-out-str (with-in-str "5\n1" (sut/select-board)))]
+          (should-contain "Oops, try again." out)
+          (should-have-invoked :select-board {:times 2})))))
   )

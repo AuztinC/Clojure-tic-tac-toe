@@ -1,6 +1,8 @@
 (ns tic-tac-toe.ai-turn
   (:require [tic-tac-toe.board :as board]))
 
+;(def memo-scores memoize (fn []))
+
 (declare score-move)
 (defn minimax [board maximizing? depth ai-marker size]
   (let [p1-marker ai-marker
@@ -8,15 +10,11 @@
         spec {true  {:extrema-fn max :extreme ##-Inf :current-marker p1-marker}
               false {:extrema-fn min :extreme ##Inf :current-marker p2-marker}}
         {:keys [extrema-fn extreme current-marker]} (spec maximizing?)]
-    ;; TODO ARC - use reduce?
-    (loop [positions (board/open-positions board) best-score extreme]
-      (if (empty? positions)
-        best-score
-        (let [new-board (assoc board (first positions) [current-marker])
-              score (score-move new-board (not maximizing?) (inc depth) ai-marker size)]
-          (recur (rest positions) (extrema-fn best-score score)))))))
-
-(def memo-mini (memoize minimax))
+    (reduce (fn [best-score open] (let [new-board (assoc board open [current-marker])
+                                        score (score-move new-board (not maximizing?) (inc depth) ai-marker size)]
+                                    (extrema-fn best-score score)))
+      extreme
+      (board/open-positions board))))
 
 (defn score-minimax-result [result depth marker]
   (cond
@@ -25,7 +23,7 @@
     :else (+ depth -10)))
 
 (defn score-move [board maximizing? depth ai-marker size]
-  (if-let [result (board/check-winner board size)]
+  (if-let [result (board/check-winner board)]
     (score-minimax-result result depth ai-marker)
     (minimax board maximizing? depth ai-marker size)))
 
@@ -38,7 +36,7 @@
   (rand-nth open))
 
 (defn medium [board marker open size]
-  (let [chance (rand-int 2) ]
+  (let [chance (rand-int 2)]
     (cond
       (= 0 chance) (hard board marker open size)
       (= 1 chance) (easy open))))

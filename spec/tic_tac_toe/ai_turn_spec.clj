@@ -68,6 +68,15 @@
       (should= 4 (sut/ai-turn [["X"] [""] [""]
                                [""] [""] [""]
                                [""] [""] [""]] "O" :hard)))
+    #_(it "defends on 4x4 "
+      (should= 3 (sut/ai-turn [["X"] ["X"] ["X"] [""]
+                               [""] ["O"] [""] ["O"]
+                               ["O"] ["O"] ["X"] [""]
+                               [""] ["X"] ["X"] [""]] "O" :hard))
+      (should= 15 (sut/ai-turn [["X"] [""] [""] [""]
+                               ["O"] ["X"] [""] [""]
+                               ["O"] [""] ["X"] [""]
+                               [""] [""] [""] [""]] "O" :hard)))
 
     (it "defends against player win"
       (should= 2 (sut/ai-turn [["X"] ["X"] [""]

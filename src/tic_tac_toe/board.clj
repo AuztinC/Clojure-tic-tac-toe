@@ -38,10 +38,10 @@
         (first winner-result)
         (if (tie-game? board) "tie" nil)))))
 
-(defn check-winner [board size]
+(defn check-winner [board]
   (cond
-    (= :3x3 size) (score-3x3 board)
-    (= :4x4 size) (score-4x4 board)))
+    (= 9 (count board)) (score-3x3 board)
+    (= 16 (count board)) (score-4x4 board)))
 
 (defn open-positions [board]
   (filter #(not= nil %)
