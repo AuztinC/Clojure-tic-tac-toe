@@ -9,9 +9,8 @@
                         board)
         rows (partition size indexed-board)]
     (doseq [[idx row] (map-indexed vector rows)]
-      (cond
-        (= 3 size) (println (str "   " (nth row 0) " | " (nth row 1) " | " (nth row 2)))
-        (= 4 size) (println (str "   " (nth row 0) " | " (nth row 1) " | " (nth row 2) " | " (nth row 3))))
+      (println (str "   " (nth row 0) " | " (nth row 1) " | " (nth row 2)
+              (if (= 4 size) (str " | " (nth row 3)) "")))
       (when (or (< idx (dec (count rows))))
         (println "  -----------")))
     (println "----------------")))
