@@ -18,22 +18,23 @@
       :else (retry-select-board))))
 
 (declare select-difficulty)
-(defn- retry-difficulty [iterations]
-  (println "Not a difficulty, retry.")
-  (select-difficulty iterations))
+(defn- retry-difficulty []
+  (println "Not a difficulty, retry."))
 
 (defn select-difficulty [iterations]
   (printer/print-difficulty)
   (loop [out []]
+    (printer/print-difficulty-iteration (count out))
     (if (= iterations (count out))
       out
-      (let [player-choice (read-line)
-            option (cond
-                     (= "1" player-choice) :easy
-                     (= "2" player-choice) :medium
-                     (= "3" player-choice) :hard
-                     :else (retry-difficulty iterations))]
-        (recur (conj out option))))))
+      (let [player-choice (read-line)]
+        (cond
+          (= "1" player-choice) (recur (conj out :easy))
+          (= "2" player-choice) (recur (conj out :medium))
+          (= "3" player-choice) (recur (conj out :hard))
+          :else (do
+                  (retry-difficulty)
+                  (recur out)))))))
 
 (declare select-game)
 (defn- retry-select-game []

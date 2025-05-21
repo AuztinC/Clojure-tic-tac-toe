@@ -40,6 +40,12 @@
   3: Human vs Human
   4: Computer vs Computer"))
 
+(defn print-difficulty-iteration [current-ai]
+  (let [current-ai (inc current-ai)]
+   (println (cond
+             (= 1 current-ai)(str "Choose " current-ai "st AI difficulty")
+             (= 2 current-ai)(str "Choose " current-ai "nd AI difficulty")))))
+
 (defn print-difficulty []
   (println "Choose AI difficulties
   1: Easy

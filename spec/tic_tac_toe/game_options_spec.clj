@@ -41,14 +41,15 @@
 
   (context "selecting difficulty"
     (it "prints difficulty"
-      (should= "Choose AI difficulties\n  1: Easy\n  2: Medium\n  3: Hard\n"
+      (should-contain "Choose AI difficulties\n  1: Easy\n  2: Medium\n  3: Hard\n"
         (with-out-str (with-in-str "1\n" (sut/select-difficulty 1)))))
 
     (it "difficulty retries for bad input"
       (with-redefs [sut/select-difficulty (stub :select-difficulty {:invoke sut/select-difficulty})]
-        (let [out (with-out-str (with-in-str "5\n1" (sut/select-difficulty 1)))]
-          (should-contain "Not a difficulty, retry.\n" out)
-          (should-have-invoked :select-difficulty {:times 2}))))
+        (let [out1 (with-out-str (with-in-str "5\n1\n1" (sut/select-difficulty 1)))
+              out2 (with-out-str (with-in-str "5\n1\n6\n2" (sut/select-difficulty 2)))]
+          (should-contain "Not a difficulty, retry.\n" out1)
+          (should-contain "Not a difficulty, retry.\n" out2))))
 
     (it "selects one difficulty for human vs ai"
       (with-out-str (should= [:easy] (with-in-str "1" (sut/select-difficulty 1)))))
