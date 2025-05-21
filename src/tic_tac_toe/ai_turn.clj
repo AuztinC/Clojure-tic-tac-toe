@@ -30,14 +30,7 @@
                 new-p2-best (if (not maximizing?) (min p2-best new-best) p2-best)]
             (if (>= new-ai-best new-p2-best)
               new-best
-              (recur (rest open-positions) new-best new-ai-best new-p2-best))))))
-    #_(reduce (fn [best-score current-open]
-                (let [new-board (assoc board current-open [current-marker])
-                      score (score-move new-board (not maximizing?) (inc depth) ai-marker ##-Inf ##Inf)]
-                  (extrema-fn best-score score)))
-        extreme
-        (board/open-positions board))
-    ))
+              (recur (rest open-positions) new-best new-ai-best new-p2-best))))))))
 
 (def memo-minimax (memoize (fn [board maximizing? depth ai-marker ai-best p2-best]
                              (minimax board maximizing? depth ai-marker ai-best p2-best))))
@@ -55,9 +48,10 @@
 
 (defn hard [board marker open-positions]
   (let [possible-boards (map #(assoc board % [marker]) open-positions)
-        board-scores (map #(score-move % false 0 marker ##-Inf ##Inf) possible-boards)]
+        board-scores (map #(score-move % false 0 marker ##-Inf ##Inf) possible-boards)
+        turn-limit 12]
     (cond
-      (<= 14 (count open-positions)) (best-early-move board)
+      (<= turn-limit (count open-positions)) (best-early-move board)
       :else (first (first (sort-by second > (zipmap open-positions board-scores)))))))
 
 (defn easy [open]

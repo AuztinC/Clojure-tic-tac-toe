@@ -1,18 +1,26 @@
 (ns tic-tac-toe.printer)
 
+(defn ->index-board [board]
+  (map-indexed
+    (fn [idx cell] (if (= "" (first cell))
+                     (str idx)
+                     (first cell)))
+    board))
+
+(defn print-rows [row size]
+  (println (str "   " (nth row 0) " | " (nth row 1) " | " (nth row 2)
+             (if (= 4 size) (str " | " (nth row 3)) ""))))
+
+(defn print-breaks [idx rows]
+  (when (or (< idx (dec (count rows))))
+    (println "  -----------")))
+
 (defn formatted-board [board size]
-  (let [indexed-board (map-indexed
-                        (fn [idx cell]
-                          (if (= "" (first cell))
-                            (str idx)
-                            (first cell)))
-                        board)
+  (let [indexed-board (->index-board board)
         rows (partition size indexed-board)]
     (doseq [[idx row] (map-indexed vector rows)]
-      (println (str "   " (nth row 0) " | " (nth row 1) " | " (nth row 2)
-              (if (= 4 size) (str " | " (nth row 3)) "")))
-      (when (or (< idx (dec (count rows))))
-        (println "  -----------")))
+      (print-rows row size)
+      (print-breaks idx rows))
     (println "----------------")))
 
 (defn print-board-selection []
