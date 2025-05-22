@@ -41,12 +41,21 @@
   (println "Not a game-mode, retry.")
   (select-game))
 
+(defn setup-game [player-types difficulty-count]
+  (let [board (board/get-board (select-board))
+        difficulties (select-difficulty difficulty-count)]
+    (init/init-game {:size board
+                     :players player-types
+                     :markers ["X" "O"]
+                     :difficulties difficulties})))
+
 (defn select-game []
   (printer/print-game-options)
-  (let [game (read-line)]
-    (cond
-      (= "1" game) (init/init-game {:size (board/get-board (select-board)) :players [:human :ai] :markers ["X" "O"] :difficulties (select-difficulty 1)})
-      (= "2" game) (init/init-game {:size (board/get-board (select-board)) :players [:ai :human] :markers ["X" "O"] :difficulties (select-difficulty 1)})
-      (= "3" game) (init/init-game {:size (board/get-board (select-board)) :players [:human :human] :markers ["X" "O"] :difficulties (select-difficulty 0)})
-      (= "4" game) (init/init-game {:size (board/get-board (select-board)) :players [:ai :ai] :markers ["X" "O"] :difficulties (select-difficulty 2)})
-      :else (retry-select-game))))
+  (let [choice (read-line)]
+    (case choice
+      "1" (setup-game [:human :ai] 1)
+      "2" (setup-game [:ai :human] 1)
+      "3" (setup-game [:human :human] 0)
+      "4" (setup-game [:ai :ai] 2)
+      (retry-select-game))))
+

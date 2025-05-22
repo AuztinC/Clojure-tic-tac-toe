@@ -6,6 +6,7 @@
 (describe "ai-turn"
   (with-stubs)
   (redefs-around [sut/best-early-move (fn [&_] 0)])
+
   (context "score a board through minimax"
     (tags :slow)
     (it "score-move calls minimax"
@@ -39,32 +40,32 @@
   (context "difficulty functions"
     (redefs-around [sut/score-move (stub :score-move {:return 0})])
     (it "3x3 hard invokes minimax, returns best position"
-      (sut/hard (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3)) )
+      (sut/hard (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3)))
       (should-have-invoked :score-move))
     (it "4x4 hard invokes best-early-score early game"
       (with-redefs [sut/best-early-move (stub :best-early-move {:return 0})]
-        (sut/hard (board/get-board :4x4) "O" (board/open-positions (board/get-board :4x4)) )
+        (sut/hard (board/get-board :4x4) "O" (board/open-positions (board/get-board :4x4)))
         (should-have-invoked :best-early-move)))
     (it "4x4 hard invokes minimax later game"
       (let [temp-board [["X"] ["X"] ["X"] [""] [""] ["O"] [""] ["O"]
                         ["O"] ["O"] ["X"] [""] [""] ["X"] ["X"] [""]]]
-       (sut/hard temp-board "O" (board/open-positions temp-board) ))
+        (sut/hard temp-board "O" (board/open-positions temp-board)))
       (should-have-invoked :score-move))
 
 
     (it "easy returns random open position"
       (with-redefs [rand-nth (constantly 1)]
         (should= 1 (sut/easy (board/open-positions (board/get-board :3x3))))))
-
     (it "medium can give hard"
       (with-redefs [rand-int (fn [& _] 0)
                     sut/hard (fn [& _] 5)]
-        (should= 5 (sut/medium (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3)) ))))
-
+        (should= 5
+          (sut/medium (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3))))))
     (it "medium can give easy"
       (with-redefs [rand-int (fn [& _] 1)
                     sut/easy (fn [& _] 3)]
-        (should= 3 (sut/medium (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3)) ))))
+        (should= 3
+          (sut/medium (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3))))))
     )
 
   (context "4x4 early moves"
@@ -79,7 +80,7 @@
       (should= 0 (sut/ai-turn (board/get-board :3x3) "O" :hard))
       (should= 0 (sut/ai-turn (board/get-board :4x4) "O" :hard)))
 
-    (it "plays center asap"
+    (it "3x3 plays center asap"
       (should= 4 (sut/ai-turn [["X"] [""] [""]
                                [""] [""] [""]
                                [""] [""] [""]] "O" :hard)))
@@ -89,11 +90,15 @@
                                ["O"] ["O"] ["X"] [""]
                                [""] ["X"] ["X"] [""]] "O" :hard))
       (should= 15 (sut/ai-turn [["X"] ["O"] ["O"] [""]
-                               ["O"] ["X"] [""] [""]
+                                ["O"] ["X"] [""] [""]
+                                ["O"] ["X"] ["X"] [""]
+                                [""] [""] [""] [""]] "O" :hard)))
+    (it "wins over defend"
+      (should= 7 (sut/ai-turn [["X"] ["X"] ["X"] [""]
+                               ["O"] ["O"] ["O"] [""]
                                ["O"] ["X"] ["X"] [""]
                                [""] [""] [""] [""]] "O" :hard)))
-
-    (it "defends against player win"
+    (it "defends on 3x3"
       (should= 2 (sut/ai-turn [["X"] ["X"] [""]
                                [""] ["O"] [""]
                                [""] [""] [""]] "O" :hard))

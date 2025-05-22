@@ -1,16 +1,20 @@
 (ns tic-tac-toe.init-game
-  (:require [tic-tac-toe.human-turn :as ht]
+  (:require [clojure.edn :as edn]
+            [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.ai-turn :as ai]
             [tic-tac-toe.board :as board]))
 
-(defmulti play-turn (fn [_board [_ player-type] _move-fn & _] player-type))
+(def edn-state
+  (edn/read-string (slurp "/Users/austincripe/Documents/Code Projects/Clojure-tic-tac-toe/resources/test.edn")))
 
-(defmethod play-turn :human [board [marker _] move-fn _]
+(defmulti play-turn (fn [_board _move-fn [_ player-type] & _] player-type))
+
+(defmethod play-turn :human [board move-fn [marker _] _]
   (let [move (move-fn board marker)]
     (assoc board move [marker])))
 
-(defmethod play-turn :ai [board [marker _] move-fn diff]
+(defmethod play-turn :ai [board move-fn [marker _] diff]
   (let [move (move-fn board marker diff)]
     (assoc board move [marker])))
 
@@ -48,7 +52,6 @@
                                    player2-marker player2-type)
             player-fn (->player-fn player-type)
             difficulty (->difficulties turn player-type difficulties)
-            new-board (play-turn board player player-fn difficulty)
-            ]
+            new-board (play-turn board player-fn player difficulty)]
         (recur new-board
           (next-player turn)))))))
