@@ -7,6 +7,8 @@
 
 (describe "game-options"
   (with-stubs)
+
+
   (context "select-game"
     (redefs-around [init/init-game (stub :init-game {:return :init})])
 

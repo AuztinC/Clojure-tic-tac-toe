@@ -2,15 +2,14 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe.init-game :as sut]
             [tic-tac-toe.printer :as printer]
-            [tic-tac-toe.board :as board]
-            [clojure.edn :as edn]))
+            [tic-tac-toe.board :as board]))
 
 (describe "tic tac toe"
   (with-stubs)
 
   #_(context "read edn"
-    (it "read first item"
-      (should= {:first "hello world", :second [0]}  sut/edn-state)))
+    (it "read current-game"
+      (should-be-a clojure.lang.PersistentArrayMap (sut/in-progress?))))
 
   (context "prints-game"
 
