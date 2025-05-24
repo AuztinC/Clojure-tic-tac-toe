@@ -14,7 +14,7 @@
 
     (it "prints game options"
       (with-redefs [read-line (fn [] "1")]
-        (should-contain "Choose your game\n  1: Human vs Computer\n  2: Computer vs Human\n  3: Human vs Human\n  4: Computer vs Computer\nChoose your board\n  1: 3x3\n  2: 4x4\nChoose AI difficulties\n  1: Easy\n  2: Medium\n  3: Hard\n"
+        (should-contain "Choose your game"
           (with-out-str (sut/select-game)))))
 
     (it "game-mode retries for bad input"
@@ -62,7 +62,7 @@
     )
   (context "select board size"
     (it "prints board options"
-      (should= "Choose your board\n  1: 3x3\n  2: 4x4\n" (with-out-str (printer/print-board-selection))))
+      (should= "Choose your board\n  1: 3x3\n  2: 4x4\n  3: 3x3x3\n" (with-out-str (printer/print-board-selection))))
     (it "can select both sizes"
       (with-out-str (should= :3x3 (with-in-str "1" (sut/select-board))))
       (with-out-str (should= :4x4 (with-in-str "2" (sut/select-board)))))

@@ -1,4 +1,4 @@
-(ns tic-tac-toe.core-spec
+(ns tic-tac-toe.init-spec
   (:require [speclj.core :refer :all]
             [tic-tac-toe.init-game :as sut]
             [tic-tac-toe.printer :as printer]
@@ -7,9 +7,18 @@
 (describe "tic tac toe"
   (with-stubs)
 
-  #_(context "read edn"
-    (it "read current-game"
-      (should-be-a clojure.lang.PersistentArrayMap (sut/in-progress?))))
+  #_(context "init and resume call game-loop"
+    (with-redefs [sut/game-loop (stub :game-loop)]
+      (it "init"
+        (with-out-str (with-in-str "1\n7\n3" (sut/init-game {:size (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard]})))
+        (should-have-invoked :game-loop))))
+
+  (context "read edn"
+    (it "receive package"
+      (should-be-a clojure.lang.PersistentArrayMap (sut/edn-state)))
+    (it "can read current game"
+      (with-redefs [sut/edn-state (fn [] {:current-game {}})]
+        (should (sut/in-progress?)))))
 
   (context "prints-game"
 
