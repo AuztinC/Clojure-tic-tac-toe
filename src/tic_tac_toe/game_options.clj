@@ -16,6 +16,7 @@
     (cond
       (= "1" player-choice) :3x3
       (= "2" player-choice) :4x4
+      (= "3" player-choice) :3x3x3
       :else (retry-select-board))))
 
 (declare select-difficulty)

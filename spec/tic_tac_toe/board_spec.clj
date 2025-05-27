@@ -8,12 +8,12 @@
   (context "can print a board"
     (it "displays a 3x3 board"
       (should= "   0 | 1 | 2\n  -----------\n   3 | 4 | 5\n  -----------\n   6 | 7 | 8\n----------------\n"
-        (with-out-str(printer/display-board (sut/get-board :3x3)))))
+        (with-out-str (printer/display-board (sut/get-board :3x3)))))
     (it "displays a 4x4 board"
       (should= "   0 | 1 | 2 | 3\n  -----------\n   4 | 5 | 6 | 7\n  -----------\n   8 | 9 | 10 | 11\n  -----------\n   12 | 13 | 14 | 15\n----------------\n"
         (with-out-str (printer/display-board (sut/get-board :4x4)))))
     (it "displays a 3x3x3 board"
-      (should=  " 0 |  1 |  2    3 |  4 |  5    6 |  7 |  8   \n -----------    -----------    -----------\n 9 | 10 | 11   12 | 13 | 14   15 | 16 | 17   \n -----------    -----------    -----------\n18 | 19 | 20   21 | 22 | 23   24 | 25 | 26   \n-------------------------------------------\n"
+      (should= " 0 |  1 |  2    3 |  4 |  5    6 |  7 |  8   \n -----------    -----------    -----------\n 9 | 10 | 11   12 | 13 | 14   15 | 16 | 17   \n -----------    -----------    -----------\n18 | 19 | 20   21 | 22 | 23   24 | 25 | 26   \n-------------------------------------------\n"
         (with-out-str (printer/display-board (sut/get-board :3x3x3))))))
 
   (context "open-positions"
@@ -45,8 +45,24 @@
 
     (it "4x4 winning moves"
       (should= "X" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["X"] ["X"] ["X"] ["O"] ["X"] ["O"] ["X"] ["O"] ["O"] ["X"] [""] ["X"]]))
-      (should= "O" (sut/check-winner [["X"] ["X"] ["O"] ["O"]["X"] ["X"] ["X"] ["O"]["X"] ["O"] ["X"] ["O"]["O"] ["X"] [""] ["O"]]))
-      (should= "tie" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]]))
-      )
+      (should= "O" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["X"] ["X"] ["X"] ["O"] ["X"] ["O"] ["X"] ["O"] ["O"] ["X"] [""] ["O"]]))
+      (should= "tie" (sut/check-winner [["X"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"] ["O"] ["O"] ["O"] ["X"] ["X"] ["O"] ["X"]])))
+    (it "3x3x3 flat winning moves"
+      (should= "X" (sut/check-winner [["X"] ["X"] ["X"] [""] [""] [""] [""] [""] [""]
+                                      [""] [""] [""] [""] [""] [""] [""] [""] [""]
+                                      [""] [""] [""] [""] [""] [""] [""] [""] [""]]))
+      (should= "X" (sut/check-winner [[""] [""] [""] [""] [""] [""] [""] [""] [""]
+                                      [""] [""] [""] ["X"] ["X"] ["X"] [""] [""] [""]
+                                      [""] [""] [""] [""] [""] [""] [""] [""] [""]])))
+    (it "3x3x3 vertical moves"
+      (should= "X" (sut/check-winner [[""] [""] [""]  [""] [""] [""]  [""] [""] [""]
+                                      ["X"] [""] [""]  [""] ["X"] [""]  [""] [""] ["X"]
+                                      [""] [""] [""]  [""] [""] [""]  [""] [""] [""]])))
+    (it "3x3x3 tie"
+      (should= "X" (sut/check-winner [["X"] ["O"] ["O"] ["X"] ["X"] [""] [""] [""] [""]
+                                      ["X"] ["X"] [""] [""] ["X"] ["X"] ["O"] [""] ["X"]
+                                      [""] [""] ["O"] [""] [""] [""] [""] [""] [""]])))
     )
+  (it "count 49 3x3x3 winning moves"
+    (should= 49 (count (get sut/winning-moves :3x3x3))))
   )
