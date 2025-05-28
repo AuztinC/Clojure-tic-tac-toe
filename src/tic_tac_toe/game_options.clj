@@ -1,5 +1,6 @@
 (ns tic-tac-toe.game-options
-  (:require [tic-tac-toe.printer :as printer]
+  (:require [tic-tac-toe.persistence :as db]
+            [tic-tac-toe.printer :as printer]
             [tic-tac-toe.init-game :as init]
             [tic-tac-toe.board :as board]))
 
@@ -49,7 +50,8 @@
     (init/init-game {:size         board
                      :players      player-types
                      :markers      ["X" "O"]
-                     :difficulties difficulties})))
+                     :difficulties difficulties
+                     :store nil})))
 
 (defn select-game []
   (printer/print-game-options)
@@ -73,7 +75,7 @@
     (load-game)))
 
 (defn load-game []
-  (if (init/in-progress?)
+  (if (db/in-progress?)
     (do
       (print-load-game)
       (let [choice (read-line)]

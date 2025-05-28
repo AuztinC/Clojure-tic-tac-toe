@@ -24,21 +24,20 @@
           (should-have-invoked :select-game {:times 2}))))
 
     (it "selects human v ai"
-      (with-redefs [board/get-board (stub :get-board)]
-        (with-out-str (with-in-str "1\n1\n1" (sut/select-game)))
-        (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:easy])]})))
+      (with-out-str (with-in-str "1\n1\n1" (sut/select-game)))
+      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:easy] :store nil)]}))
 
     (it "selects ai vs human"
       (with-out-str (with-in-str "2\n1\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:ai :human] :markers ["X" "O"] :difficulties [:easy])]}))
+      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:ai :human] :markers ["X" "O"] :difficulties [:easy] :store nil)]}))
 
     (it "selects human v human"
       (with-out-str (with-in-str "3\n0\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:human :human] :markers ["X" "O"] :difficulties [])]}))
+      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:human :human] :markers ["X" "O"] :difficulties [] :store nil)]}))
 
     (it "selects ai v ai"
       (with-out-str (with-in-str "4\n1\n1\n3" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:ai :ai] :markers ["X" "O"] :difficulties [:easy :hard])]}))
+      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:ai :ai] :markers ["X" "O"] :difficulties [:easy :hard] :store nil)]}))
     )
 
   (context "selecting difficulty"

@@ -1,40 +1,6 @@
 (ns tic-tac-toe.ai-turn
   (:require [tic-tac-toe.board :as board]))
 
-(defn creates-fork? [board marker pos]
-  (let [new-board (assoc board pos [marker])
-        lines (get board/winning-moves :3x3x3)
-        catch-fork
-        (filter (fn [line]
-                  (let [vals (map #(get new-board %) line)
-                        count (frequencies vals)]
-                    (and (= 2 (get count [marker] 0))
-                      (= 1 (get count [""] 0)))))
-          lines)]
-    (>= (count catch-fork) 2)))
-
-(defn will-create-fork-next-turn? [board marker pos]
-  (let [new-board (assoc board pos [marker])
-        open (board/open-positions new-board)]
-    (some #(creates-fork? new-board marker %) open)))
-
-(defn evaluate-lines [board marker]
-  (let [opponent (if (= "X" marker) "O" "X")
-        lines (get board/winning-moves :3x3x3)
-        score-line
-        (fn [line]
-          (let [vals (map #(get board %) line)
-                counts (frequencies vals)
-                marker-score (get counts [marker] 0)
-                opponent-score (get counts [opponent] 0)]
-            (cond
-              (and (= 2 marker-score) (= 0 opponent-score)) 10
-              (and (= 1 marker-score) (= 0 opponent-score)) 1
-              (and (= 2 opponent-score) (= 0 marker-score)) -10
-              (and (= 1 opponent-score) (= 0 marker-score)) -1
-              :else 0)))]
-    (reduce + (map #(score-line %) lines))))
-
 (defn score-minimax-result [result depth marker]
   (cond
     (= result marker) (- 10 depth)
@@ -43,8 +9,7 @@
 
 (declare score-move)
 (defn minimax [board maximizing? depth ai-marker ai-best p2-best]
-  (let [
-        p1-marker ai-marker
+  (let [p1-marker ai-marker
         p2-marker (if (= "O" p1-marker) "X" "O")
         spec {true  {:extrema-fn max :extreme ##-Inf :current-marker p1-marker}
               false {:extrema-fn min :extreme ##Inf :current-marker p2-marker}}
@@ -76,16 +41,71 @@
         random-best (rand-int (count filtered-moves))]
     (get filtered-moves random-best)))
 
+(defn creates-fork? [board marker pos]
+  (let [new-board (assoc board pos [marker])
+        lines (get board/winning-moves :3x3x3)
+        potential-wins
+        (for [line lines
+              :let [vals (map #(get new-board %) line)
+                    freqs (frequencies vals)]
+              :when (and (= 2 (get freqs [marker] 0))
+                      (= 1 (get freqs [""] 0)))]
+          (first (filter #(= (get new-board %) [""]) line)))]
+    (>= (count (distinct potential-wins)) 2)))
+
+(declare evaluate-lines)
+(defn best-fork-threats [board marker pos]
+  (let [new-board (assoc board pos [marker])
+        opponent (if (= "X" marker) "O" "X")
+        open (board/open-positions new-board)
+        fork-threats (filter #(creates-fork? (assoc new-board % [opponent]) opponent %) open)]
+    (reduce
+      (fn [acc threat-pos]
+        (let [score (evaluate-lines (assoc new-board threat-pos [opponent]) opponent)]
+          (cond
+            (> score (:score acc)) {:score score :positions [threat-pos]}
+            (= score (:score acc)) (update acc :positions conj threat-pos)
+            :else acc)))
+      {:score ##-Inf :positions []}
+      fork-threats)))
+
+(defn evaluate-lines [board marker]
+  (let [opponent (if (= "X" marker) "O" "X")
+        lines (get board/winning-moves :3x3x3)
+        score-line
+        (fn [line]
+          (let [vals (map #(get board %) line)
+                counts (frequencies vals)
+                marker-score (get counts [marker] 0)
+                opponent-score (get counts [opponent] 0)]
+            (cond
+              (= 3 marker-score) 1000
+              (and (= 2 marker-score) (= 0 opponent-score)) 100
+              (and (= 1 marker-score) (= 0 opponent-score)) 10
+              (and (= 2 opponent-score) (= 0 marker-score)) -100
+              (and (= 1 opponent-score) (= 0 marker-score)) -10
+              :else 0)))]
+    (reduce + (map #(score-line %) lines))))
+
 (defn score-move [board maximizing? depth ai-marker ai-best p2-best]
   (if-let [result (board/check-winner board)]
     (score-minimax-result result depth ai-marker)
-    (let [max-depth (if (= 27 (count board)) 4 12)]
-      (if (>= depth max-depth)
-        (evaluate-lines board ai-marker)
-        (memo-minimax board maximizing? depth ai-marker ai-best p2-best)))))
+    (if (>= depth 10)
+      (evaluate-lines board ai-marker)
+      (memo-minimax board maximizing? depth ai-marker ai-best p2-best))
+    ))
 
+(defn prevent-opponent-fork [board marker opponent]
+  (first
+    (filter (fn [pos]
+              (let [new-board (assoc board pos [marker])
+                    forks-after-move (filter #(creates-fork? (assoc new-board % [opponent]) opponent %)
+                                       (board/open-positions new-board))]
+                (when (empty? forks-after-move)
+                  pos)))
+      (board/open-positions board))))
 
-(defn win-detected? [board marker open]
+(defn immediate-move? [board marker open]
   (let [opponent (if (= "X" marker) "O" "X")
         winning (some (fn [pos]
                         (let [new-board (assoc board pos [marker])]
@@ -96,22 +116,17 @@
                            (when (= opponent (board/check-winner new-board))
                              pos))) open)
         fork (some (fn [pos]
-                     (when (will-create-fork-next-turn? board opponent pos)
-                       pos)) open)
-        own-fork (some (fn [pos]
-                         (when (will-create-fork-next-turn? board marker pos)
-                           pos)) open)]
-    (cond
-      blocking blocking
-      winning winning
-      fork fork
-      own-fork own-fork
-      :else nil)))
+                     (first (get (best-fork-threats board marker pos) :positions)))
+               open)
+        block-fork (prevent-opponent-fork board marker opponent)]
+    (or winning blocking fork block-fork)))
 
 (defn hard [board marker open-positions]
   (let [is-3d (= 27 (count board))
-        immediate-move (when is-3d
-                         (win-detected? board marker open-positions))]
+        immediate-move (if (= 27 (count open-positions))
+                         13
+                         (when is-3d
+                           (immediate-move? board marker open-positions)))]
     (if (and immediate-move is-3d)
       immediate-move
       (let [is-4x4 (= 16 (count board))
@@ -119,7 +134,6 @@
             board-scores (map #(score-move % false 0 marker ##-Inf ##Inf) possible-boards)
             turn-limit (when is-4x4 12)]
         (cond
-          (and is-3d (<= turn-limit (count open-positions))) (evaluate-lines board marker)
           (and is-4x4 (<= turn-limit (count open-positions))) (best-early-move board)
           :else (first (first (sort-by second > (zipmap open-positions board-scores)))))))))
 

@@ -112,32 +112,44 @@
     (let [temp-board [["X"] [""] ["X"] [""] [""] [""] ["O"] [""] [""]
                       ["X"] ["O"] ["O"] [""] ["O"] [""] [""] [""] [""]
                       [""] [""] ["O"] [""] ["X"] ["X"] [""] [""] [""]]]
-      (should= 1 (sut/win-detected? temp-board "O" (board/open-positions temp-board)))))
+      (should= 1 (sut/immediate-move? temp-board "O" (board/open-positions temp-board)))))
 
   (it "catches a spot where the opponent will create a fork"
     (should (sut/creates-fork? [[""] [""] ["X"] [""] [""] [""] [""] [""] [""]
                                 [""] [""] [""] [""] [""] ["O"] [""] [""] [""]
-                                ["X"] ["O"] [""] [""] [""] ["X"] [""] [""] [""]] "X" 0)))
+                                ["X"] ["O"] [""] [""] [""] ["X"] [""] [""] [""]] "X" 0))
+    (should= [4 10] (get (sut/best-fork-threats [["O"] ["X"] [""] [""] [""] [""] [""] [""] [""]
+                                                 [""] [""] [""] [""] ["X"] [""] [""] [""] [""]
+                                                 [""] [""] [""] [""] [""] [""] [""] ["O"] [""]] "O" 0) :positions))
+    (should= 4 (sut/ai-turn [["O"] ["X"] [""] [""] [""] [""] [""] [""] [""]
+                             [""] [""] [""] [""] ["X"] [""] [""] [""] [""]
+                             [""] [""] [""] [""] [""] [""] [""] ["O"] [""]] "O" :hard)))
 
   (context "evaluate lines 3x3x3"
-    (it "zero for empty board"
-      (should= 0 (sut/evaluate-lines (board/get-board :3x3x3) (board/open-positions (board/get-board :3x3x3)))))
+    (it "3x3x3 hard invokes immediate-move late game"
+      (let [temp-board [["X"] [""] ["X"] [""] [""] [""] ["O"] [""] [""]
+                        ["X"] ["O"] ["O"] [""] ["O"] [""] [""] [""] [""]
+                        [""] [""] ["O"] [""] ["X"] ["X"] [""] [""] [""]]]
+        (with-redefs [sut/immediate-move? (stub :immediate-move? {:return 0})]
+          (sut/hard temp-board "O" (board/open-positions temp-board))
+          (should-have-invoked :immediate-move?))))
+
     (it "high negative score for opponent winning"
-      (should= -19 (sut/evaluate-lines [["X"] [""] [""] [""] [""] [""] [""] [""] [""]
-                                        ["X"] [""] [""] [""] [""] [""] [""] [""] [""]
-                                        [""] [""] [""] [""] [""] [""] [""] [""] [""]] "O")))
+      (should= -190 (sut/evaluate-lines [["X"] [""] [""] [""] [""] [""] [""] [""] [""]
+                                         ["X"] [""] [""] [""] [""] [""] [""] [""] [""]
+                                         [""] [""] [""] [""] [""] [""] [""] [""] [""]] "O")))
     (it "high positive score for win"
-      (should= 10 (sut/evaluate-lines [["X"] [""] [""] [""] [""] [""] [""] [""] [""]
-                                       ["O"] ["O"] [""] [""] [""] [""] [""] [""] [""]
-                                       [""] [""] [""] [""] [""] [""] [""] [""] [""]] "O"))
-      (should= 22 (sut/evaluate-lines [["X"] [""] [""] [""] [""] [""] [""] [""] [""]
-                                       ["O"] ["O"] [""] [""] [""] [""] [""] [""] [""]
-                                       [""] ["O"] [""] [""] [""] [""] [""] [""] [""]] "O"))))
+      (should= 100 (sut/evaluate-lines [["X"] [""] [""] [""] [""] [""] [""] [""] [""]
+                                        ["O"] ["O"] [""] [""] [""] [""] [""] [""] [""]
+                                        [""] [""] [""] [""] [""] [""] [""] [""] [""]] "O"))
+      (should= 220 (sut/evaluate-lines [["X"] [""] [""] [""] [""] [""] [""] [""] [""]
+                                        ["O"] ["O"] [""] [""] [""] [""] [""] [""] [""]
+                                        [""] ["O"] [""] [""] [""] [""] [""] [""] [""]] "O"))))
   (context "3x3x3 moves"
     (it "defend"
-      (should= 1 (sut/ai-turn [["X"] [""] ["X"] [""] [""] [""] ["O"] [""] [""]
-                                ["X"] ["O"] ["O"] [""] ["O"] [""] [""] [""] [""]
-                                [""] [""] [""] [""] ["X"] ["X"] [""] [""] [""]] "O" :hard)))
+      (should= 1 (sut/ai-turn [["X"] [""] ["X"] [""] [""] [""] ["O"] ["O"] [""]
+                               ["X"] [""] [""] [""] ["O"] [""] [""] [""] [""]
+                               [""] [""] ["O"] [""] ["X"] ["X"] [""] [""] ["X"]] "O" :hard)))
     (it "make a winning move"
       (should= 1 (sut/ai-turn [["O"] [""] ["O"] [""] [""] [""] [""] [""] [""]
                                [""] [""] ["X"] [""] ["O"] [""] [""] [""] [""]

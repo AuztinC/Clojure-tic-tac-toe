@@ -47,11 +47,17 @@
                      9 :3x3
                      16 :4x4
                      :3x3x3)
-        wm->board (for [wm (get winning-moves board-size)] (map #(first (nth board %)) wm))]
-    (let [winner-result (winner-result wm->board)]
-      (if winner-result
-        (first winner-result)
-        (if (tie-game? board) "tie" nil)))))
+        winning-lines (get winning-moves board-size)
+        line-values (map #(map (comp first (partial nth board)) %) winning-lines)
+        winner (some (fn [line]
+                       (let [first-val (first line)]
+                         (when (and (not= first-val "")
+                                 (every? #(= % first-val) line))
+                           first-val)))
+                 line-values)]
+    (if winner
+      winner
+      (if (tie-game? board) "tie" nil))))
 
 (defn open-positions [board]
   (filter #(not= nil %)
