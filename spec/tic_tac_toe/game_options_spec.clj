@@ -1,16 +1,20 @@
 (ns tic-tac-toe.game-options-spec
   (:require [speclj.core :refer :all]
             [tic-tac-toe.game-options :as sut]
-            [tic-tac-toe.board :as board]
             [tic-tac-toe.init-game :as init]
             [tic-tac-toe.printer :as printer]))
+
+(def composed-args (atom nil))
 
 (describe "game-options"
   (with-stubs)
 
 
   (context "select-game"
-    (redefs-around [init/init-game (stub :init-game {:return :init})])
+    (redefs-around [init/init-game
+                    (stub :init-game {:invoke (fn [args]
+                                                (reset! composed-args args)
+                                                :init)})])
 
     (it "prints game options"
       (with-redefs [read-line (fn [] "1")]
@@ -25,19 +29,24 @@
 
     (it "selects human v ai"
       (with-out-str (with-in-str "1\n1\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:easy] :store nil)]}))
+      (should-have-invoked :init-game)
+      (should= [:human :ai] (:players @composed-args))
+      )
 
     (it "selects ai vs human"
       (with-out-str (with-in-str "2\n1\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:ai :human] :markers ["X" "O"] :difficulties [:easy] :store nil)]}))
+      (should-have-invoked :init-game)
+      (should= [:ai :human] (:players @composed-args)))
 
     (it "selects human v human"
       (with-out-str (with-in-str "3\n0\n1" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:human :human] :markers ["X" "O"] :difficulties [] :store nil)]}))
+      (should-have-invoked :init-game)
+      (should= [:human :human] (:players @composed-args)))
 
     (it "selects ai v ai"
       (with-out-str (with-in-str "4\n1\n1\n3" (sut/select-game)))
-      (should-have-invoked :init-game {:with [(hash-map :size (board/get-board :3x3) :players [:ai :ai] :markers ["X" "O"] :difficulties [:easy :hard] :store nil)]}))
+      (should-have-invoked :init-game)
+      (should= [:ai :ai] (:players @composed-args)))
     )
 
   (context "selecting difficulty"

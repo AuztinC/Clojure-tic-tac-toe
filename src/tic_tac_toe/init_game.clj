@@ -1,11 +1,9 @@
 (ns tic-tac-toe.init-game
-  (:require [clojure.edn :as edn]
-            [tic-tac-toe.human-turn :as ht]
+  (:require [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.ai-turn :as ai]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
-
 
 (defmulti play-turn (fn [_board _move-fn [_ player-type] & _] player-type))
 
@@ -60,10 +58,9 @@
 (defn init-game [state]
   (let [{board                           :size, [player1-type player2-type] :players,
          [player1-marker player2-marker] :markers, difficulties :difficulties
-         store :store
+         store :store turn :turn
          }
-        state
-        turn "p1"]
+        state]
     (do
       (db/update-game! :file board player1-type player2-type player1-marker player2-marker difficulties turn)
       (game-loop store board player1-type player2-type player1-marker player2-marker difficulties turn))))

@@ -25,11 +25,34 @@
   (context "Game-loop"
     (tags :slow)
     (it "Human-vs-ai"
-      (should (clojure.string/includes? (with-out-str (with-in-str "0\n3\n7\n" (sut/init-game {:size (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard]}))) "O wins!\n")))
+      (should (clojure.string/includes?
+                (with-out-str
+                  (with-in-str "0\n3\n7\n"
+                    (sut/init-game
+                      {:size         (board/get-board :3x3)
+                       :players      [:human :ai] :markers ["X" "O"]
+                       :difficulties [:hard]})))
+                "O wins!\n")))
     (it "ai-vs-human"
-      (should (clojure.string/includes? (with-out-str (with-in-str "0\n3\n7\n" (sut/init-game {:size (board/get-board :3x3) :players [:ai :human] :markers ["X" "O"] :difficulties [:hard]}))) "X wins!\n")))
+      (should (clojure.string/includes?
+                (with-out-str
+                  (with-in-str "0\n3\n7\n"
+                    (sut/init-game
+                      {:size         (board/get-board :3x3)
+                       :players      [:ai :human]
+                       :markers      ["X" "O"]
+                       :difficulties [:hard]})))
+                "X wins!\n")))
     (it "ai-vs-ai"
-      (should (clojure.string/includes? (with-out-str (sut/init-game {:size (board/get-board :3x3) :players [:ai :ai] :markers ["X" "O"] :difficulties [:hard :hard]})) "tie")))
+      (should (clojure.string/includes?
+                (with-out-str
+                  (sut/init-game
+                    {:size         (board/get-board :3x3)
+                     :players      [:ai :ai]
+                     :markers      ["X" "O"]
+                     :difficulties [:hard :hard]
+                     :turn         "p1" :store nil}))
+                "tie")))
     )
   )
 

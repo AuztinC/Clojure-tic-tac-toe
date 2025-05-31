@@ -51,6 +51,7 @@
                      :players      player-types
                      :markers      ["X" "O"]
                      :difficulties difficulties
+                     :turn "p1"
                      :store nil})))
 
 (defn select-game []
