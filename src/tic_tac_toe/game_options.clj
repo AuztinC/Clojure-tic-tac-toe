@@ -52,7 +52,7 @@
                      :markers      ["X" "O"]
                      :difficulties difficulties
                      :turn "p1"
-                     :store nil})))
+                     :store :file})))
 
 (defn select-game []
   (printer/print-game-options)

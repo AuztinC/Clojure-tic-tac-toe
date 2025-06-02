@@ -43,7 +43,7 @@
     (if (board/check-winner board)
       (do
         (printer/output-result (board/check-winner board))
-        (db/clear! nil))
+        (db/clear! :file))
       (let [[_marker player-type :as player] (->players turn
                                                player1-marker player1-type
                                                player2-marker player2-type)
@@ -68,6 +68,8 @@
 (defn resume-game []
   (let [{:keys [board players markers difficulties turn store]} (get (db/edn-state) :current-game)
         [player1-type player2-type] players
-        [player1-marker player2-marker] markers]
-    (game-loop store board player1-type player2-type player1-marker player2-marker difficulties (next-player turn))))
+        [player1-marker player2-marker] markers
+        new-game? (= (count board) (count (board/open-positions board)))
+        next-turn (if new-game? turn (next-player turn))]
+    (game-loop store board player1-type player2-type player1-marker player2-marker difficulties next-turn)))
 

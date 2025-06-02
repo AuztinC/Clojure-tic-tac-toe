@@ -16,7 +16,8 @@
                               :players      [player1-type player2-type]
                               :markers      [player1-marker player2-marker]
                               :difficulties difficulties
-                              :turn         turn}))))
+                              :turn         turn
+                              :store :file}))))
 
 (defn update-atom!
   [board player1-type player2-type player1-marker player2-marker difficulties turn]

@@ -1,1 +1,1 @@
-{:current-game {:board [[""] [""] [""] [""] [""] [""] [""] [""] [""]], :players [:ai :ai], :markers ["X" "O"], :difficulties [:hard :hard], :turn "p1"}}
+{}

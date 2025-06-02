@@ -23,11 +23,20 @@
 
     (context "write to edn"
       (redefs-around [spit (stub :spit)])
-      (it "updates file"
-        (sut/update-game! :file (board/get-board :3x3) :human :ai "X" "O" [:hard] "p1")
-        (should-have-invoked :spit
-          {:with [sut/edn-file
-                  "{:current-game {:board [[\"\"] [\"\"] [\"\"] [\"\"] [\"\"] [\"\"] [\"\"] [\"\"] [\"\"]], :players [:human :ai], :markers [\"X\" \"O\"], :difficulties [:hard], :turn \"p1\"}}\n"]}))
+
+      (let [state (prn-str {:current-game
+                            {:board        (board/get-board :3x3),
+                             :players      [:human :ai], :markers ["X" "O"],
+                             :difficulties [:hard], :turn "p1"
+                             :store :file}})]
+        (it "updates current game file"
+          (sut/update-game! :file (board/get-board :3x3) :human :ai "X" "O" [:hard] "p1")
+          (should-have-invoked :spit
+            {:with [sut/edn-file
+                    state]}))
+
+        #_(it "update previous games file"
+          (sut/update-previous! )))
 
       (it "clear edn"
         (with-redefs [sut/edn-state (fn [] {:current-game   {}
@@ -38,8 +47,8 @@
 
   #_(context "postgres"
 
-    (it "blah"
-      (sut/clear! :pgsql)))
+      (it "blah"
+        (sut/clear! :pgsql)))
 
   (context "mem"
 
@@ -65,4 +74,6 @@
                  :markers      ["X" "O"]
                  :difficulties [:hard]
                  :turn         "p1"}}
-        @sut/mem-db))))
+        @sut/mem-db)))
+
+  )
