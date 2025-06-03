@@ -2,6 +2,7 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe.human-turn :as sut]
             [tic-tac-toe.board :as board]
+            [tic-tac-toe.init-game :as init]
             [tic-tac-toe.printer :as printer]))
 
 (describe "human-turn"
@@ -11,7 +12,7 @@
 
   (it "print player prompt"
     (let [marker "X"]
-     (should= (str "Player " marker ", enter your move:\n") (with-out-str (printer/print-player-prompt marker)))))
+      (should= (str "Player " marker ", enter your move:\n") (with-out-str (printer/print-player-prompt marker)))))
 
   (it "invoke 'bad-move' for bad input"
     (with-redefs [sut/bad-move (stub :bad-move)]

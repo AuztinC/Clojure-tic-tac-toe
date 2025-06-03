@@ -47,7 +47,7 @@
 (defn setup-game [player-types difficulty-count]
   (let [board (board/get-board (select-board))
         difficulties (select-difficulty difficulty-count)]
-    (init/init-game {:size         board
+    (init/init-game {:board         board
                      :players      player-types
                      :markers      ["X" "O"]
                      :difficulties difficulties

@@ -85,3 +85,6 @@
 (defn print-bad-move [] (println "oops bad move, try again"))
 
 (defn print-player-prompt [marker] (println (str "Player " marker ", enter your move:")))
+
+(defn game-id [id]
+  (println (str "Game ID: " id)))
