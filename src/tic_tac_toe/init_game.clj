@@ -47,7 +47,8 @@
       (and (= "p2" turn) (= :ai player-type)) (second difficulties))))
 
 (defn end-game! [board store]
-  (let [data {:id (random-uuid)
+  (let [new-id (inc (get (last (get (db/edn-state) :previous-games)) :id 0))
+        data {:id new-id
               :moves @stored-moves
               :board-size (case (count board)
                             9 :3x3

@@ -8,7 +8,6 @@
   (with-stubs)
 
   (context "file"
-
     (context "read edn"
       (it "from correct file"
         (should= "resources/state.edn"
@@ -43,8 +42,7 @@
                     :board-size (case (count (board/get-board :3x3))
                                   9 :3x3
                                   16 :4x4
-                                  :3x3x3)}
-              file {:previous-games []}]
+                                  :3x3x3)}]
           (with-redefs [sut/edn-state "{:previous-games []}"]
             (it "update previous games file"
               (sut/update-previous-games! data)
@@ -97,15 +95,4 @@
               move-fn (fn [board marker] 5)
               return (init/play-turn board move-fn ["X" :human] nil)]
           (should= ["5"] @init/stored-moves))))
-  (context "storing moves"
-    (it "stores single human move"
-      (reset! init/stored-moves [])
-      (swap! init/stored-moves conj (str 0))
-      (should= ["0"] @init/stored-moves))
-    (it "stores multiple moves"
-      (reset! init/stored-moves [])
-      (swap! init/stored-moves conj (str 0))
-      (swap! init/stored-moves conj (str 4))
-      (swap! init/stored-moves conj (str 7))
-      (should= ["0" "4" "7"] @init/stored-moves)))
   )

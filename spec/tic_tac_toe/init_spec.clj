@@ -7,6 +7,8 @@
 
 (describe "tic tac toe"
   (with-stubs)
+  (before (reset! db/mem-db {}))
+
   (context "prints-game"
 
     (it "prints board first"
@@ -46,8 +48,7 @@
                      :markers ["X" "O"]
                      :difficulties [:hard :hard]
                      :turn "p1" :store nil}))
-                "tie")))
-    )
+                "tie"))))
 
   (it "game over calls game-end!"
     (with-redefs [sut/end-game! (stub :end-game!)]
@@ -57,8 +58,20 @@
   (it "print end-game ID"
     (should (clojure.string/includes?
               (with-out-str
-                (sut/end-game! (board/get-board :3x3) :file))
+                (sut/end-game! (board/get-board :3x3) :mem))
               "Game ID: ")))
+
+  (context "storing moves"
+    (it "scores single human move"
+      (reset! sut/stored-moves [])
+      (sut/record-move! "X" 0)
+      (should= [{:player "X" :move 0}] @sut/stored-moves))
+
+    (it "stores multiple moves"
+      (reset! sut/stored-moves [])
+      (sut/record-move! "X" 0)
+      (sut/record-move! "O" 3)
+      (should= [{:player "X" :move 0}{:player "O" :move 3}] @sut/stored-moves)))
 
   #_(context "end game data has correct params"
       (it "correct board"

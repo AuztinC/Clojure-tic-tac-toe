@@ -2,8 +2,8 @@
   (:require [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.init-game :as init]
-            [tic-tac-toe.board :as board]))
-
+            [tic-tac-toe.board :as board]
+            [tic-tac-toe.replay :as replay]))
 
 (declare select-board)
 (defn- retry-select-board []
@@ -44,12 +44,12 @@
   (println "Not a game-mode, retry.")
   (select-game))
 
-(defn setup-game [player-types difficulty-count]
+(defn- setup-game [player-types difficulty-count]
   (let [board (board/get-board (select-board))
         difficulties (select-difficulty difficulty-count)]
-    (init/init-game {:board         board
-                     :players      player-types
-                     :markers      ["X" "O"]
+    (init/init-game {:board board
+                     :players player-types
+                     :markers ["X" "O"]
                      :difficulties difficulties
                      :turn "p1"
                      :store :file})))
@@ -85,6 +85,40 @@
           "2" (select-game)
           (retry-load-game))))
     (select-game)))
+
+(declare dispatch-id)
+(defn retry-dispatch-id []
+  (do
+    (println "Game not found! Let's try that again.")
+    (dispatch-id)))
+
+(defn dispatch-id []
+  (println "Please enter your game ID: ")
+  (let [id (Integer/parseInt (read-line))
+        game (replay/unpack-game id)]
+    (if (empty? game)
+      (retry-dispatch-id)
+      (replay/replay game))))
+
+(declare watch-replay?)
+(defn retry-watch-replay []
+  (do
+    (println "Bad input, try again.")
+    (watch-replay?)))
+
+(defn watch-replay? []
+  (if (db/previous-games?)
+    (do
+      (println "Would you like to watch a replay?
+  You'll need a match ID.
+  1: Yes
+  2: No")
+      (let [choice (read-line)]
+        (case choice
+          "1" (dispatch-id)
+          "2" (load-game)
+          (retry-watch-replay))))
+    (load-game)))
 
 
 

@@ -8,18 +8,19 @@
         game (filter #(= id (:id %)) previous-games)]
     game))
 
+(defn game-loop! []
+  (fn [acc {:keys [player move]}]
+    (let [new-board (assoc acc move [player])
+          winner (board/check-winner new-board)]
+          (printer/display-board new-board)
+          (println (str "Player " player " moves to: " move))
+      (if winner
+        (printer/output-result winner)
+        new-board))))
+
 (defn replay [state]
   (let [{moves :moves, size :board-size} state
         board (board/get-board size)]
-    (reduce (fn [acc {:keys [player move]}]
-              (let [new-board (assoc acc move [player])
-                    winner (board/check-winner new-board)]
-                (if winner
-                  (printer/output-result winner)
-                  (do
-                    (println (str "Player " player " moves to: " move))
-                    (prn new-board)
-                    new-board))
-                ))
+    (reduce (game-loop!)
       board
       moves)))

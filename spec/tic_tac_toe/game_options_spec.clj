@@ -2,13 +2,13 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe.game-options :as sut]
             [tic-tac-toe.init-game :as init]
-            [tic-tac-toe.printer :as printer]))
+            [tic-tac-toe.printer :as printer]
+            [tic-tac-toe.replay :as replay]))
 
 (def composed-args (atom nil))
 
 (describe "game-options"
   (with-stubs)
-
 
   (context "select-game"
     (redefs-around [init/init-game
@@ -79,4 +79,33 @@
         (let [out (with-out-str (with-in-str "5\n1" (sut/select-board)))]
           (should-contain "Oops, try again." out)
           (should-have-invoked :select-board {:times 2})))))
+
+  (context "replay a game"
+    (it "prints option to replay with ID"
+      (let [out (with-out-str (with-in-str "1\n1" (sut/watch-replay?)))]
+        (should-contain "Would you like to watch a replay?
+  You'll need a match ID.
+  1: Yes
+  2: No\n" out)))
+
+    #_(it "asks for ID to invoke unpack-game with"
+      (with-redefs [replay/unpack-game (stub :unpack-game)]
+        (should-contain "Please enter your game ID: "
+          (with-out-str (with-in-str "1\n1" (sut/watch-replay?))))
+        (should-have-invoked :unpack-game {:with [1]})))
+
+    (it "load-game for 2"
+      (with-redefs [sut/load-game (stub :load-game)]
+        (with-out-str (with-in-str "2" (sut/watch-replay?)))
+        (should-have-invoked :load-game)))
+
+    (it "retry replay for bad input"
+      (with-redefs [sut/watch-replay? (stub :watch-replay? {:invoke sut/watch-replay?})]
+        (let [out (with-out-str (with-in-str "W\n1\n1" (sut/watch-replay?)))]
+          (should-contain "Bad input" out)
+          (should-have-invoked :watch-replay? {:times 2}))))
+    )
+  #_(context "dispatching id"
+    (focus-it "retry for empty game"
+      (should= -1 (with-out-str (with-in-str "2" (sut/dispatch-id))))))
   )

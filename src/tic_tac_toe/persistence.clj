@@ -49,6 +49,9 @@
 (defn in-progress? []
   (get (edn-state) :current-game))
 
+(defn previous-games? []
+  (get (edn-state) :previous-games))
+
 (defn clear! [store]
   (case store
     :file (spit edn-file (dissoc (edn-state) :current-game))
@@ -69,4 +72,4 @@
 ;(defmethod clear :pgsql [state]
 ;  (...))
 
-
+;
