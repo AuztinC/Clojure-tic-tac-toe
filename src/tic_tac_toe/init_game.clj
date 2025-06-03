@@ -47,7 +47,7 @@
       (and (= "p2" turn) (= :ai player-type)) (second difficulties))))
 
 (defn end-game! [board store]
-  (let [new-id (inc (get (last (get (db/edn-state) :previous-games)) :id 0))
+  (let [new-id (db/set-new-game-id)
         data {:id new-id
               :moves @stored-moves
               :board-size (case (count board)
@@ -55,7 +55,7 @@
                             16 :4x4
                             :3x3x3)}]
     (reset! stored-moves [])
-    (db/update-previous-games! data)
+    (db/update-previous-games! store data)
     (printer/output-result (board/check-winner board))
     (printer/game-id (get data :id))
     (db/clear! store)))
@@ -80,6 +80,8 @@
             (db/update-game! next-state)
             (recur new-board
               (next-player turn))))))))
+
+
 
 (defn init-game [state]
   (do

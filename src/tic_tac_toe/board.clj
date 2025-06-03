@@ -37,10 +37,13 @@
 (defn tie-game? [board]
   (every? false? (map #(empty? (first %)) board)))
 
-(defn- winner-result [board]
-  (first (filter #(and
-                    (not= "" (first %))
-                    (every? #{(first %)} %)) board)))
+(defn- winner-result [line-values]
+  (some (fn [line]
+          (let [first-val (first line)]
+            (when (and (not= first-val "")
+                    (every? #(= % first-val) line))
+              first-val)))
+    line-values))
 
 (defn check-winner [board]
   (let [board-size (case (count board)
@@ -49,12 +52,7 @@
                      :3x3x3)
         winning-lines (get winning-moves board-size)
         line-values (map #(map (comp first (partial nth board)) %) winning-lines)
-        winner (some (fn [line]
-                       (let [first-val (first line)]
-                         (when (and (not= first-val "")
-                                 (every? #(= % first-val) line))
-                           first-val)))
-                 line-values)]
+        winner (winner-result line-values)]
     (if winner
       winner
       (if (tie-game? board) "tie" nil))))

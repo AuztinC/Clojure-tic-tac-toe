@@ -28,9 +28,9 @@
                                 {:board (board/get-board :3x3),
                                  :players [:human :ai], :markers ["X" "O"],
                                  :difficulties [:hard], :turn "p1"
-                                 :store :file}})
+                                 :store :mem}})
             state {:board (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"]
-                   :difficulties [:hard] :turn "p1" :store :file}]
+                   :difficulties [:hard] :turn "p1" :store :mem}]
         (it "updates current game file"
           (sut/update-game! state)
           (should-have-invoked :spit
@@ -45,7 +45,7 @@
                                   :3x3x3)}]
           (with-redefs [sut/edn-state "{:previous-games []}"]
             (it "update previous games file"
-              (sut/update-previous-games! data)
+              (sut/update-previous-games! :file data)
               (should-have-invoked :spit)
               (dissoc (sut/edn-state) (:id data))))))
 

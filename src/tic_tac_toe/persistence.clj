@@ -6,6 +6,13 @@
 (defn edn-state []
   (edn/read-string (slurp edn-file)))
 
+(defn set-new-game-id []
+  (-> (edn-state)
+    (get :previous-games)
+    (last)
+    (get :id 0)
+    (inc)))
+
 (def mem-db (atom {}))
 
 (defn update-game-file!
@@ -40,11 +47,10 @@
       :mem (update-atom! board player1-type player2-type player1-marker player2-marker difficulties turn)
       (update-game! next-state))))
 
-(defn update-previous-games! [data]
+(defn update-previous-games! [store data]
   (let [state (edn-state)
         updated (update state :previous-games (fnil conj []) data)]
-    (spit edn-file
-      (prn-str updated))))
+    (spit edn-file (prn-str updated))))
 
 (defn in-progress? []
   (get (edn-state) :current-game))

@@ -15,7 +15,7 @@
       (with-redefs [printer/display-board (stub :display-board)]
         (with-out-str
           (with-in-str "0\n3\n7"
-            (sut/init-game {:board (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard]})))
+            (sut/init-game {:board (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard] :store :mem})))
         (should-have-invoked :display-board))))
 
   (context "Game-loop"
@@ -27,7 +27,8 @@
                     (sut/init-game
                       {:board (board/get-board :3x3)
                        :players [:human :ai] :markers ["X" "O"]
-                       :difficulties [:hard]})))
+                       :difficulties [:hard]
+                       :store :mem})))
                 "O wins!\n")))
     (it "ai-vs-human"
       (should (clojure.string/includes?
@@ -37,7 +38,8 @@
                       {:board (board/get-board :3x3)
                        :players [:ai :human]
                        :markers ["X" "O"]
-                       :difficulties [:hard]})))
+                       :difficulties [:hard]
+                       :store :mem})))
                 "X wins!\n")))
     (it "ai-vs-ai"
       (should (clojure.string/includes?
@@ -47,12 +49,12 @@
                      :players [:ai :ai]
                      :markers ["X" "O"]
                      :difficulties [:hard :hard]
-                     :turn "p1" :store nil}))
+                     :turn "p1" :store :mem}))
                 "tie"))))
 
   (it "game over calls game-end!"
     (with-redefs [sut/end-game! (stub :end-game!)]
-      (with-out-str (sut/game-loop {:board (repeat 9 ["X"]) :players [:human :ai] :markers ["X" "O"] :difficulties [:easy] :store :file :turn "p1"}))
+      (with-out-str (sut/game-loop {:board (repeat 9 ["X"]) :players [:human :ai] :markers ["X" "O"] :difficulties [:easy] :store :mem :turn "p1"}))
       (should-have-invoked :end-game!)))
 
   (it "print end-game ID"
@@ -100,7 +102,7 @@
   (context "init and resume call game-loop"
     (it "init"
       (with-redefs [sut/game-loop (stub :game-loop)]
-        (with-out-str (with-in-str "1\n7\n3" (sut/init-game {:size (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard]})))
+        (with-out-str (with-in-str "1\n7\n3" (sut/init-game {:size (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard] :store :mem})))
         (should-have-invoked :game-loop))))
   )
 
