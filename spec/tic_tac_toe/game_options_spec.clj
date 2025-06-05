@@ -1,20 +1,18 @@
 (ns tic-tac-toe.game-options-spec
   (:require [speclj.core :refer :all]
+            [speclj.stub :as stub]
             [tic-tac-toe.game-options :as sut]
             [tic-tac-toe.init-game :as init]
+            [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.replay :as replay]))
-
-(def composed-args (atom nil))
 
 (describe "game-options"
   (with-stubs)
 
   (context "select-game"
-    (redefs-around [init/init-game
-                    (stub :init-game {:invoke (fn [args]
-                                                (reset! composed-args args)
-                                                :init)})])
+    (redefs-around [db/previous-games? (fn [] true)
+                    init/init-game (stub :init-game {:return :init})])
 
     (it "prints game options"
       (with-redefs [read-line (fn [] "1")]
@@ -29,83 +27,95 @@
 
     (it "selects human v ai"
       (with-out-str (with-in-str "1\n1\n1" (sut/select-game)))
-      (should-have-invoked :init-game)
-      (should= [:human :ai] (:players @composed-args))
-      )
+      (let [[{:keys [players]}] (stub/last-invocation-of :init-game)]
+        (should= [:human :ai] players)
+        (should-have-invoked :init-game)))
 
     (it "selects ai vs human"
       (with-out-str (with-in-str "2\n1\n1" (sut/select-game)))
-      (should-have-invoked :init-game)
-      (should= [:ai :human] (:players @composed-args)))
+      (let [[{:keys [players]}] (stub/last-invocation-of :init-game)]
+        (should= [:ai :human] players)
+        (should-have-invoked :init-game)))
 
     (it "selects human v human"
       (with-out-str (with-in-str "3\n0\n1" (sut/select-game)))
+      (let [[{:keys [players]}] (stub/last-invocation-of :init-game)]
       (should-have-invoked :init-game)
-      (should= [:human :human] (:players @composed-args)))
+      (should= [:human :human] players)))
 
-    (it "selects ai v ai"
-      (with-out-str (with-in-str "4\n1\n1\n3" (sut/select-game)))
+  (it "selects ai v ai"
+    (with-out-str (with-in-str "4\n1\n1\n3" (sut/select-game)))
+    (let [[{:keys [players]}] (stub/last-invocation-of :init-game)]
       (should-have-invoked :init-game)
-      (should= [:ai :ai] (:players @composed-args)))
-    )
+      (should= [:ai :ai] players)))
+  )
 
-  (context "selecting difficulty"
-    (it "prints difficulty"
-      (should-contain "Choose AI difficulties\n  1: Easy\n  2: Medium\n  3: Hard\n"
-        (with-out-str (with-in-str "1\n" (sut/select-difficulty 1)))))
+(context "selecting difficulty"
+  (it "prints difficulty"
+    (should-contain "Choose AI difficulties\n  1: Easy\n  2: Medium\n  3: Hard\n"
+      (with-out-str (with-in-str "1\n" (sut/select-difficulty 1)))))
 
-    (it "difficulty retries for bad input"
-      (with-redefs [sut/select-difficulty (stub :select-difficulty {:invoke sut/select-difficulty})]
-        (let [out1 (with-out-str (with-in-str "5\n1\n1" (sut/select-difficulty 1)))
-              out2 (with-out-str (with-in-str "5\n1\n6\n2" (sut/select-difficulty 2)))]
-          (should-contain "Not a difficulty, retry.\n" out1)
-          (should-contain "Not a difficulty, retry.\n" out2))))
+  (it "difficulty retries for bad input"
+    (with-redefs [sut/select-difficulty (stub :select-difficulty {:invoke sut/select-difficulty})]
+      (let [out1 (with-out-str (with-in-str "5\n1\n1" (sut/select-difficulty 1)))
+            out2 (with-out-str (with-in-str "5\n1\n6\n2" (sut/select-difficulty 2)))]
+        (should-contain "Not a difficulty, retry.\n" out1)
+        (should-contain "Not a difficulty, retry.\n" out2))))
 
-    (it "selects one difficulty for human vs ai"
-      (with-out-str (should= [:easy] (with-in-str "1" (sut/select-difficulty 1)))))
-    (it "selects two difficulty for ai vs ai"
-      (with-out-str (should= [:easy :hard] (with-in-str "1\n3" (sut/select-difficulty 2)))))
-    (it "empty for human vs human"
-      (with-out-str (should= [] (with-in-str "1" (sut/select-difficulty 0)))))
-    )
-  (context "select board size"
-    (it "prints board options"
-      (should= "Choose your board\n  1: 3x3\n  2: 4x4\n  3: 3x3x3\n" (with-out-str (printer/print-board-selection))))
-    (it "can select both sizes"
-      (with-out-str (should= :3x3 (with-in-str "1" (sut/select-board))))
-      (with-out-str (should= :4x4 (with-in-str "2" (sut/select-board)))))
-    (it "retry for bad input"
-      (with-redefs [sut/select-board (stub :select-board {:invoke sut/select-board})]
-        (let [out (with-out-str (with-in-str "5\n1" (sut/select-board)))]
-          (should-contain "Oops, try again." out)
-          (should-have-invoked :select-board {:times 2})))))
+  (it "selects one difficulty for human vs ai"
+    (with-out-str (should= [:easy] (with-in-str "1" (sut/select-difficulty 1)))))
+  (it "selects two difficulty for ai vs ai"
+    (with-out-str (should= [:easy :hard] (with-in-str "1\n3" (sut/select-difficulty 2)))))
+  (it "empty for human vs human"
+    (with-out-str (should= [] (with-in-str "1" (sut/select-difficulty 0)))))
+  )
+(context "select board size"
+  (it "prints board options"
+    (should= "Choose your board\n  1: 3x3\n  2: 4x4\n  3: 3x3x3\n" (with-out-str (printer/print-board-selection))))
+  (it "can select both sizes"
+    (with-out-str (should= :3x3 (with-in-str "1" (sut/select-board))))
+    (with-out-str (should= :4x4 (with-in-str "2" (sut/select-board)))))
+  (it "retry for bad input"
+    (with-redefs [sut/select-board (stub :select-board {:invoke sut/select-board})]
+      (let [out (with-out-str (with-in-str "5\n1" (sut/select-board)))]
+        (should-contain "Oops, try again." out)
+        (should-have-invoked :select-board {:times 2})))))
 
-  (context "replay a game"
-    (it "prints option to replay with ID"
-      (let [out (with-out-str (with-in-str "1\n1" (sut/watch-replay?)))]
+(context "replay a game"
+  (redefs-around [db/previous-games? (fn [] true)])
+  (it "prints option to replay with ID"
+    (with-redefs [sut/dispatch-id (stub :dispatch-id)]
+      (let [out (with-out-str (with-in-str "1" (sut/watch-replay?)))]
         (should-contain "Would you like to watch a replay?
   You'll need a match ID.
   1: Yes
-  2: No\n" out)))
+  2: No\n" out))))
 
-    #_(it "asks for ID to invoke unpack-game with"
-      (with-redefs [replay/unpack-game (stub :unpack-game)]
-        (should-contain "Please enter your game ID: "
-          (with-out-str (with-in-str "1\n1" (sut/watch-replay?))))
-        (should-have-invoked :unpack-game {:with [1]})))
+  (it "asks for ID to invoke unpack-game with"
+    (with-redefs [sut/dispatch-id (fn []
+                                    (println "Please enter your game ID: ")
+                                    (let [id-str (read-line)
+                                          id (Integer/parseInt id-str)]
+                                      (replay/unpack-game id)))
+                  replay/unpack-game (stub :unpack-game)]
+      (should-contain "Please enter your game ID: "
+        (with-out-str (with-in-str "1\n1" (sut/watch-replay?))))
+      (should-have-invoked :unpack-game {:with [1]})))
 
-    (it "load-game for 2"
-      (with-redefs [sut/load-game (stub :load-game)]
-        (with-out-str (with-in-str "2" (sut/watch-replay?)))
-        (should-have-invoked :load-game)))
+  (it "load-game for 2"
+    (with-redefs [sut/load-game (stub :load-game)]
+      (with-out-str (with-in-str "2" (sut/watch-replay?)))
+      (should-have-invoked :load-game)))
 
-    (it "retry replay for bad input"
-      (with-redefs [sut/watch-replay? (stub :watch-replay? {:invoke sut/watch-replay?})]
-        (let [out (with-out-str (with-in-str "W\n1\n1" (sut/watch-replay?)))]
-          (should-contain "Bad input" out)
-          (should-have-invoked :watch-replay? {:times 2}))))
-    )
-  #_(context "dispatching id"
+  (it "retry replay for bad input"
+    (with-redefs [sut/dispatch-id (stub :dispatch-id)
+                  sut/watch-replay? (stub :watch-replay? {:invoke sut/watch-replay?})
+                  ]
+      (let [out (with-out-str (with-in-str "W\n1\n1" (sut/watch-replay?)))]
+        (should-contain "Bad input" out)
+        (should-have-invoked :watch-replay? {:times 2}))))
+  )
+#_(context "dispatching id"
     (focus-it "retry for empty game"
       (should= -1 (with-out-str (with-in-str "2" (sut/dispatch-id))))))
-  )
+)

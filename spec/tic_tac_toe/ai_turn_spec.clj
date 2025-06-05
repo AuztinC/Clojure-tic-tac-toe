@@ -5,7 +5,7 @@
 
 (describe "ai-turn"
   (with-stubs)
-  (redefs-around [sut/best-early-move (fn [&_] 0)])
+  (redefs-around [sut/best-early-move (stub :best-early-move {:invoke (fn [&_] 0)})])
 
   (context "score a board through minimax"
     (tags :slow)
@@ -42,16 +42,16 @@
     (it "3x3 hard invokes minimax, returns best position"
       (sut/hard (board/get-board :3x3) "O" (board/open-positions (board/get-board :3x3)))
       (should-have-invoked :score-move))
+
     (it "4x4 hard invokes best-early-score early game"
-      (with-redefs [sut/best-early-move (stub :best-early-move {:return 0})]
-        (sut/hard (board/get-board :4x4) "O" (board/open-positions (board/get-board :4x4)))
-        (should-have-invoked :best-early-move)))
+      (sut/hard (board/get-board :4x4) "O" (board/open-positions (board/get-board :4x4)))
+      (should-have-invoked :best-early-move))
+
     (it "4x4 hard invokes minimax later game"
       (let [temp-board [["X"] ["X"] ["X"] [""] [""] ["O"] [""] ["O"]
                         ["O"] ["O"] ["X"] [""] [""] ["X"] ["X"] [""]]]
         (sut/hard temp-board "O" (board/open-positions temp-board)))
       (should-have-invoked :score-move))
-
 
     (it "easy returns random open position"
       (with-redefs [rand-nth (constantly 1)]

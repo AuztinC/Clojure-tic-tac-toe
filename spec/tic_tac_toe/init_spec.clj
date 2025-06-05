@@ -13,9 +13,8 @@
 
     (it "prints board first"
       (with-redefs [printer/display-board (stub :display-board)]
-        (with-out-str
-          (with-in-str "0\n3\n7"
-            (sut/init-game {:board (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard] :store :mem})))
+        (with-out-str (with-in-str "1\n3\n7\n"
+            (sut/init-game {:board (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard] :store :mem :turn "p1"})))
         (should-have-invoked :display-board))))
 
   (context "Game-loop"
@@ -62,6 +61,11 @@
               (with-out-str
                 (sut/end-game! (board/get-board :3x3) :mem))
               "Game ID: ")))
+
+  (it "stores a new move"
+    (let [new-state (sut/next-state {:board (board/get-board :3x3) :players [:ai :ai] :markers ["X" "O"] :difficulties [:easy] :store :mem :turn "p1"})
+          saved-state (:current-game @db/mem-db)]
+      (should= new-state saved-state)))
 
   (context "storing moves"
     (it "scores single human move"

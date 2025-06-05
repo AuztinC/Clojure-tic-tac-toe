@@ -94,7 +94,8 @@
 
 (defn dispatch-id []
   (println "Please enter your game ID: ")
-  (let [id (Integer/parseInt (read-line))
+  (let [id-str (read-line)
+        id (Integer/parseInt id-str)
         game (replay/unpack-game id)]
     (if (empty? game)
       (retry-dispatch-id)

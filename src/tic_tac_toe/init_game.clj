@@ -60,28 +60,30 @@
     (printer/game-id (get data :id))
     (db/clear! store)))
 
+(defn next-state [state]
+  (let [{board :board,
+         [player1-type player2-type] :players
+         [player1-marker player2-marker] :markers,
+         difficulties :difficulties
+         turn :turn} state]
+    (let [[_marker player-type :as player] (->players turn
+                                             player1-marker player1-type
+                                             player2-marker player2-type)
+          player-fn (->player-fn player-type)
+          difficulty (->difficulties turn player-type difficulties)
+          new-board (play-turn board player-fn player difficulty)
+          next-state (assoc state :board new-board :turn (next-player turn))]
+      (do
+        (db/update-game! next-state)
+        next-state))))
+
 (defn game-loop [state]
-  (let [{board :board, [player1-type player2-type] :players,
-         [player1-marker player2-marker] :markers, difficulties :difficulties
-         store :store turn :turn} state]
-    (loop [board board
-           turn turn]
-      (printer/display-board board)
-      (if (board/check-winner board)
-        (end-game! board store)
-        (let [[_marker player-type :as player] (->players turn
-                                                 player1-marker player1-type
-                                                 player2-marker player2-type)
-              player-fn (->player-fn player-type)
-              difficulty (->difficulties turn player-type difficulties)
-              new-board (play-turn board player-fn player difficulty)
-              next-state (assoc state :board new-board)]
-          (do
-            (db/update-game! next-state)
-            (recur new-board
-              (next-player turn))))))))
-
-
+  (loop [{:keys [board store] :as state} state]
+    (if (board/check-winner board)
+      (end-game! board store)
+      (do
+        (printer/display-board board)
+        (recur (next-state state))))))
 
 (defn init-game [state]
   (do
