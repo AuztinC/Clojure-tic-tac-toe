@@ -1,12 +1,6 @@
 (ns tic-tac-toe.replay
   (:require [tic-tac-toe.board :as board]
-            [tic-tac-toe.printer :as printer]
-            [tic-tac-toe.persistence :as db]))
-
-(defn unpack-game [id]
-  (let [previous-games (get (db/edn-state) :previous-games)
-        game (filter #(= id (:id %)) previous-games)]
-    game))
+            [tic-tac-toe.printer :as printer]))
 
 (defn game-loop! []
   (fn [acc {:keys [player move]}]

@@ -30,15 +30,7 @@
                                        {:player "X" :move 5}] :board-size :3x3}))]
         (should-contain "tie game" out))))
 
-  (context "receive game to replay"
-    (it "given id returns state"
-      (with-redefs [db/edn-state (fn [] {:previous-games [{:id 1 :moves [{}] :board-size :3x3}]})]
-        (should-contain {:id 1
-                         :moves [{}]
-                         :board-size :3x3} (sut/unpack-game 1))))
 
-    (it "user gives bad id"
-      (should= () (sut/unpack-game "S"))))
   )
 
 

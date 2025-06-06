@@ -5,24 +5,33 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
 
-(def stored-moves (atom []))
+#_(def stored-moves (atom []))
 
-(defmulti play-turn (fn [_board _move-fn [_ player-type] & _] player-type))
+(defmulti play-turn (fn [_id _board _move-fn [_ player-type] & _] player-type))
 
-(defn record-move! [marker move]
-  (let [entry {:player marker
+#_(defn record-move! [marker move]
+    (let [entry {:player marker
+                 :move move}]
+      (swap! stored-moves conj entry)))
+
+#_(defn record-move! [id marker move]
+    (let [game-to-update (db/find-game-by-id id)
+          entry {:player marker
+                 :move move}]
+      (swap! stored-moves conj entry)))
+
+(defmethod play-turn :human [id board move-fn [marker _] _]
+  (let [move (move-fn board marker)
+        entry {:player marker
                :move move}]
-    (swap! stored-moves conj entry)))
-
-(defmethod play-turn :human [board move-fn [marker _] _]
-  (let [move (move-fn board marker)]
-    (record-move! marker move)
+    ;(db/update-previous-games! )
+    ;(record-move! marker move)
     (assoc board move [marker])))
 
-(defmethod play-turn :ai [board move-fn [marker _] diff]
+(defmethod play-turn :ai [id board move-fn [marker _] diff]
   (let [move (move-fn board marker diff)]
     (do
-      (record-move! marker move)
+      ;(record-move! marker move)
       (assoc board move [marker]))))
 
 (defn- next-player [turn]
@@ -46,18 +55,10 @@
       (and (= "p1" turn) (= :ai player-type)) (first difficulties)
       (and (= "p2" turn) (= :ai player-type)) (second difficulties))))
 
-(defn end-game! [board store]
-  (let [new-id (db/set-new-game-id)
-        data {:id new-id
-              :moves @stored-moves
-              :board-size (case (count board)
-                            9 :3x3
-                            16 :4x4
-                            :3x3x3)}]
-    (reset! stored-moves [])
-    (db/update-previous-games! store data)
+(defn end-game! [id board store]
+  (let [id id]
     (printer/output-result (board/check-winner board))
-    (printer/game-id (get data :id))
+    (printer/game-id id)
     (db/clear! store)))
 
 (defn next-state [state]
@@ -65,30 +66,39 @@
          [player1-type player2-type] :players
          [player1-marker player2-marker] :markers,
          difficulties :difficulties
-         turn :turn} state]
+         turn :turn
+         id :id} state]
     (let [[_marker player-type :as player] (->players turn
                                              player1-marker player1-type
                                              player2-marker player2-type)
           player-fn (->player-fn player-type)
           difficulty (->difficulties turn player-type difficulties)
-          new-board (play-turn board player-fn player difficulty)
+          new-board (play-turn id board player-fn player difficulty)
           next-state (assoc state :board new-board :turn (next-player turn))]
       (do
-        (db/update-game! next-state)
+        (db/update-current-game! next-state)
         next-state))))
 
 (defn game-loop [state]
-  (loop [{:keys [board store] :as state} state]
+  (loop [{:keys [board store id] :as state} state]
     (if (board/check-winner board)
-      (end-game! board store)
+      (end-game! id board store)
       (do
         (printer/display-board board)
         (recur (next-state state))))))
 
 (defn init-game [state]
-  (do
-    (db/update-game! state)
-    (game-loop state)))
+  (let [data {:id (:id state)
+              :moves []
+              :board-size (case (count (:board state))
+                            9 :3x3
+                            16 :4x4
+                            :3x3x3)}]
+    (do
+      (db/update-current-game! state)
+      (db/add-entry-to-previous! (:store state) data)
+      (printer/game-id (get data :id))
+      (game-loop state))))
 
 (defn resume-game []
   (let [state (get (db/edn-state) :current-game)

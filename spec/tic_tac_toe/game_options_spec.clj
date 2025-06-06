@@ -96,8 +96,8 @@
                                     (println "Please enter your game ID: ")
                                     (let [id-str (read-line)
                                           id (Integer/parseInt id-str)]
-                                      (replay/unpack-game id)))
-                  replay/unpack-game (stub :unpack-game)]
+                                      (db/find-game-by-id id)))
+                  db/find-game-by-id (stub :unpack-game)]
       (should-contain "Please enter your game ID: "
         (with-out-str (with-in-str "1\n1" (sut/watch-replay?))))
       (should-have-invoked :unpack-game {:with [1]})))
@@ -115,7 +115,4 @@
         (should-contain "Bad input" out)
         (should-have-invoked :watch-replay? {:times 2}))))
   )
-#_(context "dispatching id"
-    (focus-it "retry for empty game"
-      (should= -1 (with-out-str (with-in-str "2" (sut/dispatch-id))))))
 )

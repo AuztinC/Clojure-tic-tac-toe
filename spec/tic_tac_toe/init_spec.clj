@@ -4,17 +4,40 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.board :as board]))
+(def ai-vs-ai-state {:id 123
+                     :board (board/get-board :3x3)
+                     :players [:ai :ai] :markers ["X" "O"]
+                     :difficulties [:hard :hard]
+                     :store :mem
+                     :turn "p1"})
+
+(def human-vs-ai-state {:id 123
+                        :board (board/get-board :3x3)
+                        :players [:human :ai]
+                        :markers ["X" "O"]
+                        :difficulties [:hard]
+                        :store :mem
+                        :turn "p1"})
+(def ai-vs-human-state {:id 123
+                        :board (board/get-board :3x3)
+                        :players [:ai :human]
+                        :markers ["X" "O"]
+                        :difficulties [:hard]
+                        :store :mem
+                        :turn "p1"})
 
 (describe "tic tac toe"
   (with-stubs)
   (before (reset! db/mem-db {}))
+
+
 
   (context "prints-game"
 
     (it "prints board first"
       (with-redefs [printer/display-board (stub :display-board)]
         (with-out-str (with-in-str "1\n3\n7\n"
-            (sut/init-game {:board (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard] :store :mem :turn "p1"})))
+                        (sut/init-game human-vs-ai-state)))
         (should-have-invoked :display-board))))
 
   (context "Game-loop"
@@ -24,90 +47,63 @@
                 (with-out-str
                   (with-in-str "0\n3\n7\n"
                     (sut/init-game
-                      {:board (board/get-board :3x3)
-                       :players [:human :ai] :markers ["X" "O"]
-                       :difficulties [:hard]
-                       :store :mem})))
+                      human-vs-ai-state)))
                 "O wins!\n")))
     (it "ai-vs-human"
       (should (clojure.string/includes?
                 (with-out-str
                   (with-in-str "0\n3\n7\n"
                     (sut/init-game
-                      {:board (board/get-board :3x3)
-                       :players [:ai :human]
-                       :markers ["X" "O"]
-                       :difficulties [:hard]
-                       :store :mem})))
+                      ai-vs-human-state)))
                 "X wins!\n")))
     (it "ai-vs-ai"
       (should (clojure.string/includes?
                 (with-out-str
                   (sut/init-game
-                    {:board (board/get-board :3x3)
-                     :players [:ai :ai]
-                     :markers ["X" "O"]
-                     :difficulties [:hard :hard]
-                     :turn "p1" :store :mem}))
+                    ai-vs-ai-state))
                 "tie"))))
 
   (it "game over calls game-end!"
     (with-redefs [sut/end-game! (stub :end-game!)]
-      (with-out-str (sut/game-loop {:board (repeat 9 ["X"]) :players [:human :ai] :markers ["X" "O"] :difficulties [:easy] :store :mem :turn "p1"}))
+      (with-out-str (sut/game-loop (assoc human-vs-ai-state :board (repeat 9 ["X"]))))
       (should-have-invoked :end-game!)))
-
-  (it "print end-game ID"
-    (should (clojure.string/includes?
-              (with-out-str
-                (sut/end-game! (board/get-board :3x3) :mem))
-              "Game ID: ")))
-
-  (it "stores a new move"
-    (let [new-state (sut/next-state {:board (board/get-board :3x3) :players [:ai :ai] :markers ["X" "O"] :difficulties [:easy] :store :mem :turn "p1"})
-          saved-state (:current-game @db/mem-db)]
-      (should= new-state saved-state)))
-
-  (context "storing moves"
-    (it "scores single human move"
-      (reset! sut/stored-moves [])
-      (sut/record-move! "X" 0)
-      (should= [{:player "X" :move 0}] @sut/stored-moves))
-
-    (it "stores multiple moves"
-      (reset! sut/stored-moves [])
-      (sut/record-move! "X" 0)
-      (sut/record-move! "O" 3)
-      (should= [{:player "X" :move 0}{:player "O" :move 3}] @sut/stored-moves)))
-
-  #_(context "end game data has correct params"
-      (it "correct board"
-        (let [data {:id 1
-                    :moves @sut/stored-moves
-                    :board-size (case (count (board/get-board :3x3))
-                                  9 :3x3
-                                  16 :4x4
-                                  :3x3x3)}]
-          (sut/end-game! (board/get-board :3x3) :file)
-          (should-have-invoked :update-previous-games!))))
-
-  #_(context "resume game"
-    (it "maintain state"
-      (let [state {:board (board/get-board :3x3)
-                   :players [:human :ai]
-                   :markers ["X" "O"]
-                   :difficulties [:hard :hard]
-                   :turn "p1" :store :file}]
-        (with-redefs [db/edn-state {:current-game state}
-                      sut/game-loop (stub :game-loop)]
-          (sut/resume-game)
-          (should-have-invoked :game-loop))))
-    )
 
   (context "init and resume call game-loop"
     (it "init"
       (with-redefs [sut/game-loop (stub :game-loop)]
-        (with-out-str (with-in-str "1\n7\n3" (sut/init-game {:size (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"] :difficulties [:hard] :store :mem})))
-        (should-have-invoked :game-loop))))
+        (with-out-str (with-in-str "1\n7\n3" (sut/init-game human-vs-ai-state)))
+        (should-have-invoked :game-loop)))
+    )
+
+  (it "print ID for end-game"
+    (should (clojure.string/includes?
+              (with-out-str
+                (sut/end-game! 123 (board/get-board :3x3) :mem))
+              "Game ID: ")))
+
+  (context "storing moves"
+    (it "stores a new move"
+      (let [new-state (sut/next-state
+                        ai-vs-ai-state)
+            saved-state (:current-game @db/mem-db)]
+        (should= new-state saved-state)))
+
+    (it "init game adds new entry to :previous-games and prints Game ID"
+      (let [fixed-id 123
+            state human-vs-ai-state
+            expected-data {:id fixed-id
+                           :moves []
+                           :board-size :3x3}]
+        (with-redefs [db/update-current-game! (stub :update-current-game!)
+                      db/add-entry-to-previous! (stub :update-previous-games!)
+                      printer/game-id (stub :print-game-id)
+                      sut/game-loop (fn [_state] nil)]
+          (sut/init-game state))
+        (should-have-invoked :update-current-game! {:with [state]})
+        (should-have-invoked :print-game-id {:with [fixed-id]})
+        (should-have-invoked :update-previous-games!
+          {:with [(:store state) expected-data]}))))
+
   )
 
 

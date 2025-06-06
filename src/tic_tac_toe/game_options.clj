@@ -45,9 +45,11 @@
   (select-game))
 
 (defn- setup-game [player-types difficulty-count]
-  (let [board (board/get-board (select-board))
+  (let [new-game-id (db/set-new-game-id)
+        board (board/get-board (select-board))
         difficulties (select-difficulty difficulty-count)]
-    (init/init-game {:board board
+    (init/init-game {:id new-game-id
+                     :board board
                      :players player-types
                      :markers ["X" "O"]
                      :difficulties difficulties
@@ -96,7 +98,7 @@
   (println "Please enter your game ID: ")
   (let [id-str (read-line)
         id (Integer/parseInt id-str)
-        game (replay/unpack-game id)]
+        game (db/find-game-by-id id)]
     (if (empty? game)
       (retry-dispatch-id)
       (replay/replay game))))

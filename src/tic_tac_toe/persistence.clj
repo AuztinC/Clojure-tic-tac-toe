@@ -16,6 +16,23 @@
 
 (def mem-db (atom {}))
 
+(defmulti find-game-by-id :store)
+
+(defmethod find-game-by-id :file [_store id]
+  (let [previous-games (get (edn-state) :previous-games)
+        game (filter #(= id (:id %)) previous-games)]
+    game))
+
+(defmethod find-game-by-id :mem [_store id]
+  (let [previous-games (get @mem-db :previous-games)
+        game (filter #(= id (:id %)) previous-games)]
+    game))
+;; TODO ARC - JUST finished :mem tests need :file
+#_(defn find-game-by-id [id]
+    (let [previous-games (get (edn-state) :previous-games)
+          game (filter #(= id (:id %)) previous-games)]
+      game))
+
 (defn update-game-file! [state]
   (spit edn-file
     (-> (edn-state)
@@ -25,21 +42,63 @@
 (defn update-atom! [state]
   (reset! mem-db (assoc @mem-db :current-game state)))
 
-(defn update-game! [state]
-  (let [{store :store} state]
-    (case store
-      :file (update-game-file! state)
-      :mem (update-atom! state)
-      (update-game! :mem))))
+(defmulti update-current-game!
+  (fn [state]
+    (:store state)))
 
-(defn update-previous-games! [store data]
+(defmethod update-current-game! :file [state]
+  (update-game-file! state))
+
+(defmethod update-current-game! :mem [state]
+  (update-atom! state))
+
+#_(defn update-game! [state]
+    (let [{store :store} state]
+      (case store
+        :file (update-game-file! state)
+        :mem (update-atom! state)
+        (update-current-game! :mem))))
+
+(defn update-previous-games! [store id move]
+  (let [games   (:previous-games @mem-db)
+        updated (mapv (fn [game]
+                        (if (= (:id game) id)
+                          (update game :moves conj move)
+                          game))
+                  games)]
+    (reset! mem-db {:previous-games updated})))
+
+(defn compute-entry [state data]
+  (update state :previous-games (fnil conj []) data))
+
+(defmulti add-entry-to-previous!
+  (fn [store _data]
+    store))
+
+(defmethod add-entry-to-previous! :file
+  [_store data]
   (let [state (edn-state)
-        updated (update state :previous-games (fnil conj []) data)]
-    (case store
-      :file (spit edn-file (prn-str updated))
-      :mem (reset! mem-db (assoc @mem-db
-                            :previous-games updated))
-      (update-previous-games! :mem data))))
+        updated (compute-entry state data)]
+    (spit edn-file (prn-str updated))))
+
+(defmethod add-entry-to-previous! :mem
+  [_store data]
+  (let [state @mem-db
+        updated (compute-entry state data)]
+    (reset! mem-db updated)))
+
+(defmethod add-entry-to-previous! :default
+  [_store data]
+  (add-entry-to-previous! :mem data))
+
+#_(defn update-previous-games! [store data]
+    (let [state (edn-state)
+          updated (update state :previous-games (fnil conj []) data)]
+      (case store
+        :file (spit edn-file (prn-str updated))
+        :mem (reset! mem-db (assoc @mem-db
+                              :previous-games updated))
+        (add-entry-to-previous! :mem data))))
 
 (defn in-progress? []
   (get (edn-state) :current-game))
@@ -47,11 +106,22 @@
 (defn previous-games? []
   (get (edn-state) :previous-games))
 
-(defn clear! [store]
-  (case store
-    :file (spit edn-file (dissoc (edn-state) :current-game))
-    :mem (reset! mem-db {})
-    (clear! :mem)))
+(defmulti clear! :store)
+
+(defmethod clear! :file [_store]
+  (spit edn-file (dissoc (edn-state) :current-game)))
+
+(defmethod clear! :mem [_store]
+  (reset! mem-db {}))
+
+(defmethod clear! :default [_store]
+  (clear! {:store :mem}))
+
+#_(defn clear! [store]
+    (case store
+      :file (spit edn-file (dissoc (edn-state) :current-game))
+      :mem (reset! mem-db {})
+      (clear! :mem)))
 
 ;(defprotocol Db
 ;  (clear [_this]))
