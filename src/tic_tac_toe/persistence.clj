@@ -27,16 +27,17 @@
   (let [previous-games (get @mem-db :previous-games)
         game (filter #(= id (:id %)) previous-games)]
     game))
-;; TODO ARC - JUST finished :mem tests need :file
-#_(defn find-game-by-id [id]
-    (let [previous-games (get (edn-state) :previous-games)
-          game (filter #(= id (:id %)) previous-games)]
-      game))
 
 (defn update-game-file! [state]
   (spit edn-file
     (-> (edn-state)
       (assoc :current-game state)
+      (prn-str))))
+
+(defn update-previous-game-file! [state]
+  (spit edn-file
+    (-> (edn-state)
+      (assoc :previous-games state)
       (prn-str))))
 
 (defn update-atom! [state]
@@ -60,13 +61,24 @@
         (update-current-game! :mem))))
 
 (defn update-previous-games! [store id move]
-  (let [games   (:previous-games @mem-db)
-        updated (mapv (fn [game]
-                        (if (= (:id game) id)
-                          (update game :moves conj move)
-                          game))
-                  games)]
-    (reset! mem-db {:previous-games updated})))
+  (case store
+    :file (let [state (edn-state)
+                previous-games (:previous-games state)
+                updated-games (mapv (fn [game]
+                                      (if (= (:id game) id)
+                                        (update game :moves conj move)
+                                        game))
+                                previous-games)
+                new-state (assoc state :previous-games updated-games)]
+            (spit edn-file (prn-str new-state)))
+
+    :mem (let [games (:previous-games @mem-db)
+               updated (mapv (fn [game]
+                               (if (= (:id game) id)
+                                 (update game :moves conj move)
+                                 game))
+                         games)]
+           (reset! mem-db {:previous-games updated}))))
 
 (defn compute-entry [state data]
   (update state :previous-games (fnil conj []) data))

@@ -1,9 +1,7 @@
 (ns tic-tac-toe.persistence-spec
   (:require [speclj.core :refer :all]
-            [tic-tac-toe.init-game :as init]
             [tic-tac-toe.persistence :as sut]
-            [tic-tac-toe.board :as board]
-            [tic-tac-toe.game-options :as opt]))
+            [tic-tac-toe.board :as board]))
 
 (describe "persistence"
   (with-stubs)
@@ -38,7 +36,7 @@
             (should-have-invoked :update-game-file!
               {:with [state]}))))
 
-      (it "writes game to the EDN file"
+      (it "writes :current-game game to the EDN file"
         (with-redefs [sut/edn-state (fn [] {})]
           (let [state {:board (board/get-board 3)
                        :players [:human :ai]
@@ -51,18 +49,24 @@
             (should-have-invoked :spit
               {:with [sut/edn-file expected-str]}))))
 
-      (it "update previous games file"
+      (it "add new game to previous games file"
         (let [data {:id 5
                     :moves [{:player "X" :move 0}]
                     :board-size (case (count (board/get-board :3x3))
                                   9 :3x3
                                   16 :4x4
                                   :3x3x3)}]
-          (with-redefs [reset! (stub :reset!)
-                        sut/edn-state (fn [] {:previous-games []})]
+          (with-redefs [sut/edn-state (fn [] {:previous-games []})]
             (sut/add-entry-to-previous! :file data)
-            (should-have-invoked :spit)
+            (should-have-invoked :spit {:with [sut/edn-file (prn-str {:previous-games [data]})]})
             (dissoc (sut/edn-state) (:id data)))))
+
+      (it "adds new move to :previous-games key using ID"
+        (with-redefs [sut/edn-state (fn [] {:previous-games [{:id 1 :moves [] :board-size :3x3}]})]
+          (sut/update-previous-games! :file 1 {:player "X" :move 0})
+          (should-have-invoked :spit
+            {:with [sut/edn-file
+                    (prn-str {:previous-games [{:id 1 :moves [{:player "X" :move 0}] :board-size :3x3}]})]})))
 
       (it "clear current game edn"
         (with-redefs [sut/edn-state (fn [] {:current-game {}
@@ -114,7 +118,7 @@
                    :store :mem}}
           @sut/mem-db)))
 
-    (it "update previous games mem"
+    (it "adds new game to previous games mem"
       (reset! sut/mem-db {:previous-games [{:id 1 :moves [] :board-size :3x3}]})
       (let [data {:id 5
                   :moves [{:player "X" :move 0}]

@@ -89,27 +89,27 @@
     (select-game)))
 
 (declare dispatch-id)
-(defn retry-dispatch-id []
+(defn retry-dispatch-id [store]
   (do
     (println "Game not found! Let's try that again.")
-    (dispatch-id)))
+    (dispatch-id store)))
 
-(defn dispatch-id []
+(defn dispatch-id [store]
   (println "Please enter your game ID: ")
   (let [id-str (read-line)
         id (Integer/parseInt id-str)
-        game (db/find-game-by-id id)]
+        game (db/find-game-by-id {:store store} id)]
     (if (empty? game)
-      (retry-dispatch-id)
+      (retry-dispatch-id store)
       (replay/replay game))))
 
 (declare watch-replay?)
-(defn retry-watch-replay []
+(defn retry-watch-replay [store]
   (do
     (println "Bad input, try again.")
-    (watch-replay?)))
+    (watch-replay? store)))
 
-(defn watch-replay? []
+(defn watch-replay? [store]
   (if (db/previous-games?)
     (do
       (println "Would you like to watch a replay?
@@ -118,9 +118,9 @@
   2: No")
       (let [choice (read-line)]
         (case choice
-          "1" (dispatch-id)
+          "1" (dispatch-id store)
           "2" (load-game)
-          (retry-watch-replay))))
+          (retry-watch-replay store))))
     (load-game)))
 
 

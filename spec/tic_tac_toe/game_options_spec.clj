@@ -85,33 +85,33 @@
   (redefs-around [db/previous-games? (fn [] true)])
   (it "prints option to replay with ID"
     (with-redefs [sut/dispatch-id (stub :dispatch-id)]
-      (let [out (with-out-str (with-in-str "1" (sut/watch-replay?)))]
+      (let [out (with-out-str (with-in-str "1" (sut/watch-replay? :mem)))]
         (should-contain "Would you like to watch a replay?
   You'll need a match ID.
   1: Yes
   2: No\n" out))))
 
   (it "asks for ID to invoke unpack-game with"
-    (with-redefs [sut/dispatch-id (fn []
+    (with-redefs [sut/dispatch-id (fn [_store]
                                     (println "Please enter your game ID: ")
                                     (let [id-str (read-line)
                                           id (Integer/parseInt id-str)]
                                       (db/find-game-by-id id)))
                   db/find-game-by-id (stub :unpack-game)]
       (should-contain "Please enter your game ID: "
-        (with-out-str (with-in-str "1\n1" (sut/watch-replay?))))
+        (with-out-str (with-in-str "1\n1" (sut/watch-replay? :mem))))
       (should-have-invoked :unpack-game {:with [1]})))
 
   (it "load-game for 2"
     (with-redefs [sut/load-game (stub :load-game)]
-      (with-out-str (with-in-str "2" (sut/watch-replay?)))
+      (with-out-str (with-in-str "2" (sut/watch-replay? :mem)))
       (should-have-invoked :load-game)))
 
   (it "retry replay for bad input"
     (with-redefs [sut/dispatch-id (stub :dispatch-id)
                   sut/watch-replay? (stub :watch-replay? {:invoke sut/watch-replay?})
                   ]
-      (let [out (with-out-str (with-in-str "W\n1\n1" (sut/watch-replay?)))]
+      (let [out (with-out-str (with-in-str "W\n1\n1" (sut/watch-replay? :mem)))]
         (should-contain "Bad input" out)
         (should-have-invoked :watch-replay? {:times 2}))))
   )

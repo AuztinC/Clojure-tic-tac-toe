@@ -30,8 +30,6 @@
   (with-stubs)
   (before (reset! db/mem-db {}))
 
-
-
   (context "prints-game"
 
     (it "prints board first"
@@ -82,7 +80,7 @@
               "Game ID: ")))
 
   (context "storing moves"
-    (it "stores a new move"
+    (it "stores a new move to :current-game"
       (let [new-state (sut/next-state
                         ai-vs-ai-state)
             saved-state (:current-game @db/mem-db)]
@@ -102,7 +100,24 @@
         (should-have-invoked :update-current-game! {:with [state]})
         (should-have-invoked :print-game-id {:with [fixed-id]})
         (should-have-invoked :update-previous-games!
-          {:with [(:store state) expected-data]}))))
+          {:with [(:store state) expected-data]})))
+
+    (it "calls move-fn with board and marker, then calls db/update-previous-games! appropriately"
+      (reset! db/mem-db {:previous-games [{:id 1 :moves [] :board-size :3x3}]})
+      (let [store     :mem
+            game-id   1
+            board  (board/get-board :3x3)
+            marker    "X"
+            fake-move 0
+            move-fn (fn [_b _n] 0)
+            db-stub   (stub :update-previous-games!)]
+        (with-redefs [db/update-previous-games! db-stub]
+          (sut/play-turn store game-id board move-fn [marker :human] nil)
+          (should-have-invoked :update-previous-games!
+            {:with [store
+                    game-id
+                    {:player marker :move fake-move}]}))))
+    )
 
   )
 

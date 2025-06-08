@@ -5,33 +5,22 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
 
-#_(def stored-moves (atom []))
 
-(defmulti play-turn (fn [_id _board _move-fn [_ player-type] & _] player-type))
+(defmulti play-turn (fn [_store _id _board _move-fn [_ player-type] & _] player-type))
 
-#_(defn record-move! [marker move]
-    (let [entry {:player marker
-                 :move move}]
-      (swap! stored-moves conj entry)))
-
-#_(defn record-move! [id marker move]
-    (let [game-to-update (db/find-game-by-id id)
-          entry {:player marker
-                 :move move}]
-      (swap! stored-moves conj entry)))
-
-(defmethod play-turn :human [id board move-fn [marker _] _]
+(defmethod play-turn :human [store id board move-fn [marker _] _]
   (let [move (move-fn board marker)
         entry {:player marker
                :move move}]
-    ;(db/update-previous-games! )
-    ;(record-move! marker move)
+    (db/update-previous-games! store id entry)
     (assoc board move [marker])))
 
-(defmethod play-turn :ai [id board move-fn [marker _] diff]
-  (let [move (move-fn board marker diff)]
+(defmethod play-turn :ai [store id board move-fn [marker _] diff]
+  (let [move (move-fn board marker diff)
+        entry {:player marker
+               :move move}]
     (do
-      ;(record-move! marker move)
+      (db/update-previous-games! store id entry)
       (assoc board move [marker]))))
 
 (defn- next-player [turn]
@@ -67,13 +56,14 @@
          [player1-marker player2-marker] :markers,
          difficulties :difficulties
          turn :turn
-         id :id} state]
+         id :id
+         store :store} state]
     (let [[_marker player-type :as player] (->players turn
                                              player1-marker player1-type
                                              player2-marker player2-type)
           player-fn (->player-fn player-type)
           difficulty (->difficulties turn player-type difficulties)
-          new-board (play-turn id board player-fn player difficulty)
+          new-board (play-turn store id board player-fn player difficulty)
           next-state (assoc state :board new-board :turn (next-player turn))]
       (do
         (db/update-current-game! next-state)
