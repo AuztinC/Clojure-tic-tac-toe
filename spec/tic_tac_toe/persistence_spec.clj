@@ -1,10 +1,24 @@
 (ns tic-tac-toe.persistence-spec
-  (:require [speclj.core :refer :all]
+  (:require [cheshire.core :as json]
+            [speclj.core :refer :all]
             [tic-tac-toe.persistence :as sut]
-            [tic-tac-toe.board :as board]))
+            [tic-tac-toe.board :as board]
+            [clojure.java.jdbc :as jdbc]))
+
+(defn clojurify-psql-state [state]
+  (-> state
+    (update :players      (fn [ps] (mapv keyword ps)))
+    (update :difficulties (fn [ds] (mapv keyword ds)))
+    (update :store        keyword)))
 
 (describe "persistence"
   (with-stubs)
+  (redefs-around [sut/psql-spec {:dbtype "postgresql"
+                                 :dbname "tic-tac-toe-test"
+                                 :host "localhost"
+                                 :port 5432
+                                 :user "austincripe"
+                                 :password ""}])
 
   (before (reset! sut/mem-db {}))
 
@@ -36,9 +50,9 @@
             (should-have-invoked :update-game-file!
               {:with [state]}))))
 
-      (it "writes :current-game game to the EDN file"
+      (it "writes :current-game to the EDN file"
         (with-redefs [sut/edn-state (fn [] {})]
-          (let [state {:board (board/get-board 3)
+          (let [state {:board (board/get-board :3x3)
                        :players [:human :ai]
                        :markers ["X" "O"]
                        :difficulties [:hard]
@@ -85,9 +99,38 @@
         (should= () (sut/find-game-by-id {:store :file} "S"))))
     )
 
-  #_(context "postgres"
-      (it "blah"
-        (sut/clear! :pgsql)))
+  (context "postgres"
+    (context "read from psql"
+      (it "SELECT 1 as one, confirms db connection"
+        (let [result (jdbc/query sut/psql-spec ["SELECT 1 as one"])
+              one (:one (first result))]
+          (should= 1 one))))
+
+    (context "write to psql"
+      (it "creates and drops the current_game"
+        (jdbc/db-do-commands sut/psql-spec ["DROP TABLE IF EXISTS current_game;"])
+        (should-not-throw (jdbc/db-do-commands sut/psql-spec ["CREATE TABLE current_game(state JSONB);"]))
+        (let [result (first (jdbc/db-do-commands sut/psql-spec ["SELECT * FROM current_game;"]))]
+         (should= 0 result))
+        (jdbc/db-do-commands sut/psql-spec ["DROP TABLE IF EXISTS current_game;"])
+        )
+
+      (it "update-current-game! adds new current game"
+        (jdbc/db-do-commands sut/psql-spec
+          ["DROP TABLE IF EXISTS current_game"
+           "CREATE TABLE current_game (state JSONB)"])
+        (let [state {:board (board/get-board :3x3)
+                     :players [:human :ai]
+                     :markers ["X" "O"]
+                     :difficulties [:hard]
+                     :turn "p1"
+                     :store :psql}]
+         (sut/update-current-game! state)
+          (let [result (:state (first (jdbc/query sut/psql-spec ["SELECT state FROM current_game;"])))
+                json-str (.getValue result)
+                loaded (clojurify-psql-state (json/parse-string json-str true))]
+            (should= state loaded)))))
+    )
 
   (context "mem"
     (it "uses mem impl as default"
@@ -107,7 +150,7 @@
         (sut/clear! :mem)
         (should= {} @sut/mem-db))
 
-      (it "updates cuurent game"
+      (it "updates current game"
         (sut/update-current-game! state)
         (should= {:current-game
                   {:board (repeat 9 [""])

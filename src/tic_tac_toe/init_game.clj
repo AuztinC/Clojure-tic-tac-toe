@@ -5,7 +5,6 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
 
-
 (defmulti play-turn (fn [_store _id _board _move-fn [_ player-type] & _] player-type))
 
 (defmethod play-turn :human [store id board move-fn [marker _] _]

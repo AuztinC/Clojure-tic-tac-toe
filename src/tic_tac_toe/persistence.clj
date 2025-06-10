@@ -1,5 +1,14 @@
 (ns tic-tac-toe.persistence
-  (:require [clojure.edn :as edn]))
+  (:require [clojure.edn :as edn]
+            [cheshire.core :as json]
+            [clojure.java.jdbc :as jdbc]))
+
+(def psql-spec {:dbtype "postgresql"
+                :dbname "tic-tac-toe"
+                :host "localhost"
+                :port 5432
+                :user "austincripe"
+                :password ""})
 
 (def edn-file "resources/state.edn")
 
@@ -34,12 +43,6 @@
       (assoc :current-game state)
       (prn-str))))
 
-(defn update-previous-game-file! [state]
-  (spit edn-file
-    (-> (edn-state)
-      (assoc :previous-games state)
-      (prn-str))))
-
 (defn update-atom! [state]
   (reset! mem-db (assoc @mem-db :current-game state)))
 
@@ -47,11 +50,19 @@
   (fn [state]
     (:store state)))
 
+(defmethod update-current-game! :psql [state]
+  (jdbc/execute! psql-spec
+    ["INSERT INTO current_game(state) VALUES (?::jsonb)"
+     (json/generate-string state)]))
+
 (defmethod update-current-game! :file [state]
   (update-game-file! state))
 
 (defmethod update-current-game! :mem [state]
   (update-atom! state))
+
+(defmethod update-current-game! :default [state]
+  (update-current-game! (assoc state :store :mem)))
 
 #_(defn update-game! [state]
     (let [{store :store} state]

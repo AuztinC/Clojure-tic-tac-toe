@@ -4,6 +4,6 @@
 (defn -main [& args]
   (let [flags     (set args)
         store     (if (flags "-file") :file :mem)]
-    (println "▶ Using storage:" store)
-    (opt/watch-replay? :file)))
+
+    (opt/watch-replay? store)))
 

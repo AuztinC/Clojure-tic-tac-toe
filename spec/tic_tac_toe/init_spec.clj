@@ -6,7 +6,8 @@
             [tic-tac-toe.board :as board]))
 (def ai-vs-ai-state {:id 123
                      :board (board/get-board :3x3)
-                     :players [:ai :ai] :markers ["X" "O"]
+                     :players [:ai :ai]
+                     :markers ["X" "O"]
                      :difficulties [:hard :hard]
                      :store :mem
                      :turn "p1"})
@@ -61,10 +62,17 @@
                     ai-vs-ai-state))
                 "tie"))))
 
-  (it "game over calls game-end!"
-    (with-redefs [sut/end-game! (stub :end-game!)]
-      (with-out-str (sut/game-loop (assoc human-vs-ai-state :board (repeat 9 ["X"]))))
-      (should-have-invoked :end-game!)))
+  (context "game over"
+    (it "game over calls game-end!"
+      (with-redefs [sut/end-game! (stub :end-game!)]
+        (with-out-str (sut/game-loop (assoc human-vs-ai-state :board (repeat 9 ["X"]))))
+        (should-have-invoked :end-game!)))
+
+    (it "clears db :current-game"
+      (reset! db/mem-db {:current-game {}})
+      (sut/end-game! 1 (repeat 9 [["X"]]) :mem)
+      (should= {} @db/mem-db))
+    )
 
   (context "init and resume call game-loop"
     (it "init"
@@ -102,17 +110,30 @@
         (should-have-invoked :update-previous-games!
           {:with [(:store state) expected-data]})))
 
-    (it "calls move-fn with board and marker, then calls db/update-previous-games! appropriately"
+    (it "calls db/update-previous-games! appropriately"
       (reset! db/mem-db {:previous-games [{:id 1 :moves [] :board-size :3x3}]})
-      (let [store     :mem
-            game-id   1
-            board  (board/get-board :3x3)
-            marker    "X"
+      (let [store :mem
+            game-id 1
+            board (board/get-board :3x3)
+            marker "X"
             fake-move 0
             move-fn (fn [_b _n] 0)
-            db-stub   (stub :update-previous-games!)]
+            db-stub (stub :update-previous-games!)]
         (with-redefs [db/update-previous-games! db-stub]
           (sut/play-turn store game-id board move-fn [marker :human] nil)
+          (should-have-invoked :update-previous-games!
+            {:with [store
+                    game-id
+                    {:player marker :move fake-move}]})))
+      (let [store :mem
+            game-id 1
+            board (board/get-board :3x3)
+            marker "O"
+            fake-move 0
+            move-fn (fn [_b _n _d] 0)
+            db-stub (stub :update-previous-games!)]
+        (with-redefs [db/update-previous-games! db-stub]
+          (sut/play-turn store game-id board move-fn ["O" :ai] [:hard])
           (should-have-invoked :update-previous-games!
             {:with [store
                     game-id
