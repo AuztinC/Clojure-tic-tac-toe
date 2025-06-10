@@ -11,40 +11,40 @@
   (with-stubs)
 
   (context "select-game"
-    (redefs-around [db/previous-games? (fn [] true)
+    (redefs-around [db/previous-games? (fn [_store] true)
                     init/init-game (stub :init-game {:return :init})])
 
     (it "prints game options"
       (with-redefs [read-line (fn [] "1")]
         (should-contain "Choose your game"
-          (with-out-str (sut/select-game)))))
+          (with-out-str (sut/select-game :mem)))))
 
     (it "game-mode retries for bad input"
       (with-redefs [sut/select-game (stub :select-game {:invoke sut/select-game})]
-        (let [out (with-out-str (with-in-str "5\n1\n1\n1" (sut/select-game)))]
+        (let [out (with-out-str (with-in-str "5\n1\n1\n1" (sut/select-game :mem)))]
           (should-contain "Not a game-mode, retry.\n" out)
           (should-have-invoked :select-game {:times 2}))))
 
     (it "selects human v ai"
-      (with-out-str (with-in-str "1\n1\n1" (sut/select-game)))
+      (with-out-str (with-in-str "1\n1\n1" (sut/select-game :mem)))
       (let [[{:keys [players]}] (stub/last-invocation-of :init-game)]
         (should= [:human :ai] players)
         (should-have-invoked :init-game)))
 
     (it "selects ai vs human"
-      (with-out-str (with-in-str "2\n1\n1" (sut/select-game)))
+      (with-out-str (with-in-str "2\n1\n1" (sut/select-game :mem)))
       (let [[{:keys [players]}] (stub/last-invocation-of :init-game)]
         (should= [:ai :human] players)
         (should-have-invoked :init-game)))
 
     (it "selects human v human"
-      (with-out-str (with-in-str "3\n0\n1" (sut/select-game)))
+      (with-out-str (with-in-str "3\n0\n1" (sut/select-game :mem)))
       (let [[{:keys [players]}] (stub/last-invocation-of :init-game)]
       (should-have-invoked :init-game)
       (should= [:human :human] players)))
 
   (it "selects ai v ai"
-    (with-out-str (with-in-str "4\n1\n1\n3" (sut/select-game)))
+    (with-out-str (with-in-str "4\n1\n1\n3" (sut/select-game :mem)))
     (let [[{:keys [players]}] (stub/last-invocation-of :init-game)]
       (should-have-invoked :init-game)
       (should= [:ai :ai] players)))
@@ -82,7 +82,7 @@
         (should-have-invoked :select-board {:times 2})))))
 
 (context "replay a game"
-  (redefs-around [db/previous-games? (fn [] true)])
+  (redefs-around [db/previous-games? (fn [_store] true)])
   (it "prints option to replay with ID"
     (with-redefs [sut/dispatch-id (stub :dispatch-id)]
       (let [out (with-out-str (with-in-str "1" (sut/watch-replay? :mem)))]

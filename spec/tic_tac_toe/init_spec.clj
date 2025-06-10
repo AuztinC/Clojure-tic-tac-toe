@@ -70,7 +70,7 @@
 
     (it "clears db :current-game"
       (reset! db/mem-db {:current-game {}})
-      (sut/end-game! 1 (repeat 9 [["X"]]) :mem)
+      (with-out-str (sut/end-game! 1 (repeat 9 [["X"]]) :mem))
       (should= {} @db/mem-db))
     )
 

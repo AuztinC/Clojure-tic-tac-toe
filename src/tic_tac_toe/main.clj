@@ -3,7 +3,10 @@
 
 (defn -main [& args]
   (let [flags     (set args)
-        store     (if (flags "-file") :file :mem)]
+        store     (cond
+                    (flags "-file") :file
+                    (flags "-psql") :psql
+                    :default :mem)]
 
     (opt/watch-replay? store)))
 

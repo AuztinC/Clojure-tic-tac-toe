@@ -40,12 +40,12 @@
                   (recur out)))))))
 
 (declare select-game)
-(defn- retry-select-game []
+(defn- retry-select-game [store]
   (println "Not a game-mode, retry.")
-  (select-game))
+  (select-game store))
 
-(defn- setup-game [player-types difficulty-count]
-  (let [new-game-id (db/set-new-game-id)
+(defn- setup-game [store player-types difficulty-count]
+  (let [new-game-id (db/set-new-game-id store)
         board (board/get-board (select-board))
         difficulties (select-difficulty difficulty-count)]
     (init/init-game {:id new-game-id
@@ -54,17 +54,17 @@
                      :markers ["X" "O"]
                      :difficulties difficulties
                      :turn "p1"
-                     :store :file})))
+                     :store store})))
 
-(defn select-game []
+(defn select-game [store]
   (printer/print-game-options)
   (let [choice (read-line)]
     (case choice
-      "1" (setup-game [:human :ai] 1)
-      "2" (setup-game [:ai :human] 1)
-      "3" (setup-game [:human :human] 0)
-      "4" (setup-game [:ai :ai] 2)
-      (retry-select-game))))
+      "1" (setup-game store [:human :ai] 1)
+      "2" (setup-game store [:ai :human] 1)
+      "3" (setup-game store [:human :human] 0)
+      "4" (setup-game store [:ai :ai] 2)
+      (retry-select-game store))))
 
 (defn print-load-game []
   (println "Previous game detected! Resume?
@@ -72,21 +72,21 @@
   2: No"))
 
 (declare load-game)
-(defn retry-load-game []
+(defn retry-load-game [store ]
   (do
     (println "I'm sorry, that's not an option. Try again")
-    (load-game)))
+    (load-game store)))
 
-(defn load-game []
-  (if (db/in-progress?)
+(defn load-game [store]
+  (if (db/in-progress? store)
     (do
       (print-load-game)
       (let [choice (read-line)]
         (case choice
-          "1" (init/resume-game)
-          "2" (select-game)
-          (retry-load-game))))
-    (select-game)))
+          "1" (init/resume-game store)
+          "2" (select-game store)
+          (retry-load-game store))))
+    (select-game store)))
 
 (declare dispatch-id)
 (defn retry-dispatch-id [store]
@@ -110,7 +110,7 @@
     (watch-replay? store)))
 
 (defn watch-replay? [store]
-  (if (db/previous-games?)
+  (if (db/previous-games? store)
     (do
       (println "Would you like to watch a replay?
   You'll need a match ID.
@@ -119,9 +119,9 @@
       (let [choice (read-line)]
         (case choice
           "1" (dispatch-id store)
-          "2" (load-game)
+          "2" (load-game store)
           (retry-watch-replay store))))
-    (load-game)))
+    (load-game store)))
 
 
 

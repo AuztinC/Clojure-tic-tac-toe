@@ -45,9 +45,10 @@
 
 (defn end-game! [id board store]
   (let [id id]
+    (printer/display-board board)
     (printer/output-result (board/check-winner board))
     (printer/game-id id)
-    (db/clear! store)))
+    (db/clear-current-game! {:store store})))
 
 (defn next-state [state]
   (let [{board :board,
@@ -89,11 +90,6 @@
       (printer/game-id (get data :id))
       (game-loop state))))
 
-(defn resume-game []
-  (let [state (get (db/edn-state) :current-game)
-        turn (case (odd? (count (board/open-positions (get state :board))))
-               true "p1"
-               false "p2")
-        next-state (assoc state :turn turn)]
-    (game-loop next-state)))
+(defn resume-game [store]
+  (game-loop (db/in-progress? store)))
 

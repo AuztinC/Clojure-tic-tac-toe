@@ -14,4 +14,9 @@
     (it "-file calls with :file"
       (with-redefs [opt/watch-replay? (stub :watch-replay?)]
         (apply sut/-main ["-file"])
-        (should-have-invoked :watch-replay? {:with [:file]})))))
+        (should-have-invoked :watch-replay? {:with [:file]})))
+
+    (it "-psql"
+      (with-redefs [opt/watch-replay? (stub :watch-replay?)]
+        (apply sut/-main ["-psql"])
+        (should-have-invoked :watch-replay? {:with [:psql]})))))

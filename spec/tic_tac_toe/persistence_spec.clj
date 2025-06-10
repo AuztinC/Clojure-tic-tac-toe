@@ -5,12 +5,6 @@
             [tic-tac-toe.board :as board]
             [clojure.java.jdbc :as jdbc]))
 
-(defn clojurify-psql-state [state]
-  (-> state
-    (update :players      (fn [ps] (mapv keyword ps)))
-    (update :difficulties (fn [ds] (mapv keyword ds)))
-    (update :store        keyword)))
-
 (describe "persistence"
   (with-stubs)
   (redefs-around [sut/psql-spec {:dbtype "postgresql"
@@ -85,7 +79,7 @@
       (it "clear current game edn"
         (with-redefs [sut/edn-state (fn [] {:current-game {}
                                             :previous-games []})]
-          (sut/clear! {:store :file})
+          (sut/clear-current-game! {:store :file})
           (should-have-invoked :spit {:with [sut/edn-file (dissoc (sut/edn-state) :current-game)]}))))
 
     (context "receive game to replay"
@@ -104,42 +98,164 @@
       (it "SELECT 1 as one, confirms db connection"
         (let [result (jdbc/query sut/psql-spec ["SELECT 1 as one"])
               one (:one (first result))]
-          (should= 1 one))))
+          (should= 1 one)))
 
-    (context "write to psql"
-      (it "creates and drops the current_game"
-        (jdbc/db-do-commands sut/psql-spec ["DROP TABLE IF EXISTS current_game;"])
-        (should-not-throw (jdbc/db-do-commands sut/psql-spec ["CREATE TABLE current_game(state JSONB);"]))
-        (let [result (first (jdbc/db-do-commands sut/psql-spec ["SELECT * FROM current_game;"]))]
-         (should= 0 result))
-        (jdbc/db-do-commands sut/psql-spec ["DROP TABLE IF EXISTS current_game;"])
-        )
-
-      (it "update-current-game! adds new current game"
+      (it "reads empty psql state"
         (jdbc/db-do-commands sut/psql-spec
-          ["DROP TABLE IF EXISTS current_game"
-           "CREATE TABLE current_game (state JSONB)"])
+          ["DROP TABLE IF EXISTS current_game;"
+           "DROP TABLE IF EXISTS previous_games;"
+           "CREATE TABLE current_game(state JSONB);"
+           "CREATE TABLE previous_games(games JSONB);"])
+        (should= () (sut/psql-state "current_game"))
+        (should= () (sut/psql-state "previous_games")))
+
+      (it "empty current_game"
+        (sut/clear-current-game! {:store :psql})
+        (should= nil (sut/in-progress? :psql))
+        (sut/clear-current-game! {:store :psql}))
+
+      (it "finds current_game"
+        (sut/clear-current-game! {:store :psql})
         (let [state {:board (board/get-board :3x3)
                      :players [:human :ai]
                      :markers ["X" "O"]
                      :difficulties [:hard]
                      :turn "p1"
                      :store :psql}]
-         (sut/update-current-game! state)
+          (jdbc/execute! sut/psql-spec
+            ["INSERT INTO current_game(state) VALUES (?::jsonb)"
+             (json/generate-string state)])
+          (should= state (sut/in-progress? :psql))
+          (sut/clear-current-game! {:store :psql})))
+      )
+
+    (context "write to psql"
+      (before [(jdbc/db-do-commands sut/psql-spec
+                 ["DELETE FROM previous_games"])
+               (sut/clear-current-game! {:store :psql})])
+      (after [(jdbc/db-do-commands sut/psql-spec
+                ["DELETE FROM previous_games"])
+              (sut/clear-current-game! {:store :psql})])
+
+      (it " updates current-game once started"
+        (let [init-state {:board (board/get-board :3x3)
+                          :players [:human :ai]
+                          :markers ["X" "O"]
+                          :difficulties [:hard]
+                          :turn "p1"
+                          :store :psql}]
+          (jdbc/execute! sut/psql-spec
+            ["INSERT INTO current_game(state) VALUES (?::jsonb)"
+             (json/generate-string init-state)]))
+        (let [new-state {:board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
+                         :players [:human :ai]
+                         :markers ["X" "O"]
+                         :difficulties [:hard]
+                         :turn "p2"
+                         :store :psql}]
+          (sut/update-current-game! new-state)
           (let [result (:state (first (jdbc/query sut/psql-spec ["SELECT state FROM current_game;"])))
                 json-str (.getValue result)
-                loaded (clojurify-psql-state (json/parse-string json-str true))]
-            (should= state loaded)))))
-    )
+                loaded (sut/clojurify-psql-state result)]
+            (should= new-state loaded))))
+
+      (it "initialize current_game if empty"
+        (let [state {:board (board/get-board :3x3)
+                     :players [:human :ai]
+                     :markers ["X" "O"]
+                     :difficulties [:hard]
+                     :turn "p1"
+                     :store :psql}]
+          (sut/update-current-game! state)
+          (let [result (:state (first (jdbc/query sut/psql-spec ["SELECT state FROM current_game;"])))
+                json-str (.getValue result)
+                loaded (sut/clojurify-psql-state result)]
+            (should= state loaded))))
+
+      (it "clears current_game"
+        (sut/clear-current-game! {:store :psql})
+        (should= () (jdbc/query sut/psql-spec
+                      ["SELECT state FROM current_game;"])))
+
+      (it "update-current-game!"
+        (sut/clear-current-game! {:store :psql})
+        (let [state {:board (board/get-board :3x3)
+                     :players [:human :ai]
+                     :markers ["X" "O"]
+                     :difficulties [:hard]
+                     :turn "p1"
+                     :store :psql}]
+          (sut/update-current-game! state)
+          (let [result (:state (first (jdbc/query sut/psql-spec ["SELECT state FROM current_game;"])))
+                loaded (sut/clojurify-psql-state result)]
+            (should= state loaded))))
+
+      (it "add new game to previous games psql"
+        (let [data {:id 5
+                    :moves [{:player "X" :move 0}]
+                    :board-size (case (count (board/get-board :3x3))
+                                  9 :3x3
+                                  16 :4x4
+                                  :3x3x3)}]
+          (with-redefs [jdbc/execute! (stub :execute!)]
+            (sut/add-entry-to-previous! :psql data)
+            (should-have-invoked :execute! {:with [sut/psql-spec
+                                                   ["INSERT INTO previous_games(games) VALUES (?::jsonb)"
+                                                    "{\"id\":5,\"moves\":[{\"player\":\"X\",\"move\":0}],\"board-size\":\"3x3\"}"]]}))))
+
+      (it "gets new id for new game"
+        (let [state-1 {:id 5
+                       :moves [{:player "X" :move 0}]
+                       :board-size (case (count (board/get-board :3x3))
+                                     9 :3x3
+                                     16 :4x4
+                                     :3x3x3)}
+              state-2 {:id 1
+                       :moves [{:player "X" :move 0}]
+                       :board-size (case (count (board/get-board :3x3))
+                                     9 :3x3
+                                     16 :4x4
+                                     :3x3x3)}]
+          (sut/add-entry-to-previous! :psql state-1)
+          (sut/add-entry-to-previous! :psql state-2)
+          (should= 2 (sut/set-new-game-id :psql))
+          (jdbc/db-do-commands sut/psql-spec
+            ["DELETE FROM previous_games"])))
+
+      (it "selects previous_game with ID"
+        (let [state-1 {:id 1
+                       :moves []
+                       :board-size (case (count (board/get-board :3x3))
+                                     9 :3x3
+                                     16 :4x4
+                                     :3x3x3)}]
+          (sut/add-entry-to-previous! :psql state-1)
+          (should= []
+            (get (json/parse-string (.getValue (:games (first (jdbc/query sut/psql-spec ["SELECT games FROM previous_games WHERE (games->>'id')::int = ?" 1]))))) "moves"))
+          #_(jdbc/db-do-commands sut/psql-spec
+            ["DELETE FROM previous_games"])))
+
+      (it "adds new move to :previous-games key using ID psql"
+        (let [state-1 {:id 1
+                       :moves []
+                       :board-size (case (count (board/get-board :3x3))
+                                     9 :3x3
+                                     16 :4x4
+                                     :3x3x3)}]
+          (sut/add-entry-to-previous! :psql state-1)
+          (should= [1] (sut/update-previous-games! :psql 1 {:player "X" :move 0}))
+          (jdbc/db-do-commands sut/psql-spec
+            ["DELETE FROM previous_games"])))
+      ))
 
   (context "mem"
     (it "uses mem impl as default"
-      (with-redefs [sut/clear! (stub :clear! {:invoke sut/clear!})]
-        (sut/clear! {:store nil})
+      (with-redefs [sut/clear-current-game! (stub :clear! {:invoke sut/clear-current-game!})]
+        (sut/clear-current-game! {:store nil})
         (should-have-invoked :clear! {:with [{:store :mem}]})))
 
     (it "clears blank atom"
-      (sut/clear! {:store :mem})
+      (sut/clear-current-game! {:store :mem})
       (should= {} @sut/mem-db))
 
     (let [state {:board (board/get-board :3x3)
@@ -147,7 +263,7 @@
                  :difficulties [:hard] :turn "p1" :store :mem}]
       (it "clears populated atom"
         (sut/update-current-game! state)
-        (sut/clear! :mem)
+        (sut/clear-current-game! :mem)
         (should= {} @sut/mem-db))
 
       (it "updates current game"
