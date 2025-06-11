@@ -204,21 +204,28 @@
                                                     "{\"id\":5,\"moves\":[{\"player\":\"X\",\"move\":0}],\"board-size\":\"3x3\"}"]]}))))
 
       (it "gets new id for new game"
-        (let [state-1 {:id 5
+        (let [state-1 {:id 1
                        :moves [{:player "X" :move 0}]
                        :board-size (case (count (board/get-board :3x3))
                                      9 :3x3
                                      16 :4x4
                                      :3x3x3)}
-              state-2 {:id 1
+              state-2 {:id 2
                        :moves [{:player "X" :move 0}]
-                       :board-size (case (count (board/get-board :3x3))
+                       :board-size (case (count (board/get-board :4x4))
                                      9 :3x3
                                      16 :4x4
-                                     :3x3x3)}]
+                                     :3x3x3)}
+              state-3 {:id 3
+               :moves [{:player "X" :move 0}]
+               :board-size (case (count (board/get-board :4x4))
+                             9 :3x3
+                             16 :4x4
+                             :3x3x3)}]
           (sut/add-entry-to-previous! :psql state-1)
           (sut/add-entry-to-previous! :psql state-2)
-          (should= 2 (sut/set-new-game-id :psql))
+          (sut/add-entry-to-previous! :psql state-3)
+          (should= 4 (sut/set-new-game-id :psql))
           (jdbc/db-do-commands sut/psql-spec
             ["DELETE FROM previous_games"])))
 

@@ -15,7 +15,6 @@
 (defn replay [state]
   (let [{moves :moves, size :board-size} state
         board (board/get-board size)]
-    (println board)
     (reduce (game-loop!)
       board
       moves)))

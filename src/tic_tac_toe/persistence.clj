@@ -37,24 +37,17 @@
             (last)
             (get :id 0)
             (inc))
-    :psql (let [rows (jdbc/query psql-spec
-                       ["SELECT games FROM previous_games"])
-                last-row (last rows)]
-            (if last-row
-              (-> last-row
-                (:games)                                    ; this is a PGobject
-                (.getValue)                                 ; extract the raw JSON string
-                (json/parse-string)                         ; parse into a Clojure map with string keys
-                (get "id" 0)                                ; default to 0 if somehow missing
-                inc)                                        ; bump to the next id
-              ;; no rows yet? first id should be 1
-              1))
+    :psql (let [row (first
+                      (jdbc/query psql-spec
+                        ["SELECT
+                    COALESCE(MAX((games->>'id')::int), 0) AS maxid
+                   FROM previous_games"]))]
+            (inc (:maxid row)))
     :mem (-> @mem-db
            (get :previous-games)
            (last)
            (get :id 0)
            (inc))))
-
 
 (defmulti find-game-by-id :store)
 
