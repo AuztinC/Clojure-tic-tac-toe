@@ -45,7 +45,7 @@
   (select-game store))
 
 (defn- setup-game [store player-types difficulty-count]
-  (let [new-game-id (db/set-new-game-id store)
+  (let [new-game-id (db/set-new-game-id {:store store})
         board (board/get-board (select-board))
         difficulties (select-difficulty difficulty-count)]
     (init/init-game {:id new-game-id

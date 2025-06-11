@@ -30,24 +30,29 @@
   (let [query (str "SELECT * FROM " table ";")]
     (jdbc/query psql-spec [query])))
 
-(defn set-new-game-id [store]
-  (case store
-    :file (-> (edn-state)
-            (get :previous-games)
-            (last)
-            (get :id 0)
-            (inc))
-    :psql (let [row (first
-                      (jdbc/query psql-spec
-                        ["SELECT
+(defmulti set-new-game-id :store)
+
+(defmethod set-new-game-id :psql [_store]
+  (let [row (first
+              (jdbc/query psql-spec
+                ["SELECT
                     COALESCE(MAX((games->>'id')::int), 0) AS maxid
                    FROM previous_games"]))]
-            (inc (:maxid row)))
-    :mem (-> @mem-db
-           (get :previous-games)
-           (last)
-           (get :id 0)
-           (inc))))
+    (inc (:maxid row))))
+
+(defmethod set-new-game-id :file [_store]
+  (-> (edn-state)
+    (get :previous-games)
+    (last)
+    (get :id 0)
+    (inc)))
+
+(defmethod set-new-game-id :mem [_store]
+  (-> @mem-db
+    (get :previous-games)
+    (last)
+    (get :id 0)
+    (inc)))
 
 (defmulti find-game-by-id :store)
 

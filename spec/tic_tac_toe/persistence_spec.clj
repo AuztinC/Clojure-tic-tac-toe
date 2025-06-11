@@ -89,6 +89,23 @@
                            :moves [{}]
                            :board-size :3x3} (sut/find-game-by-id {:store :file} 1))))
 
+      (it "gets new id for new game"
+        (let [state-1 {:id 1
+                       :moves [{:player "X" :move 0}]
+                       :board-size (case (count (board/get-board :3x3))
+                                     9 :3x3
+                                     16 :4x4
+                                     :3x3x3)}
+              state-2 {:id 2
+                       :moves [{:player "X" :move 0}]
+                       :board-size (case (count (board/get-board :4x4))
+                                     9 :3x3
+                                     16 :4x4
+                                     :3x3x3)}]
+          (sut/add-entry-to-previous! :file state-1)
+          (sut/add-entry-to-previous! :file state-2)
+          (should= 3 (sut/set-new-game-id {:store :file}))))
+
       (it "user gives bad id"
         (should= () (sut/find-game-by-id {:store :file} "S"))))
     )
@@ -225,7 +242,7 @@
           (sut/add-entry-to-previous! :psql state-1)
           (sut/add-entry-to-previous! :psql state-2)
           (sut/add-entry-to-previous! :psql state-3)
-          (should= 4 (sut/set-new-game-id :psql))
+          (should= 4 (sut/set-new-game-id {:store :psql}))
           (jdbc/db-do-commands sut/psql-spec
             ["DELETE FROM previous_games"])))
 
@@ -300,8 +317,23 @@
           (sut/update-previous-games! :mem 1 move)
           (should-have-invoked :reset!
             {:with [sut/mem-db
-                    {:previous-games [{:id 1 :moves [move] :board-size :3x3}]}]})))
-      )
+                    {:previous-games [{:id 1 :moves [move] :board-size :3x3}]}]}))))
+    (it "gets new id for new game"
+      (let [state-1 {:id 1
+                     :moves [{:player "X" :move 0}]
+                     :board-size (case (count (board/get-board :3x3))
+                                   9 :3x3
+                                   16 :4x4
+                                   :3x3x3)}
+            state-2 {:id 2
+                     :moves [{:player "X" :move 0}]
+                     :board-size (case (count (board/get-board :4x4))
+                                   9 :3x3
+                                   16 :4x4
+                                   :3x3x3)}]
+        (sut/add-entry-to-previous! :mem state-1)
+        (sut/add-entry-to-previous! :mem state-2)
+        (should= 3 (sut/set-new-game-id {:store :mem}))))
 
     (context "receive game to replay"
       (it "given id returns state"
