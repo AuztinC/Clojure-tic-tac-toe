@@ -78,7 +78,7 @@
     (load-game store)))
 
 (defn load-game [store]
-  (if (db/in-progress? store)
+  (if (db/in-progress? {:store store})
     (do
       (print-load-game)
       (let [choice (read-line)]
@@ -110,7 +110,7 @@
     (watch-replay? store)))
 
 (defn watch-replay? [store]
-  (if (db/previous-games? store)
+  (if (db/previous-games? {:store store})
     (do
       (println "Would you like to watch a replay?
   You'll need a match ID.

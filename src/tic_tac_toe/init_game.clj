@@ -91,5 +91,5 @@
       (game-loop state))))
 
 (defn resume-game [store]
-  (game-loop (db/in-progress? store)))
+  (game-loop (db/in-progress? {:store store})))
 
