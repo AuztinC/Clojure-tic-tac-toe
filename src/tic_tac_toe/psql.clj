@@ -1,11 +1,5 @@
 (ns tic-tac-toe.psql
-  (:require [tic-tac-toe.persistence :refer [set-new-game-id
-                                             find-game-by-id
-                                             update-current-game!
-                                             in-progress?
-                                             clear-current-game!
-                                             add-entry-to-previous!
-                                             update-previous-games!]]
+  (:require [tic-tac-toe.persistence :as db]
             [clojure.java.jdbc :as jdbc]
             [cheshire.core :as json]))
 
@@ -16,7 +10,7 @@
                 :user "austincripe"
                 :password ""})
 
-(defn psql-state [table]
+(defn state [table]
   (let [query (str "SELECT * FROM " table ";")]
     (jdbc/query psql-spec [query])))
 
@@ -28,21 +22,21 @@
     (update :difficulties (fn [ds] (mapv keyword ds)))
     (update :store keyword)))
 
-(defmethod set-new-game-id :psql [_store]
+(defmethod db/set-new-game-id :psql [_store]
   (let [row (first
               (jdbc/query psql-spec
-                ["SELECT
-                    COALESCE(MAX((games->>'id')::int), 0) AS maxid
-                   FROM previous_games"]))]
-    (inc (:maxid row))))
+                ["SELECT * FROM previous_games
+                ORDER BY id DESC
+                LIMIT 1"]))]
+    (inc (get row :id 0))))
 
-(defmethod find-game-by-id :psql [_store id]
+(defmethod db/find-game-by-id :psql [_store id]
   (let [row (first (jdbc/query psql-spec
-                     ["SELECT games FROM previous_games WHERE (games->>'id')::int = ?" id]))]
+                     ["SELECT state FROM previous_games WHERE id = ?" id]))]
     (if row
       (let [str-map (json/parse-string
                       (.getValue
-                        (:games
+                        (:state
                           row)))
             keyword-map (update-keys str-map keyword)
             updated-moves-key (assoc keyword-map :moves (map #(update-keys % keyword) (get keyword-map :moves)))
@@ -50,7 +44,7 @@
         keyed-map)
       ())))
 
-(defmethod update-current-game! :psql [state]
+(defmethod db/update-current-game! :psql [state]
   (let [psql-state (jdbc/query psql-spec ["SELECT state FROM current_game;"])]
     (if (empty? psql-state)
       (jdbc/execute! psql-spec
@@ -61,29 +55,33 @@
                    SET state = (?::jsonb)"
          (json/generate-string state)]))))
 
-(defmethod in-progress? :psql [_store]
+(defmethod db/in-progress? :psql [_store]
   (if (empty? (jdbc/query psql-spec ["SELECT state FROM current_game;"]))
     nil
     (clojurify-psql-state (:state (first (jdbc/query psql-spec ["SELECT state FROM current_game;"]))))))
 
-(defmethod clear-current-game! :psql [_store]
+(defmethod db/clear-current-game! :psql [_store]
   (jdbc/execute! psql-spec
     ["DELETE FROM current_game"]))
 
-(defmethod add-entry-to-previous! :psql
+(defmethod db/add-entry-to-previous! :psql
   [_store data]
-  (jdbc/execute! psql-spec ["INSERT INTO previous_games(games) VALUES (?::jsonb)"
+  (jdbc/execute! psql-spec ["INSERT INTO previous_games(id, state) VALUES (?::int, ?::jsonb)"
+                            (json/generate-string (:id data))
                             (json/generate-string data)]))
 
-(defmethod update-previous-games! :psql [_store id move]
+(defmethod db/update-previous-games! :psql [_store id move]
   (let [game (json/parse-string
                (.getValue
-                 (:games
+                 (:state
                    (first (jdbc/query psql-spec
-                            ["SELECT games FROM previous_games WHERE (games->>'id')::int = ?" id])))))
+                            ["SELECT state FROM previous_games WHERE id = ?" id])))))
         updated-moves (update game "moves" conj move)
         json-str (json/generate-string updated-moves)]
     (jdbc/execute! psql-spec
-      ["UPDATE previous_games SET games = ?::jsonb WHERE (games->>'id')::int = ?"
+      ["UPDATE previous_games SET state = ?::jsonb WHERE id = ?"
        json-str
        id])))
+
+(defmethod db/previous-games? :psql [_store]
+  (not-empty (state "previous_games")))

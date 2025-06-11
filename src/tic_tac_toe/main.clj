@@ -1,5 +1,6 @@
 (ns tic-tac-toe.main
-  (:require [tic-tac-toe.game-options :as opt]))
+  (:require [tic-tac-toe.game-options :as opt]
+            [tic-tac-toe.psql]))
 
 (defn -main [& args]
   (let [flags     (set args)

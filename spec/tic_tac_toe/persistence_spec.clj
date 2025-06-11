@@ -7,12 +7,6 @@
 
 (describe "persistence"
   (with-stubs)
-  (redefs-around [sut/psql-spec {:dbtype "postgresql"
-                                 :dbname "tic-tac-toe-test"
-                                 :host "localhost"
-                                 :port 5432
-                                 :user "austincripe"
-                                 :password ""}])
 
   (before (reset! sut/mem-db {}))
 
