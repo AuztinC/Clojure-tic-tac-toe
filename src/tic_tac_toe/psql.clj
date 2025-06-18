@@ -40,7 +40,8 @@
                           row)))
             keyword-map (update-keys str-map keyword)
             updated-moves-key (assoc keyword-map :moves (map #(update-keys % keyword) (get keyword-map :moves)))
-            keyed-map (update-in updated-moves-key [:board-size] keyword)]
+            concat-id (assoc updated-moves-key :id id)
+            keyed-map (update-in concat-id [:board-size] keyword)]
         keyed-map)
       ())))
 
@@ -68,7 +69,7 @@
   [_store data]
   (jdbc/execute! psql-spec ["INSERT INTO previous_games(id, state) VALUES (?::int, ?::jsonb)"
                             (json/generate-string (:id data))
-                            (json/generate-string data)]))
+                            (json/generate-string (dissoc data :id))]))
 
 (defmethod db/update-previous-games! :psql [_store id move]
   (let [game (json/parse-string
