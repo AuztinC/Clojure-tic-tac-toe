@@ -1,26 +1,11 @@
 (ns tic-tac-toe.init-game
-  (:require [tic-tac-toe.human-turn :as ht]
+  (:require
             [tic-tac-toe.printer :as printer]
-            [tic-tac-toe.ai-turn :as ai]
+
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
 
-(defmulti play-turn (fn [_store _id _board _move-fn [_ player-type] & _] player-type))
-
-(defmethod play-turn :human [store id board move-fn [marker _] _]
-  (let [move (move-fn board marker)
-        entry {:player marker
-               :move move}]
-    (db/update-previous-games! store id entry)
-    (assoc board move [marker])))
-
-(defmethod play-turn :ai [store id board move-fn [marker _] diff]
-  (let [move (move-fn board marker diff)
-        entry {:player marker
-               :move move}]
-    (do
-      (db/update-previous-games! store id entry)
-      (assoc board move [marker]))))
+(defmulti play-turn (fn [_store _id _board [_ player-type] & _] player-type))
 
 (defn- next-player [turn]
   (if (= "p1" turn) "p2" "p1"))
@@ -30,11 +15,6 @@
   (if (= "p1" turn)
     [player1-marker player1-type]
     [player2-marker player2-type]))
-
-(defn- ->player-fn [player-type]
-  (cond
-    (= :human player-type) ht/human-turn
-    (= :ai player-type) ai/ai-turn))
 
 (defn- ->difficulties [turn player-type difficulties]
   (if (= 1 (count difficulties))
@@ -61,9 +41,8 @@
     (let [[_marker player-type :as player] (->players turn
                                              player1-marker player1-type
                                              player2-marker player2-type)
-          player-fn (->player-fn player-type)
           difficulty (->difficulties turn player-type difficulties)
-          new-board (play-turn store id board player-fn player difficulty)
+          new-board (play-turn store id board player difficulty)
           next-state (assoc state :board new-board :turn (next-player turn))]
       (do
         (db/update-current-game! next-state)

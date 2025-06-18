@@ -1,5 +1,7 @@
 (ns tic-tac-toe.ai-turn
-  (:require [tic-tac-toe.board :as board]))
+  (:require [tic-tac-toe.board :as board]
+            [tic-tac-toe.init-game :as init]
+            [tic-tac-toe.persistence :as db]))
 
 (defn score-minimax-result [result depth marker]
   (cond
@@ -152,3 +154,11 @@
       (= :hard difficulty) (hard board marker open-positions)
       (= :medium difficulty) (medium board marker open-positions)
       (= :easy difficulty) (easy open-positions))))
+
+(defmethod init/play-turn :ai [store id board [marker _] diff]
+  (let [move (ai-turn board marker diff)
+        entry {:player marker
+               :move move}]
+    (do
+      (db/update-previous-games! store id entry)
+      (assoc board move [marker]))))

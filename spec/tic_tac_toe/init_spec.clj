@@ -110,36 +110,34 @@
         (should-have-invoked :update-previous-games!
           {:with [(:store state) expected-data]})))
 
-    (it "calls db/update-previous-games! appropriately"
+    (it "calls db/update-previous-games!"
       (reset! db/mem-db {:previous-games [{:id 1 :moves [] :board-size :3x3}]})
-      (let [store :mem
+      (with-out-str (with-in-str "0"(let [store :mem
             game-id 1
             board (board/get-board :3x3)
             marker "X"
             fake-move 0
-            move-fn (fn [_b _n] 0)
             db-stub (stub :update-previous-games!)]
         (with-redefs [db/update-previous-games! db-stub]
-          (sut/play-turn store game-id board move-fn [marker :human] nil)
+          (sut/play-turn store game-id board [marker :human] nil)
           (should-have-invoked :update-previous-games!
             {:with [store
                     game-id
-                    {:player marker :move fake-move}]})))
+                    {:player marker :move fake-move}]})))))
       (let [store :mem
             game-id 1
             board (board/get-board :3x3)
             marker "O"
             fake-move 0
-            move-fn (fn [_b _n _d] 0)
             db-stub (stub :update-previous-games!)]
-        (with-redefs [db/update-previous-games! db-stub]
-          (sut/play-turn store game-id board move-fn ["O" :ai] [:hard])
+        (with-redefs [tic-tac-toe.ai-turn/ai-turn (fn [_ _ _] 0)
+                      db/update-previous-games! db-stub]
+          (sut/play-turn store game-id board ["O" :ai] [:hard])
           (should-have-invoked :update-previous-games!
             {:with [store
                     game-id
                     {:player marker :move fake-move}]}))))
     )
-
   )
 
 

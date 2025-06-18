@@ -1,5 +1,9 @@
 (ns tic-tac-toe.human-turn
-  (:require [tic-tac-toe.printer :as printer]))
+  (:require [tic-tac-toe.printer :as printer]
+            [tic-tac-toe.persistence :as db]
+            [tic-tac-toe.init-game :as init]))
+
+
 
 (defn- empty-space? [board move]
   (= [""] (get board move)))
@@ -18,3 +22,10 @@
     (if (empty-space? board move)
       move
       (bad-move board marker))))
+
+(defmethod init/play-turn :human [store id board [marker _] _]
+  (let [move (human-turn board marker)
+        entry {:player marker
+               :move move}]
+    (db/update-previous-games! store id entry)
+    (assoc board move [marker])))
