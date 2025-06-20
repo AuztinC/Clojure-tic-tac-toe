@@ -1,5 +1,6 @@
 (ns tic-tac-toe.psql
-  (:require [tic-tac-toe.persistence :as db]
+  (:require [clojure.walk :as walk]
+            [tic-tac-toe.persistence :as db]
             [clojure.java.jdbc :as jdbc]
             [cheshire.core :as json]))
 
@@ -32,17 +33,15 @@
 
 (defmethod db/find-game-by-id :psql [_store id]
   (let [row (first (jdbc/query psql-spec
-                     ["SELECT state FROM previous_games WHERE id = ?" id]))]
+                     ["SELECT id, moves, board_size FROM previous_games WHERE id = ?" id]))]
     (if row
-      (let [str-map (json/parse-string
-                      (.getValue
-                        (:state
-                          row)))
-            keyword-map (update-keys str-map keyword)
-            updated-moves-key (assoc keyword-map :moves (map #(update-keys % keyword) (get keyword-map :moves)))
-            concat-id (assoc updated-moves-key :id id)
-            keyed-map (update-in concat-id [:board-size] keyword)]
-        keyed-map)
+      (let [parsed-moves (json/parse-string (:moves row))
+            updated-moves-key (assoc row :moves (map walk/keywordize-keys parsed-moves))
+            updated-board-size (assoc updated-moves-key :board_size (read-string (:board_size updated-moves-key)))
+            corrected (-> updated-board-size
+                        (assoc :board-size (:board_size updated-board-size))
+                        (dissoc :board_size))]
+        corrected)
       ())))
 
 (defmethod db/update-current-game! :psql [state]
@@ -67,20 +66,19 @@
 
 (defmethod db/add-entry-to-previous! :psql
   [_store data]
-  (jdbc/execute! psql-spec ["INSERT INTO previous_games(id, state) VALUES (?::int, ?::jsonb)"
+  (jdbc/execute! psql-spec ["INSERT INTO previous_games(id, moves, board_size) VALUES (?::int, ?::text, ?::text)"
                             (json/generate-string (:id data))
-                            (json/generate-string (dissoc data :id))]))
+                            (json/generate-string (:moves data))
+                            (str (:board-size data))]))
 
 (defmethod db/update-previous-games! :psql [_store id move]
-  (let [game (json/parse-string
-               (.getValue
-                 (:state
-                   (first (jdbc/query psql-spec
-                            ["SELECT state FROM previous_games WHERE id = ?" id])))))
-        updated-moves (update game "moves" conj move)
+  (let [row (first (jdbc/query psql-spec
+                      ["SELECT moves FROM previous_games WHERE id = ?" id]))
+        parsed-moves (vec (json/parse-string (:moves row)))
+        updated-moves (conj parsed-moves move)
         json-str (json/generate-string updated-moves)]
     (jdbc/execute! psql-spec
-      ["UPDATE previous_games SET state = ?::jsonb WHERE id = ?"
+      ["UPDATE previous_games SET moves = ?::text WHERE id = ?"
        json-str
        id])))
 

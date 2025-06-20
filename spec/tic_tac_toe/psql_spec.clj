@@ -35,7 +35,7 @@
         ["DROP TABLE IF EXISTS current_game;"
          "DROP TABLE IF EXISTS previous_games;"
          "CREATE TABLE current_game(state JSONB);"
-         "CREATE TABLE previous_games(id int NOT NULL UNIQUE, state JSONB);"])
+         "CREATE TABLE previous_games(id int NOT NULL UNIQUE, moves TEXT, board_size TEXT);"])
       (should= () (sut/state "current_game"))
       (should= () (sut/state "previous_games")))
 
