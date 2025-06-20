@@ -3,8 +3,6 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.init-game :as init]))
 
-
-
 (defn- empty-space? [board move]
   (= [""] (get board move)))
 
