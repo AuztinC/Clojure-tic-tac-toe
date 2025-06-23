@@ -48,7 +48,8 @@
   (let [new-game-id (db/set-new-game-id {:store store})
         board (board/get-board (select-board))
         difficulties (select-difficulty difficulty-count)]
-    (init/init-game {:id new-game-id
+    (init/init-game {:screen :main-menu
+                     :id new-game-id
                      :board board
                      :players player-types
                      :markers ["X" "O"]

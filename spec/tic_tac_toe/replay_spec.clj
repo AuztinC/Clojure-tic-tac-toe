@@ -1,9 +1,10 @@
 (ns tic-tac-toe.replay-spec
   (:require [speclj.core :refer :all]
-            [tic-tac-toe.replay :as sut]
-            [tic-tac-toe.persistence :as db]))
+            [tic-tac-toe.replay :as sut]))
+
 
 (describe "replay"
+
   (context "given move(s) will display board with the move"
     (it "give a position, makes a move on blank"
       (let [out (with-out-str
