@@ -5,16 +5,16 @@
 
 (defmulti play-turn (fn [_store _id _board [_ player-type] & _] player-type))
 
-(defn- next-player [turn]
+(defn next-player [turn]
   (if (= "p1" turn) "p2" "p1"))
 
-(defn- ->players
+(defn ->players
   [turn player1-marker player1-type player2-marker player2-type]
   (if (= "p1" turn)
     [player1-marker player1-type]
     [player2-marker player2-type]))
 
-(defn- ->difficulties [turn player-type difficulties]
+(defn ->difficulties [turn player-type difficulties]
   (if (= 1 (count difficulties))
     (if (= :ai player-type) (first difficulties))
     (cond

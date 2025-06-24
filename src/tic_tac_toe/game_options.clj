@@ -5,6 +5,12 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.replay :as replay]))
 
+(defn determine-starting-screen [store]
+  (cond
+    (db/in-progress? {:store store}) :in-progress-game
+    (db/previous-games? {:store store}) :replay
+    :else :select-game-mode))
+
 (declare select-board)
 (defn- retry-select-board []
   (do
@@ -73,7 +79,7 @@
   2: No"))
 
 (declare load-game)
-(defn retry-load-game [store ]
+(defn retry-load-game [store]
   (do
     (println "I'm sorry, that's not an option. Try again")
     (load-game store)))
