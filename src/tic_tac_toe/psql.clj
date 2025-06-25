@@ -1,5 +1,6 @@
 (ns tic-tac-toe.psql
   (:require [clojure.walk :as walk]
+            [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]
             [clojure.java.jdbc :as jdbc]
             [cheshire.core :as json]))
@@ -26,22 +27,26 @@
 (defmethod db/set-new-game-id :psql [_store]
   (let [row (first
               (jdbc/query psql-spec
-                ["SELECT * FROM previous_games
-                ORDER BY id DESC
-                LIMIT 1"]))]
-    (inc (get row :id 0))))
+                ["SELECT nextval('games_id_seq')"]))]
+    (:nextval row)))
 
+;; TODO ARC - return single item, not coll
 (defmethod db/find-game-by-id :psql [_store id]
-  (let [row (first (jdbc/query psql-spec
-                     ["SELECT id, moves, board_size FROM previous_games WHERE id = ?" id]))]
-    (if row
-      (let [parsed-moves (json/parse-string (:moves row))
-            updated-moves-key (assoc row :moves (map walk/keywordize-keys parsed-moves))
-            updated-board-size (assoc updated-moves-key :board_size (read-string (:board_size updated-moves-key)))
-            corrected (-> updated-board-size
-                        (assoc :board-size (:board_size updated-board-size))
-                        (dissoc :board_size))]
-        corrected)
+  (let [game (first (jdbc/query psql-spec
+                      ["SELECT * FROM games WHERE id = ?" id]))
+        moves (jdbc/query psql-spec
+                ["SELECT * FROM moves WHERE gameid = ?" id])]
+    (if game
+      [{:id (:id game)
+        :screen (keyword (:screen game))
+        :board (reduce (fn [acc move] (assoc acc (:position move) [(:player move)]))
+                 (board/get-board (keyword (:board-size game)))
+                 moves)
+        :players (map keyword [(:p1 game) (:p2 game)])
+        :markers ["X" "O"]
+        :difficulties (map keyword [(:diff1 game) (:diff2 game)])
+        :turn (if (= (:player (last moves)) "X") "p2" "p1")
+        :store :psql}]
       ())))
 
 (defmethod db/update-current-game! :psql [state]
@@ -73,7 +78,7 @@
 
 (defmethod db/update-previous-games! :psql [_store id move]
   (let [row (first (jdbc/query psql-spec
-                      ["SELECT moves FROM previous_games WHERE id = ?" id]))
+                     ["SELECT moves FROM previous_games WHERE id = ?" id]))
         parsed-moves (vec (json/parse-string (:moves row)))
         updated-moves (conj parsed-moves move)
         json-str (json/generate-string updated-moves)]
@@ -84,3 +89,9 @@
 
 (defmethod db/previous-games? :psql [_store]
   (not-empty (state "previous_games")))
+
+(defn db-setup []
+  (jdbc/execute! psql-spec
+    ["CREATE TABLE IF NOT EXISTS games(id SERIAL PRIMARY KEY, screen TEXT, p1 TEXT, p2 TEXT, diff1 TEXT, diff2 TEXT, boardsize TEXT)"])
+  (jdbc/execute! psql-spec
+    ["CREATE TABLE IF NOT EXISTS moves(id SERIAL PRIMARY KEY, gameId INTEGER NOT NULL, FOREIGN KEY(gameId) REFERENCES games(id), position INTEGER, player TEXT)"]))

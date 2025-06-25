@@ -2,7 +2,8 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe.main :as sut]
             [tic-tac-toe.game-options :as opt]
-            [tic-tac-toe.quil-core :as gui]))
+            [tic-tac-toe.quil-core :as gui]
+            [tic-tac-toe.spec-helper :as helper]))
 
 (describe "Main"
   (with-stubs)
@@ -17,10 +18,20 @@
         (apply sut/-main ["-file"])
         (should-have-invoked :watch-replay? {:with [:file]})))
 
-    (it "-psql"
-      (with-redefs [opt/watch-replay? (stub :watch-replay?)]
-        (apply sut/-main ["-psql"])
-        (should-have-invoked :watch-replay? {:with [:psql]}))))
+    (context "-psql"
+      (helper/stub-jdbc)
+
+      (it "returns :psql with flag"
+        (with-redefs [opt/watch-replay? (stub :watch-replay?)]
+          (apply sut/-main ["-psql"])
+          (should-have-invoked :watch-replay? {:with [:psql]})))
+
+      (it "initializes db"
+        (with-redefs [opt/watch-replay? (stub :watch-replay?)]
+          (apply sut/-main ["-psql"])
+          (helper/should-initialize-db)))
+      ))
+
 
   (context "gui"
     (it "default to cli"

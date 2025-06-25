@@ -38,6 +38,7 @@
     ;; TODO ARC - display given id
     state))
 
+;; TODO ARC - replay with recursion
 (defn replay [state]
   (println "in replay")
   (let [{moves :moves, size :board-size} state
@@ -91,7 +92,6 @@
 (defmulti handle-in-game-click!
   (fn [state _event] (:board-size state)))
 
-;; TODO ARC - handle human v human
 (declare draw-game-screen)
 (defmethod handle-in-game-click! :3x3 [state event]
   (let [{:keys [x y]} event
@@ -133,7 +133,7 @@
           (draw-game-screen)))
       state)))
 
-#_(defmethod handle-in-game-click! :3x3x3 [state event]
+(defmethod handle-in-game-click! :3x3x3 [state event]
     (let [{:keys [x y]} event
           {:keys [markers turn board store id]} state
           marker (case turn
