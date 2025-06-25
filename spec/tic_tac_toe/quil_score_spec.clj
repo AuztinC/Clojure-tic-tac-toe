@@ -59,6 +59,17 @@
 
   (context "state changes"
 
+    (it "update-state calls game loop if no winner"
+      (with-redefs [sut/game-loop (stub :game-loop)]
+        (sut/update-state ai-vs-ai-state)
+        (should-have-invoked :game-loop)))
+
+    (it "update-state returns state not in game"
+      (let [state (assoc ai-vs-ai-state :screen :select-game-mode)]
+       (with-redefs [sut/game-loop (stub :game-loop)]
+        (should= state (sut/update-state state))
+        (should-not-have-invoked :game-loop))))
+
     (context "mouse pressed"
       (it "selects human vs human"
         (let [event {:x 25 :y 225}

@@ -90,6 +90,7 @@
 
 (defmulti handle-in-game-click!
   (fn [state _event] (:board-size state)))
+
 ;; TODO ARC - handle human v human
 (declare draw-game-screen)
 (defmethod handle-in-game-click! :3x3 [state event]
@@ -328,8 +329,12 @@
     :replay (draw/draw-replay-screen state)
     :replay-id-entry (draw/draw-replay-id-entry state)
     :game (cond
-            (or (= :3x3 (:board-size state)) (= :4x4 (:board-size state))) (draw-game-screen state)
-            (= :3x3x3 (:board-size state)) (draw-3d-game-screen state)
+            (or (= :3x3 (:board-size state)) (= :4x4 (:board-size state)))
+            (draw-game-screen state)
+
+            (= :3x3x3 (:board-size state))
+            (draw-3d-game-screen state)
+
             :else (draw/draw-select-game-mode state))))
 
 (defn update-state [state]
@@ -337,7 +342,7 @@
     (game-loop state)
     state))
 
-(defn determine-starting-screen [store]
+(defn- determine-starting-screen [store]
   (cond
     (db/in-progress? {:store store}) :in-progress-game
     (db/previous-games? {:store store}) :replay
