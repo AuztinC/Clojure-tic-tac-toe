@@ -83,6 +83,9 @@
     (db/update-current-game! updated)
     updated))
 
+(defn sleep []
+  (Thread/sleep 500))
+
 (defn- get-selection [state]
   (let [{:keys [store id board markers difficulties turn players]} state
         marker (case turn
@@ -95,7 +98,7 @@
     (when (= :ai player)
       (if (= :ai-v-ai (:mode state))
         (do
-          (Thread/sleep 500)
+          (sleep)
           (init/play-turn store id board [marker :ai] difficulty))
         (init/play-turn store id board [marker :ai] difficulty)))))
 
@@ -118,6 +121,46 @@
                  "p1" (first markers)
                  "p2" (second markers))
         cell-size (/ (q/width) 3)
+        col (int (/ x cell-size))
+        row (int (/ y cell-size))
+        index (+ (* row 3) col)
+        entry {:player marker :move index}
+        selection? (and (>= index 0) (< index 9) (= (first (nth board index)) ""))]
+    (if selection?
+      (do
+        (db/update-previous-games! store id entry)
+        (-> state
+          (assoc :board (assoc board index [marker]) :turn (init/next-player turn))
+          (draw-game-screen)))
+      state)))
+
+(defmethod handle-in-game-click! :4x4 [state event]
+  (let [{:keys [x y]} event
+        {:keys [markers turn board store id]} state
+        marker (case turn
+                 "p1" (first markers)
+                 "p2" (second markers))
+        cell-size (/ (q/width) 4)
+        col (int (/ x cell-size))
+        row (int (/ y cell-size))
+        index (+ (* row 4) col)
+        entry {:player marker :move index}
+        selection? (and (>= index 0) (< index 16) (= (first (nth board index)) ""))]
+    (if selection?
+      (do
+        (db/update-previous-games! store id entry)
+        (-> state
+          (assoc :board (assoc board index [marker]) :turn (init/next-player turn))
+          (draw-game-screen)))
+      state)))
+
+#_(defmethod handle-in-game-click! :3x3x3 [state event]
+  (let [{:keys [x y]} event
+        {:keys [markers turn board store id]} state
+        marker (case turn
+                 "p1" (first markers)
+                 "p2" (second markers))
+        cell-size (/ (q/width) 9)
         col (int (/ x cell-size))
         row (int (/ y cell-size))
         index (+ (* row 3) col)
@@ -166,9 +209,9 @@
           (if (< (count updated-difficulties) ai-count)
             (assoc state :difficulties updated-difficulties)
             (-> state
-              (assoc :id (db/set-new-game-id {:store (:store state)}))
-              (assoc :difficulties updated-difficulties)
-              (assoc :screen :game)
+              (assoc :id (db/set-new-game-id {:store (:store state)})
+                :difficulties updated-difficulties
+                :screen :game)
               (init-data!))))
         state))
 
