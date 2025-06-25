@@ -27,10 +27,10 @@
 
   (it "difficulty"
     (let [state {}]
-      (should= :easy (sut/->difficulty 300 230 state))
-      (should= :medium (sut/->difficulty 180 221 state))
-      (should= :hard (sut/->difficulty 100 230 state))
-      (should= nil (sut/->difficulty 10 50 state))))
+      (should= :easy (sut/->difficulty 300 230))
+      (should= :medium (sut/->difficulty 180 221))
+      (should= :hard (sut/->difficulty 100 230))
+      (should= nil (sut/->difficulty 10 50))))
 
   (context "state changes"
     #_(it "select-game-mode calls select-board"

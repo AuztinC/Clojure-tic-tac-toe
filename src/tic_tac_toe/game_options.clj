@@ -5,12 +5,6 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.replay :as replay]))
 
-(defn determine-starting-screen [store]
-  (cond
-    (db/in-progress? {:store store}) :in-progress-game
-    (db/previous-games? {:store store}) :replay
-    :else :select-game-mode))
-
 (declare select-board)
 (defn- retry-select-board []
   (do
