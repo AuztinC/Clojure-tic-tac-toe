@@ -22,13 +22,13 @@
   (reset! mem-db (assoc @mem-db :current-game state)))
 
 (defmulti update-current-game!
-  (fn [state]
+  (fn [state _move]
     (:store state)))
 
-(defmethod update-current-game! :mem [state]
+(defmethod update-current-game! :mem [state _move]
   (update-atom! state))
 
-(defmethod update-current-game! :default [state]
+(defmethod update-current-game! :default [state _move]
   (update-current-game! (assoc state :store :mem)))
 
 (defmulti update-previous-games!

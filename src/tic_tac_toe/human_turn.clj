@@ -26,4 +26,4 @@
         entry {:player marker
                :move move}]
     (db/update-previous-games! store id entry)
-    (assoc board move [marker])))
+    move #_(assoc board move [marker])))

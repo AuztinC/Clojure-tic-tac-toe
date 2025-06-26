@@ -105,7 +105,7 @@
                       printer/game-id (stub :print-game-id)
                       sut/game-loop (fn [_state] nil)]
           (sut/init-game state))
-        (should-have-invoked :update-current-game! {:with [state]})
+        #_(should-have-invoked :update-current-game! {:with [state]})
         (should-have-invoked :print-game-id {:with [fixed-id]})
         (should-have-invoked :update-previous-games!
           {:with [(:store state) expected-data]})))

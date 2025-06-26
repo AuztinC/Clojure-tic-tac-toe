@@ -36,14 +36,14 @@
          turn :turn
          id :id
          store :store} state]
-    (let [[_marker player-type :as player] (->players turn
+    (let [[marker player-type :as player] (->players turn
                                              player1-marker player1-type
                                              player2-marker player2-type)
           difficulty (->difficulties turn player-type difficulties)
-          new-board (play-turn store id board player difficulty)
-          next-state (assoc state :board new-board :turn (next-player turn))]
+          move (play-turn store id board player difficulty)
+          next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
       (do
-        (db/update-current-game! next-state)
+        (db/update-current-game! next-state move)
         next-state))))
 
 (defn game-loop [state]
@@ -62,7 +62,7 @@
                             16 :4x4
                             :3x3x3)}]
     (do
-      (db/update-current-game! state)
+      #_(db/update-current-game! state)
       (db/add-entry-to-previous! (:store state) data)
       (printer/game-id (get data :id))
       (game-loop state))))

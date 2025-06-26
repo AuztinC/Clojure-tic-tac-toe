@@ -39,7 +39,7 @@
                         sut/update-game-file! (stub :update-game-file!)]
             (let [state {:board (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"]
                          :difficulties [:hard] :turn "p1" :store :file}]
-              (db/update-current-game! state)
+              (db/update-current-game! state 0)
               (should-have-invoked :update-game-file!
                 {:with [state]}))))
 

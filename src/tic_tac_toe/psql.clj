@@ -1,6 +1,5 @@
 (ns tic-tac-toe.psql
-  (:require [clojure.walk :as walk]
-            [tic-tac-toe.board :as board]
+  (:require [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]
             [clojure.java.jdbc :as jdbc]
             [cheshire.core :as json]))
@@ -49,12 +48,25 @@
         :store :psql}]
       ())))
 
-(defmethod db/update-current-game! :psql [state]
-  (let [psql-state (jdbc/query psql-spec ["SELECT state FROM current_game;"])]
+(defmethod db/update-current-game! :psql [state move]
+  (let [psql-state (db/find-game-by-id {:store :psql} (:id state))]
     (if (empty? psql-state)
       (jdbc/execute! psql-spec
-        ["INSERT INTO current_game(state) VALUES (?::jsonb)"
-         (json/generate-string state)])
+        ["INSERT INTO games(id, screen, p1, p2, diff1, diff2, boardsize) VALUES (?::int, ?::text, ?::text, ?::text, ?::text, ?::text, ?::text)"
+         (:id state)
+         (str (:screen state))
+         (str (first (:players state)))
+         (str (second (:players state)))
+         (str (first (:difficulties state)))
+         (str (second (:difficulties state)))
+         (case (count (:board state))
+           9 "3x3"
+           16 "4x4"
+           "3x3x3")
+         "INSERT INTO moves(gameid, position, player) VALUES (?::int, ?::int, ?::text)"
+         (:id state)
+         move
+         (first (get (:board state) move))])
       (jdbc/execute! psql-spec
         ["UPDATE current_game
                    SET state = (?::jsonb)"

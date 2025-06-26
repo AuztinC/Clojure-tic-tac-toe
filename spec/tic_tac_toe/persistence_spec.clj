@@ -1,9 +1,7 @@
 (ns tic-tac-toe.persistence-spec
-  (:require [cheshire.core :as json]
-            [speclj.core :refer :all]
+  (:require [speclj.core :refer :all]
             [tic-tac-toe.persistence :as sut]
-            [tic-tac-toe.board :as board]
-            [clojure.java.jdbc :as jdbc]))
+            [tic-tac-toe.board :as board]))
 
 (describe "persistence"
   (with-stubs)
@@ -24,12 +22,12 @@
                  :players [:human :ai] :markers ["X" "O"]
                  :difficulties [:hard] :turn "p1" :store :mem}]
       (it "clears populated atom"
-        (sut/update-current-game! state)
+        (sut/update-current-game! state 0)
         (sut/clear-current-game! :mem)
         (should= {} @sut/mem-db))
 
       (it "updates current game"
-        (sut/update-current-game! state)
+        (sut/update-current-game! state 0)
         (should= {:current-game
                   {:board (repeat 9 [""])
                    :players [:human :ai]

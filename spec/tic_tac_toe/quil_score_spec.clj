@@ -225,7 +225,7 @@
                     db/add-entry-to-previous! (stub :add-entry-to-previous!)]
         (sut/init-data! human-vs-ai-state)
         (should-have-invoked :add-entry-to-previous! {:with [:mem {:id 123 :moves [] :board-size :3x3}]})
-        (should-have-invoked :update-current-game! {:with [human-vs-ai-state]})))
+        #_(should-have-invoked :update-current-game! {:with [human-vs-ai-state]})))
 
     (context "human input"
 

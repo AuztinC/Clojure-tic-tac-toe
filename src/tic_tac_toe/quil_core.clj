@@ -33,7 +33,7 @@
                             9 :3x3
                             16 :4x4
                             :3x3x3)}]
-    (db/update-current-game! state)
+    #_(db/update-current-game! state)
     (db/add-entry-to-previous! (:store state) data)
     ;; TODO ARC - display given id
     state))

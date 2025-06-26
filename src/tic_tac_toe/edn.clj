@@ -26,7 +26,7 @@
       (assoc :current-game state)
       (prn-str))))
 
-(defmethod db/update-current-game! :file [state]
+(defmethod db/update-current-game! :file [state move]
   (update-game-file! state))
 
 (defmethod db/update-previous-games! :file [_store id move]
