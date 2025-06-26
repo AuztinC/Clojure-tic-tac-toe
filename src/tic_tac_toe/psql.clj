@@ -29,44 +29,50 @@
                 ["SELECT nextval('games_id_seq')"]))]
     (:nextval row)))
 
-;; TODO ARC - return single item, not coll
 (defmethod db/find-game-by-id :psql [_store id]
   (let [game (first (jdbc/query psql-spec
                       ["SELECT * FROM games WHERE id = ?" id]))
         moves (jdbc/query psql-spec
                 ["SELECT * FROM moves WHERE gameid = ?" id])]
     (if game
-      [{:id (:id game)
-        :screen (keyword (:screen game))
-        :board (reduce (fn [acc move] (assoc acc (:position move) [(:player move)]))
-                 (board/get-board (keyword (:board-size game)))
-                 moves)
-        :players (map keyword [(:p1 game) (:p2 game)])
-        :markers ["X" "O"]
-        :difficulties (map keyword [(:diff1 game) (:diff2 game)])
-        :turn (if (= (:player (last moves)) "X") "p2" "p1")
-        :store :psql}]
-      ())))
+      {:id (:id game)
+       :screen (keyword (:screen game))
+       :board (reduce (fn [acc move] (assoc acc (:position move) [(:player move)]))
+                (board/get-board (keyword (:board-size game)))
+                moves)
+       :players (map keyword [(:p1 game) (:p2 game)])
+       :markers ["X" "O"]
+       :difficulties (map keyword [(:diff1 game) (:diff2 game)])
+       :turn (if (= (:player (last moves)) "X") "p2" "p1")
+       :store :psql}
+      nil)))
+
+(defn state->psql [state]
+  [(:id state)
+   (str (:screen state))
+   (str (first (:players state)))
+   (str (second (:players state)))
+   (str (first (:difficulties state)))
+   (str (second (:difficulties state)))
+   (case (count (:board state))
+     9 "3x3"
+     16 "4x4"
+     "3x3x3")])
+
+(defn game-complete? [board]
+  (empty? (board/open-positions board)))
 
 (defmethod db/update-current-game! :psql [state move]
   (let [psql-state (db/find-game-by-id {:store :psql} (:id state))]
-    (if (empty? psql-state)
-      (jdbc/execute! psql-spec
-        ["INSERT INTO games(id, screen, p1, p2, diff1, diff2, boardsize) VALUES (?::int, ?::text, ?::text, ?::text, ?::text, ?::text, ?::text)"
-         (:id state)
-         (str (:screen state))
-         (str (first (:players state)))
-         (str (second (:players state)))
-         (str (first (:difficulties state)))
-         (str (second (:difficulties state)))
-         (case (count (:board state))
-           9 "3x3"
-           16 "4x4"
-           "3x3x3")
-         "INSERT INTO moves(gameid, position, player) VALUES (?::int, ?::int, ?::text)"
-         (:id state)
-         move
-         (first (get (:board state) move))])
+    (if (or (game-complete? (:board psql-state)) (empty? psql-state))
+      (let [[id screen p1 p2 diff1 diff2 boardsize] (state->psql state)]
+        (jdbc/execute! psql-spec
+          ["INSERT INTO games(id, screen, p1, p2, diff1, diff2, boardsize) VALUES (?::int, ?::text, ?::text, ?::text, ?::text, ?::text, ?::text)"
+           id screen p1 p2 diff1 diff2 boardsize
+           "INSERT INTO moves(gameid, position, player) VALUES (?::int, ?::int, ?::text)"
+           (:id state)
+           move
+           (first (get (:board state) move))]))
       (jdbc/execute! psql-spec
         ["UPDATE current_game
                    SET state = (?::jsonb)"

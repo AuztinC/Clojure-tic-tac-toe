@@ -100,7 +100,7 @@
   (let [id-str (read-line)
         id (Integer/parseInt id-str)
         game (db/find-game-by-id {:store store} id)]
-    (if (empty? game)
+    (if (nil? game)
       (retry-dispatch-id store)
       (replay/replay game))))
 
