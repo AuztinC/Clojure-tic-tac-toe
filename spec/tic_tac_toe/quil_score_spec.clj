@@ -245,15 +245,13 @@
       )
 
     (context "ai turns"
-      (it "game loop invokes next-state, returning the updated board"
+      (it "get-selection returns next board and sleeps"
         (with-redefs [sut/sleep (stub :sleep)
                       sut/next-state (stub :next-state {:invoke :init})
                       db/update-previous-games! (stub :update-previous-games!)
                       init/play-turn (stub :play-turn {:return [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]})]
-          (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
-            (sut/game-loop ai-vs-ai-state))
-          (should-have-invoked :sleep)
-          (should-have-invoked :next-state {:with [ai-vs-ai-state [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]]})))
+          (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (sut/get-selection ai-vs-ai-state))
+          (should-have-invoked :sleep)))
 
       )
     )

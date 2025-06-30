@@ -38,10 +38,10 @@
                             :3x3x3)}]
     (db/update-current-game! state nil)
     (db/add-entry-to-previous! (:store state) data)
-    ;; TODO ARC - display given id
     state))
 
 (defn next-state [state selection]
+  (println "next-state")
   (let [{:keys [turn markers]} state
         marker (case turn
                  "p1" (first markers)
@@ -51,7 +51,8 @@
     (db/update-current-game! updated selection)
     updated))
 
-(defn- get-selection [state]
+(defn get-selection [state]
+  (println "get-selection")
   (let [{:keys [store id board markers difficulties turn players]} state
         marker (case turn
                  "p1" (first markers)
@@ -61,19 +62,33 @@
                  "p1" (first players)
                  "p2" (second players))]
     (when (= :ai player)
-      (if (= :ai-v-ai (:mode state))
-        (do
-          (sleep)
-          (init/play-turn store id board [marker :ai] difficulty))
-        (init/play-turn store id board [marker :ai] difficulty)))))
+      (sleep)
+      (let [move (init/play-turn store id board [marker :ai] difficulty)]
+        (when (nil? move)
+          (println "[AI ERROR] play-turn returned nil – likely no valid moves"))
+        move))))
 
 (defn game-loop [state]
-  (if (board/check-winner (:board state))
+  (cond
+    (board/check-winner (:board state))
     (assoc state :screen :game-over)
+
+    ;; AI turn – schedule AI move next frame
+    (and (not (:waiting-ai? state))
+      (= :ai (case (:turn state)
+               "p1" (first (:players state))
+               "p2" (second (:players state)))))
+    (assoc state :waiting-ai? true)
+
+    ;; AI move should now be performed
+    (:waiting-ai? state)
     (let [selection (get-selection state)]
       (if selection
-        (next-state state selection)
-        state))))
+        (-> state
+          (assoc :waiting-ai? false)
+          (next-state selection))
+        (assoc state :waiting-ai? false)))
+    :else state))
 
 (defmulti handle-in-game-click!
   (fn [state _event] (:board-size state)))
@@ -277,10 +292,9 @@
                "p2" "O"
                "X")
         board (:board state)
-        size (case (:board-size state)
-               :3x3 3
-               :4x4 4
-               3)
+        size (if (= 9 (count (:board state)))
+               3
+               4)
         cell-size (/ (q/width) size)]
     (q/background 150)
     (q/stroke 0)
@@ -301,7 +315,7 @@
           (q/text (first val) (+ x (/ cell-size 2)) (+ y (/ cell-size 2)))
           (q/text-size 15)
           (q/text (str "Game Id: " (:id state)) 50 10))))
-    (game-loop state)))
+    state))
 
 (defn draw-3d-game-screen [state]
   (let [turn (case (:turn state)
@@ -361,32 +375,34 @@
             (draw-game-screen state)
 
             (= :3x3x3 (:board-size state))
-            (draw-3d-game-screen state)
-
-            :else (draw/draw-select-game-mode state))))
+            (draw-3d-game-screen state))
+    :else (draw/draw-select-game-mode state)))
 
 (defn update-state [state]
   (case (:screen state)
     :game
-    (let [{:keys [players turn]} state
-          current-player (case turn
-                           "p1" (first players)
-                           "p2" (second players))]
-      (if (= current-player :ai)
-        (game-loop state)
-        state))
+    (game-loop state)
+    #_(let [{:keys [players turn]} state
+            current-player (case turn
+                             "p1" (first players)
+                             "p2" (second players))]
+        (if (= current-player :ai)
+          (game-loop state)
+          state))
 
     :replay
     (if-let [[next-move & remaining] (:replay-queue state)]
       (let [{:keys [player move]} next-move
             new-board (assoc (:board state) move [player])
             winner (board/check-winner new-board)]
-        (Thread/sleep 500)
-        (cond-> (assoc state
-                  :board new-board
-                  :replay-queue remaining
-                  :turn (init/next-player (:turn state)))
-          winner (assoc :screen :game-over)))
+        (sleep)
+        (let [base-state (assoc state
+                           :board new-board
+                           :replay-queue remaining
+                           :turn (init/next-player (:turn state)))]
+          (if winner
+            (assoc base-state :screen :game-over)
+            base-state)))
       (assoc state :screen :game-over))
 
     state))
@@ -407,7 +423,8 @@
                 :markers ["X" "O"]
                 :store store
                 :typed-id ""
-                :turn "p1")
+                :turn "p1"
+                :waiting-ai? true)
       :update update-state
       :draw draw
       :mouse-pressed mouse-pressed!

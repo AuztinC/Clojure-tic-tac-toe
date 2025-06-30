@@ -209,7 +209,6 @@
         (should-not (db/in-progress? {:store :psql})))))
 
   (context "clear current game"
-    ;; TODO ARC - are there games other than currently active game?
     )
 
   #_(context "integration"
