@@ -15,7 +15,7 @@
   (let [query (str "SELECT * FROM " table ";")]
     (jdbc/query psql-spec [query])))
 
-(defn clojurify-psql-state [state]
+#_(defn clojurify-psql-state [state]
   (-> state
     (.getValue)
     (json/parse-string true)
@@ -23,29 +23,20 @@
     (update :difficulties (fn [ds] (mapv keyword ds)))
     (update :store keyword)))
 
-(defmethod db/set-new-game-id :psql [_store]
-  (let [row (first
-              (jdbc/query psql-spec
-                ["SELECT nextval('games_id_seq')"]))]
-    (:nextval row)))
+(defn play-board [game moves]
+  (reduce (fn [acc move] (assoc acc (:position move) [(:player move)]))
+    (board/get-board (keyword (:board-size game)))
+    moves))
 
-(defmethod db/find-game-by-id :psql [_store id]
-  (let [game (first (jdbc/query psql-spec
-                      ["SELECT * FROM games WHERE id = ?" id]))
-        moves (jdbc/query psql-spec
-                ["SELECT * FROM moves WHERE gameid = ?" id])]
-    (if game
-      {:id (:id game)
-       :screen (keyword (:screen game))
-       :board (reduce (fn [acc move] (assoc acc (:position move) [(:player move)]))
-                (board/get-board (keyword (:board-size game)))
-                moves)
-       :players (map keyword [(:p1 game) (:p2 game)])
-       :markers ["X" "O"]
-       :difficulties (map keyword [(:diff1 game) (:diff2 game)])
-       :turn (if (= (:player (last moves)) "X") "p2" "p1")
-       :store :psql}
-      nil)))
+(defn psql->state [game moves]
+  {:id (:id game)
+   :screen (keyword (:screen game))
+   :board (play-board game moves)
+   :players (mapv keyword [(:p1 game) (:p2 game)])
+   :markers ["X" "O"]
+   :difficulties (mapv keyword [(:diff1 game) (:diff2 game)])
+   :turn (if (= (:player (last moves)) "X") "p2" "p1")
+   :store :psql})
 
 (defn state->psql [state]
   [(:id state)
@@ -59,12 +50,27 @@
      16 "4x4"
      "3x3x3")])
 
-(defn game-complete? [board]
+(defmethod db/set-new-game-id :psql [_store]
+  (let [row (first
+              (jdbc/query psql-spec
+                ["SELECT nextval('games_id_seq')"]))]
+    (:nextval row)))
+
+(defmethod db/find-game-by-id :psql [_store id]
+  (let [game (first (jdbc/query psql-spec
+                      ["SELECT * FROM games WHERE id = ?" id]))
+        moves (jdbc/query psql-spec
+                ["SELECT * FROM moves WHERE gameid = ?" id])]
+    (if game
+      (psql->state game moves)
+      nil)))
+
+(defn previous-game-complete? [board]
   (empty? (board/open-positions board)))
 
 (defmethod db/update-current-game! :psql [state move]
-  (let [psql-state (db/find-game-by-id {:store :psql} (:id state))]
-    (if (or (game-complete? (:board psql-state)) (empty? psql-state))
+  (let [psql-state (first (db/find-game-by-id {:store :psql} (:id state)))]
+    (if (or (previous-game-complete? (:board psql-state)) (empty? psql-state))
       (let [[id screen p1 p2 diff1 diff2 boardsize] (state->psql state)]
         (jdbc/execute! psql-spec
           ["INSERT INTO games(id, screen, p1, p2, diff1, diff2, boardsize) VALUES (?::int, ?::text, ?::text, ?::text, ?::text, ?::text, ?::text)"
@@ -74,18 +80,22 @@
            move
            (first (get (:board state) move))]))
       (jdbc/execute! psql-spec
-        ["UPDATE current_game
-                   SET state = (?::jsonb)"
-         (json/generate-string state)]))))
+        ["UPDATE moves SET position = (?::int), player =(?::text) WHERE gameid = ?"
+         move
+         (first (get (:board state) move))
+         (:id state)]))))
 
+;; TODO ARC - should return true/false not game
 (defmethod db/in-progress? :psql [_store]
-  (if (empty? (jdbc/query psql-spec ["SELECT state FROM current_game;"]))
-    nil
-    (clojurify-psql-state (:state (first (jdbc/query psql-spec ["SELECT state FROM current_game;"]))))))
+  (let [game (last (jdbc/query psql-spec ["SELECT * FROM games;"]))
+        moves (jdbc/query psql-spec ["SELECT * FROM moves WHERE gameid = ?;"
+                                     (:id game)])
+        board-state (play-board game moves)]
+    (if (previous-game-complete? board-state)
+      (psql->state game moves))))
 
 (defmethod db/clear-current-game! :psql [_store]
-  (jdbc/execute! psql-spec
-    ["DELETE FROM current_game"]))
+  )
 
 (defmethod db/add-entry-to-previous! :psql
   [_store data]

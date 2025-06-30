@@ -102,13 +102,14 @@
                      (first (get (:board state) move))]]}))))
 
     (it "returns true if game in progress"
-      (should-not (sut/game-complete? (board/get-board :3x3)))
-      (should (sut/game-complete? (repeat 9 ["X"]))))
+      (should-not (sut/previous-game-complete? (board/get-board :3x3)))
+      (should (sut/previous-game-complete? (repeat 9 ["X"])))
+      (should-not (sut/previous-game-complete? [["X"] [""] [""] [""] [""] [""] [""] [""] [""]])))
 
     (it "creates game with move when no game in progress"
       (with-redefs [db/find-game-by-id (stub :find-game-by-id {:return [{:id 1
                                                                          :screen :game
-                                                                         :board (repeat 9 [""])
+                                                                         :board (repeat 9 ["X"])
                                                                          :players [:ai :ai]
                                                                          :markers ["X" "O"]
                                                                          :difficulties [:easy :hard]
@@ -144,8 +145,71 @@
                      (first (get (:board state) move))]]}))))
 
     (it "adds a move to game when in progress"
-      )
+      (with-redefs [db/find-game-by-id (stub :find-game-by-id {:return [{:id 1
+                                                                         :screen :game
+                                                                         :board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
+                                                                         :players [:ai :ai]
+                                                                         :markers ["X" "O"]
+                                                                         :difficulties [:easy :hard]
+                                                                         :turn "p2"
+                                                                         :store :psql}]})
+                    jdbc/execute! (stub :execute!)]
+        (let [state {:id 1
+                     :screen :game
+                     :board [["X"] ["O"] [""] [""] [""] [""] [""] [""] [""]]
+                     :players [:ai :ai]
+                     :markers ["X" "O"]
+                     :difficulties [:easy :hard]
+                     :turn "p1"
+                     :store :psql}
+              move 0]
+          (db/update-current-game! state move)
+          (should-have-invoked :execute!
+            {:with [sut/psql-spec
+                    ["UPDATE moves SET position = (?::int), player =(?::text) WHERE gameid = ?"
+                     move
+                     (first (get (:board state) move))
+                     (:id state)]]}))))
+    )
 
+  (context "in progress? "
+    (it "returns game for replay if last game is complete"
+      (with-redefs [jdbc/query
+                    (stub :query {:invoke (fn [_spec query-coll]
+                                            (if (str/includes? (first query-coll) "games")
+                                              [{:id 1 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :board-size "3x3"}
+                                               {:id 2 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :board-size "3x3"}]
+                                              [{:id 1 :gameid 2 :position 0 :player "X"}
+                                               {:id 2 :gameid 2 :position 1 :player "O"}
+                                               {:id 3 :gameid 2 :position 2 :player "X"}
+                                               {:id 4 :gameid 2 :position 3 :player "O"}
+                                               {:id 5 :gameid 2 :position 4 :player "X"}
+                                               {:id 6 :gameid 2 :position 5 :player "O"}
+                                               {:id 7 :gameid 2 :position 6 :player "X"}
+                                               {:id 8 :gameid 2 :position 7 :player "O"}
+                                               {:id 9 :gameid 2 :position 8 :player "X"}]))})]
+        (should= {:id 2,
+                  :screen :game,
+                  :board [["X"] ["O"] ["X"] ["O"] ["X"] ["O"] ["X"] ["O"] ["X"]],
+                  :players [:ai :ai],
+                  :markers ["X" "O"],
+                  :difficulties [:easy :hard],
+                  :turn "p2",
+                  :store :psql} (db/in-progress? {:store :psql}))))
+
+    (it "false if last game is not complete"
+      (with-redefs [jdbc/query
+                    (stub :query {:invoke (fn [_spec query-coll]
+                                            (if (str/includes? (first query-coll) "games")
+                                              [{:id 1 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :board-size "3x3"}
+                                               {:id 2 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :board-size "3x3"}]
+                                              [{:id 1 :gameid 2 :position 0 :player "X"}
+                                               {:id 2 :gameid 2 :position 1 :player "O"}
+                                               {:id 3 :gameid 2 :position 2 :player "X"}]))})]
+        (should-not (db/in-progress? {:store :psql})))))
+
+  (context "clear current game"
+    ;; TODO ARC - are there games other than currently active game?
     )
 
   #_(context "integration"

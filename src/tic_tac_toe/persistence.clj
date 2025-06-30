@@ -29,7 +29,7 @@
   (update-atom! state))
 
 (defmethod update-current-game! :default [state _move]
-  (update-current-game! (assoc state :store :mem)))
+  (update-current-game! (assoc state :store :mem) 0))
 
 (defmulti update-previous-games!
   (fn [store _id _move]
