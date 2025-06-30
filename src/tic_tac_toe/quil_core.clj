@@ -130,7 +130,6 @@
             i)))
       (range 3))))
 
-
 (defmethod handle-in-game-click! :3x3x3 [state event]
   (let [{:keys [x y]} event
         {:keys [markers turn board store id]} state
@@ -162,7 +161,6 @@
           state))
       state)))
 
-
 (defmulti mouse-pressed! (fn [state _event] (:screen state)))
 
 (defmethod mouse-pressed! :select-game-mode [state event]
@@ -179,14 +177,17 @@
       :else state)))
 
 (defmethod mouse-pressed! :select-board [state event]
-  (let [{:keys [x y]} event]
+  (let [next-screen (if (= [:human :human] (:players state))
+                      :game
+                      :select-difficulty)
+        {:keys [x y]} event]
     (cond
       (in-button? x y 250 220 70 50)
-      (assoc state :board (board/get-board :3x3) :board-size :3x3 :screen :select-difficulty)
+      (assoc state :board (board/get-board :3x3) :board-size :3x3 :screen next-screen)
       (in-button? x y 150 220 70 50)
-      (assoc state :board (board/get-board :4x4) :board-size :4x4 :screen :select-difficulty)
+      (assoc state :board (board/get-board :4x4) :board-size :4x4 :screen next-screen)
       (in-button? x y 50 220 70 50)
-      (assoc state :board (board/get-board :3x3x3) :board-size :3x3x3 :screen :select-difficulty)
+      (assoc state :board (board/get-board :3x3x3) :board-size :3x3x3 :screen next-screen)
       :else state)))
 
 (defmethod mouse-pressed! :select-difficulty [state event]
@@ -222,7 +223,6 @@
    :players [:human :human]
    :difficulties []
    :replay-queue (:moves db-game)})
-
 
 (defn- add-to-typed-id [state clicked-digit]
   (let [new-id (str (:typed-id state) clicked-digit)]
@@ -298,7 +298,9 @@
           (q/text-size 32)
           (q/fill 0)
           (q/text (str "Turn: " turn) (/ (q/width) 2) (- (q/height) 20))
-          (q/text (first val) (+ x (/ cell-size 2)) (+ y (/ cell-size 2))))))
+          (q/text (first val) (+ x (/ cell-size 2)) (+ y (/ cell-size 2)))
+          (q/text-size 15)
+          (q/text (str "Game Id: " (:id state)) 50 10))))
     (game-loop state)))
 
 (defn draw-3d-game-screen [state]
@@ -328,13 +330,15 @@
                 (q/text-size 28)
                 (q/fill 0)
                 (q/text val (+ x (/ cell-size 2)) (+ y (/ cell-size 2)))))))))
-    (q/text (str "Turn: " turn) (/ (q/width) 2) (- (q/height) 20))))
+    (q/text (str "Turn: " turn) (/ (q/width) 2) (- (q/height) 20))
+    (q/text-size 15)
+    (q/text (str "Game Id: " (:id state)) (/ (q/width) 2) 10)))
 
 (defn draw-game-over [state]
-  (let [board-size (:board-size state)]
+  (let [is3d? (= 27 (count (:board state)))]
     (db/clear-current-game! {:store (:store state)})
     (q/background 150)
-    (if (= :3x3x3 board-size)
+    (if is3d?
       (draw-3d-game-screen state)
       (draw-game-screen state))
     (q/fill 255 100 100)
@@ -348,7 +352,9 @@
     :select-board (draw/draw-select-board state)
     :select-difficulty (draw/draw-select-difficulty state)
     :replay-confirm (draw/draw-replay-screen state)
-    :replay (draw-game-screen state)
+    :replay (if (= 27 (count (:board state)))
+              (draw-3d-game-screen state)
+              (draw-game-screen state))
     :replay-id-entry (draw/draw-replay-id-entry state)
     :game (cond
             (or (= :3x3 (:board-size state)) (= :4x4 (:board-size state)))
@@ -361,10 +367,17 @@
 
 (defn update-state [state]
   (case (:screen state)
-    :game (game-loop state)
+    :game
+    (let [{:keys [players turn]} state
+          current-player (case turn
+                           "p1" (first players)
+                           "p2" (second players))]
+      (if (= current-player :ai)
+        (game-loop state)
+        state))
 
     :replay
-   (if-let [[next-move & remaining] (:replay-queue state)]
+    (if-let [[next-move & remaining] (:replay-queue state)]
       (let [{:keys [player move]} next-move
             new-board (assoc (:board state) move [player])
             winner (board/check-winner new-board)]
