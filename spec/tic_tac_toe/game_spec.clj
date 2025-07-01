@@ -1,6 +1,6 @@
-(ns tic-tac-toe.init-spec
+(ns tic-tac-toe.game_spec
   (:require [speclj.core :refer :all]
-            [tic-tac-toe.init-game :as sut]
+            [tic-tac-toe.game :as sut]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.board :as board]))

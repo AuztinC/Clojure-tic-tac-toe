@@ -1,4 +1,14 @@
-(ns tic-tac-toe.persistence)
+(ns tic-tac-toe.persistence
+  (:require [tic-tac-toe.board :as board]))
+
+;; TODO ARC - Refactor turn in game logic
+(defn next-player [moves]
+  (if (= (:player (last moves)) "X") "p2" "p1"))
+
+(defn play-board [game moves]
+  (reduce (fn [acc move] (assoc acc (:position move) [(:player move)]))
+    (board/get-board (keyword (:board-size game)))
+    moves))
 
 (def mem-db (atom {}))
 

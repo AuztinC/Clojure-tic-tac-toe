@@ -1,7 +1,7 @@
 (ns tic-tac-toe.quil-score_spec
   (:require [speclj.core :refer :all]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.init-game :as init]
+            [tic-tac-toe.game :as init]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.quil-core :as sut]
             [quil.core :as q]

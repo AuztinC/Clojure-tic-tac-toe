@@ -2,7 +2,7 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe.human-turn :as sut]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.init-game :as init]
+            [tic-tac-toe.game :as init]
             [tic-tac-toe.printer :as printer]))
 
 (describe "human-turn"

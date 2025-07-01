@@ -2,7 +2,7 @@
   (:require [speclj.core :refer :all]
             [speclj.stub :as stub]
             [tic-tac-toe.game-options :as sut]
-            [tic-tac-toe.init-game :as init]
+            [tic-tac-toe.game :as init]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.replay :as replay]))

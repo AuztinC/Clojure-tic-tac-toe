@@ -23,19 +23,14 @@
     (update :difficulties (fn [ds] (mapv keyword ds)))
     (update :store keyword)))
 
-(defn play-board [game moves]
-  (reduce (fn [acc move] (assoc acc (:position move) [(:player move)]))
-    (board/get-board (keyword (:board-size game)))
-    moves))
-
 (defn psql->state [game moves]
   {:id (:id game)
    :screen (keyword (:screen game))
-   :board (play-board game moves)
+   :board (db/play-board game moves)
    :players (mapv keyword [(:p1 game) (:p2 game)])
    :markers ["X" "O"]
    :difficulties (mapv keyword [(:diff1 game) (:diff2 game)])
-   :turn (if (= (:player (last moves)) "X") "p2" "p1")
+   :turn (db/next-player moves)
    :store :psql})
 
 (defn state->psql [state]
@@ -90,7 +85,7 @@
   (let [game (last (jdbc/query psql-spec ["SELECT * FROM games;"]))
         moves (jdbc/query psql-spec ["SELECT * FROM moves WHERE gameid = ?;"
                                      (:id game)])
-        board-state (play-board game moves)]
+        board-state (db/play-board game moves)]
     (if (previous-game-complete? board-state)
       (psql->state game moves))))
 

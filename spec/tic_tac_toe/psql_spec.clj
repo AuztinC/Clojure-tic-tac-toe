@@ -56,7 +56,7 @@
           (should-have-invoked :query {:with [sut/psql-spec ["SELECT * FROM moves WHERE gameid = ?" 1]]})
           )))
 
-    (it "returns game with one move"
+    (it "returns game with multiple moves"
       (with-redefs [jdbc/query
                     (stub :query {:invoke (fn [_spec query-coll]
                                             (if (str/includes? (first query-coll) "games")
@@ -65,8 +65,7 @@
                                                {:id 2 :gameid 1 :position 1 :player "O"}
                                                {:id 3 :gameid 1 :position 2 :player "X"}]))})]
         (let [game (db/find-game-by-id {:store :psql} 1)]
-          (should= [["X"] ["O"] ["X"] [""] [""] [""] [""] [""] [""]] (:board game))
-          ))))
+          (should= [["X"] ["O"] ["X"] [""] [""] [""] [""] [""] [""]] (:board game))))))
 
   (context "update current game"
 

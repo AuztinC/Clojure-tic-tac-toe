@@ -3,7 +3,7 @@
             [quil.middleware :as m]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.init-game :as init]
+            [tic-tac-toe.game :as init]
             [tic-tac-toe.quil-drawings :as draw]))
 
 (defn in-button? [mx my x y w h]

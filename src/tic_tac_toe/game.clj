@@ -1,4 +1,4 @@
-(ns tic-tac-toe.init-game
+(ns tic-tac-toe.game
   (:require [tic-tac-toe.printer :as printer]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))

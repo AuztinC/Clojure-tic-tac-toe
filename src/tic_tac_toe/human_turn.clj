@@ -1,7 +1,7 @@
 (ns tic-tac-toe.human-turn
   (:require [tic-tac-toe.printer :as printer]
             [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.init-game :as init]))
+            [tic-tac-toe.game :as init]))
 
 (defn- empty-space? [board move]
   (= [""] (get board move)))

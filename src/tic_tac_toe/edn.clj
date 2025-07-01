@@ -10,15 +10,22 @@
 
 (defmethod db/set-new-game-id :file [_store]
   (-> (edn-state)
-    (get :previous-games)
     (last)
-    (get :id 0)
+    (get :state)
+    (get :id -1)
     (inc)))
 
+(defn file->state [{:keys [state moves] :as _game}]
+  (merge state
+    {:board (db/play-board state moves)
+     :turn (db/next-player moves)}))
+
 (defmethod db/find-game-by-id :file [_store id]
-  (let [previous-games (get (edn-state) :previous-games)
-        game (filter #(= id (:id %)) previous-games)]
-    game))
+  (let [previous-games (edn-state)
+        game (first (filter #(= id (:id (:state %))) previous-games))]
+    (if game
+      (file->state game)
+      nil)))
 
 (defn update-game-file! [state]
   (spit edn-file

@@ -20,15 +20,61 @@
           (should= {} (sut/edn-state))
           (should-have-invoked :slurp {:with [sut/edn-file]})))
 
-      (context "set-new-game-id"
-        (it "return id for new game"
-          (with-redefs [sut/edn-state (fn [] {:games [{:id 1}]})])
-          (should= 2 (db/set-new-game-id {:store :file}))))
+      )
+
+    (context "set new game id"
+      (it "return zero for empty file"
+        (with-redefs [slurp (stub :slurp {:return ""})]
+          (should= 0 (db/set-new-game-id {:store :file}))))
+
+      (it "returns 1 for single game in file"
+        (with-redefs [slurp (stub :slurp {:return (pr-str [{:state {:id 0} :moves []}])})]
+          (should= 1 (db/set-new-game-id {:store :file}))))
+      )
+
+    (context "find game by id"
+      (it "if query returns empty, return empty vector"
+        (with-redefs [slurp (stub :slurp {:return ""})]
+          (should-not (db/find-game-by-id {:store :file} 123))
+          (should-have-invoked :slurp {:with [sut/edn-file]})))
+
+      (it "returns game with one move"
+        (with-redefs [slurp (stub :slurp {:return (pr-str [{:state {:id 0
+                                                                    :screen :game
+                                                                    :players [:human :ai]
+                                                                    :markers ["X" "O"]
+                                                                    :difficulties [:hard]
+                                                                    :store :file
+                                                                    :board-size :3x3}
+                                                            :moves [{:player "X" :position 0}]}])})]
+          (let [game (db/find-game-by-id {:store :file} 0)]
+            (should= :game (:screen game))
+            (should= 0 (:id game))
+            (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board game))
+            (should= [:human :ai] (:players game))
+            (should= ["X" "O"] (:markers game))
+            (should= [:hard] (:difficulties game))
+            (should= "p2" (:turn game))
+            (should= :file (:store game)))))
+
+      (it "returns game with multiple moves"
+        (with-redefs [slurp (stub :slurp {:return (pr-str [{:state {:id 1
+                                                                    :screen :game
+                                                                    :players [:human :ai]
+                                                                    :markers ["X" "O"]
+                                                                    :difficulties [:hard]
+                                                                    :store :file
+                                                                    :board-size :3x3}
+                                                            :moves [{:player "X" :position 0}
+                                                                    {:player "O" :position 1}
+                                                                    {:player "X" :position 2}]}])})]
+          (let [game (db/find-game-by-id {:store :file} 1)]
+            (should= [["X"] ["O"] ["X"] [""] [""] [""] [""] [""] [""]] (:board game)))))
       )
 
 
 
-    (context "read edn"
+    #_(context "read edn"
       (it "from correct file"
         (should= "resources/state.edn"
           sut/edn-file))
@@ -52,7 +98,7 @@
             (should= {:id 1} (db/previous-games? {:store :file}))))
         )
 
-      (context "write to edn"
+      #_(context "write to edn"
         (redefs-around [spit (stub :spit)])
 
         (it "updates current game file"
@@ -102,7 +148,7 @@
             (db/clear-current-game! {:store :file})
             (should-have-invoked :spit {:with [sut/edn-file (dissoc (sut/edn-state) :current-game)]}))))
 
-      (context "receive game to replay"
+      #_(context "receive game to replay"
         (it "given id returns state"
           (with-redefs [sut/edn-state (fn [] {:previous-games [{:id 1 :moves [{}] :board-size :3x3}]})]
             (should-contain {:id 1

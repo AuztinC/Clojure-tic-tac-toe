@@ -1,7 +1,7 @@
 (ns tic-tac-toe.game-options
   (:require [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
-            [tic-tac-toe.init-game :as init]
+            [tic-tac-toe.game :as init]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.replay :as replay]))
 
