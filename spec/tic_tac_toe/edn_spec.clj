@@ -6,7 +6,28 @@
 
 (describe "edn"
   (with-stubs)
+
+
   (context "file"
+
+    #_(context "read edn"
+      (it "from correct file"
+        (should= "resources/state.edn"
+          sut/edn-file))
+
+      (it "empty file"
+        (with-redefs [slurp (stub :slurp {:return "{}"})]
+          (should= {} (sut/edn-state))
+          (should-have-invoked :slurp {:with [sut/edn-file]})))
+
+      (context "set-new-game-id"
+        (it "return id for new game"
+          (with-redefs [sut/edn-state (fn [] {:games [{:id 1}]})])
+          (should= 2 (db/set-new-game-id {:store :file}))))
+      )
+
+
+
     (context "read edn"
       (it "from correct file"
         (should= "resources/state.edn"

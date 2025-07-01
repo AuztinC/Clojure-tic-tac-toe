@@ -41,7 +41,6 @@
     state))
 
 (defn next-state [state selection]
-  (println "next-state")
   (let [{:keys [turn markers]} state
         marker (case turn
                  "p1" (first markers)
@@ -52,7 +51,6 @@
     updated))
 
 (defn get-selection [state]
-  (println "get-selection")
   (let [{:keys [store id board markers difficulties turn players]} state
         marker (case turn
                  "p1" (first markers)
@@ -64,8 +62,7 @@
     (when (= :ai player)
       (sleep)
       (let [move (init/play-turn store id board [marker :ai] difficulty)]
-        (when (nil? move)
-          (println "[AI ERROR] play-turn returned nil – likely no valid moves"))
+        (when (nil? move))
         move))))
 
 (defn game-loop [state]
