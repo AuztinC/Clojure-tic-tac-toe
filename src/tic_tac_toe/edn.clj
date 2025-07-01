@@ -53,6 +53,15 @@
         board (db/play-board (:state last-game) (:moves last-game))]
     (some? (board/check-winner board))))
 
+(defmethod db/previous-games? :file [_store]
+  (if-let [games (edn-state)]
+    (->> games
+      vals
+      (map #(db/play-board (:state %) (:moves %)))
+      (filter #(nil? (board/check-winner %)))
+      empty?)
+    false))
+
 (defmethod db/update-previous-games! :file [_store id move]
   (let [state (edn-state)
         previous-games (:previous-games state)
@@ -74,8 +83,6 @@
     (spit edn-file (prn-str updated))))
 
 
-(defmethod db/previous-games? :file [_store]
-  (get (edn-state) :previous-games))
 
 (defmethod db/clear-current-game! :file [_store]
   (spit edn-file (dissoc (edn-state) :current-game)))

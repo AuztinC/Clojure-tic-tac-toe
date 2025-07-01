@@ -186,6 +186,31 @@
         )
       )
 
+    (context "previous games"
+      (it "returns false if no games in file"
+        (with-redefs [slurp (stub :slurp {:return ""})]
+          (should-not (db/previous-games? {:store :file}))))
+
+      (it "returns true if previous game complete in file"
+        (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
+                                                                       :board-size   :3x3
+                                                                       :screen       :game
+                                                                       :players      [:ai :ai]
+                                                                       :difficulties [:easy :hard]}
+                                                               :moves (map #(assoc {} :player "X" :position %) (range 9))}})})]
+          (should (db/previous-games? {:store :file}))))
+
+      (it "returns true if previous game complete in file"
+        (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
+                                                                       :board-size   :3x3
+                                                                       :screen       :game
+                                                                       :players      [:ai :ai]
+                                                                       :difficulties [:easy :hard]}
+                                                               :moves [{:player "X" :position 0}
+                                                                       {:player "O" :position 1}]}})})]
+          (should-not (db/previous-games? {:store :file}))))
+      )
+
 
 
     #_(context "read edn"

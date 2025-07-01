@@ -34,7 +34,8 @@
   (context "win or tie?"
     (it "tie game"
       (should (sut/tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["O"] ["X"]]))
-      (should-not (sut/tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""] [""]])))
+      (should-not (sut/tie-game? [["X"] ["X"] ["X"] ["X"] ["X"] ["X"] ["X"] [""] [""]]))
+      (should-not (sut/tie-game? [[""] [""] [""] [""] [""] [""] [""] [""] [""]])))
 
     (it "someone made winning move"
       (should= "X" (sut/check-winner [["X"] ["X"] ["X"] ["O"] ["X"] ["X"] [""] [""] [""]]))

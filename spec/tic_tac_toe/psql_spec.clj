@@ -197,7 +197,7 @@
                                                {:id 3 :gameid 2 :position 2 :player "X"}]))})]
         (should-not (db/in-progress? {:store :psql})))))
 
-  (context "clear current game"
+  (context "previous games"
     )
 
   #_(context "integration"
