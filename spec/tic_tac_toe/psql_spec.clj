@@ -91,10 +91,7 @@
                      (str (second (:players state)))
                      (str (first (:difficulties state)))
                      (str (second (:difficulties state)))
-                     (case (count (:board state))
-                       9 "3x3"
-                       16 "4x4"
-                       "3x3x3")
+                     "3x3"
                      "INSERT INTO moves(gameid, position, player) VALUES (?::int, ?::int, ?::text)"
                      (:id state)
                      move
@@ -172,7 +169,7 @@
     )
 
   (context "in progress? "
-    (it "returns game for replay if last game is complete"
+    (it "returns if last game is complete"
       (with-redefs [jdbc/query
                     (stub :query {:invoke (fn [_spec query-coll]
                                             (if (str/includes? (first query-coll) "games")
@@ -187,14 +184,7 @@
                                                {:id 7 :gameid 2 :position 6 :player "X"}
                                                {:id 8 :gameid 2 :position 7 :player "O"}
                                                {:id 9 :gameid 2 :position 8 :player "X"}]))})]
-        (should= {:id 2,
-                  :screen :game,
-                  :board [["X"] ["O"] ["X"] ["O"] ["X"] ["O"] ["X"] ["O"] ["X"]],
-                  :players [:ai :ai],
-                  :markers ["X" "O"],
-                  :difficulties [:easy :hard],
-                  :turn "p2",
-                  :store :psql} (db/in-progress? {:store :psql}))))
+        (should (db/in-progress? {:store :psql}))))
 
     (it "false if last game is not complete"
       (with-redefs [jdbc/query

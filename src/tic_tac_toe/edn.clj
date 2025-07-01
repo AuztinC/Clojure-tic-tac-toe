@@ -1,5 +1,6 @@
 (ns tic-tac-toe.edn
   (:require [clojure.edn :as edn]
+            [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
 
 (def edn-file "resources/state.edn")
@@ -18,7 +19,7 @@
 (defn file->state [{:keys [state moves] :as _game}]
   (merge state
     {:board (db/play-board state moves)
-     :turn (db/next-player moves)}))
+     :turn  (db/next-player moves)}))
 
 (defmethod db/find-game-by-id :file [_store id]
   (let [previous-games (edn-state)
@@ -34,7 +35,23 @@
       (prn-str))))
 
 (defmethod db/update-current-game! :file [state move]
-  (update-game-file! state))
+  (let [games (edn-state)
+        [_ last-game] (last (into (sorted-map) games))
+        board (db/play-board (:state last-game) (:moves last-game))]
+    (if (or (some? (board/check-winner board)) (empty? last-game))
+      (spit edn-file (assoc games
+                       (:id state) {:state (dissoc state :board :markers :turn :store)
+                                    :moves [{:player (first (get (:board state) move)) :position move}]}))
+      (let [updated-game (update last-game :moves conj {:player (first (get (:board state) move)) :position move})]
+        (spit edn-file (assoc games
+                         (:id state)
+                         updated-game))))))
+
+(defmethod db/in-progress? :file [_store]
+  (let [games (edn-state)
+        [_ last-game] (last (into (sorted-map) games))
+        board (db/play-board (:state last-game) (:moves last-game))]
+    (some? (board/check-winner board))))
 
 (defmethod db/update-previous-games! :file [_store id move]
   (let [state (edn-state)
@@ -56,8 +73,6 @@
         updated (compute-entry state data)]
     (spit edn-file (prn-str updated))))
 
-(defmethod db/in-progress? :file [_store]
-  (get (edn-state) :current-game))
 
 (defmethod db/previous-games? :file [_store]
   (get (edn-state) :previous-games))

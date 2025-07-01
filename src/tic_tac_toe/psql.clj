@@ -65,7 +65,7 @@
 
 (defmethod db/update-current-game! :psql [state move]
   (let [psql-state (first (db/find-game-by-id {:store :psql} (:id state)))]
-    (if (or (previous-game-complete? (:board psql-state)) (empty? psql-state))
+    (if (or (some? (board/check-winner (:board psql-state))) (empty? psql-state))
       (let [[id screen p1 p2 diff1 diff2 boardsize] (state->psql state)]
         (jdbc/execute! psql-spec
           ["INSERT INTO games(id, screen, p1, p2, diff1, diff2, boardsize) VALUES (?::int, ?::text, ?::text, ?::text, ?::text, ?::text, ?::text)"
@@ -86,8 +86,7 @@
         moves (jdbc/query psql-spec ["SELECT * FROM moves WHERE gameid = ?;"
                                      (:id game)])
         board-state (db/play-board game moves)]
-    (if (previous-game-complete? board-state)
-      (psql->state game moves))))
+    (previous-game-complete? board-state)))
 
 (defmethod db/clear-current-game! :psql [_store]
   )
