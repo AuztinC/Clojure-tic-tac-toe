@@ -198,6 +198,11 @@
         (should-not (db/in-progress? {:store :psql})))))
 
   (context "previous games"
+    (it "returns false if no games in file"
+      (with-redefs [jdbc/query (stub :query {:return {}})]
+        (should-not (db/previous-games? {:store :psql}))))
+
+    (it "")
     )
 
   #_(context "integration"

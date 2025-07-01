@@ -80,13 +80,15 @@
          (first (get (:board state) move))
          (:id state)]))))
 
-;; TODO ARC - should return true/false not game
 (defmethod db/in-progress? :psql [_store]
   (let [game (last (jdbc/query psql-spec ["SELECT * FROM games;"]))
         moves (jdbc/query psql-spec ["SELECT * FROM moves WHERE gameid = ?;"
                                      (:id game)])
         board-state (db/play-board game moves)]
     (previous-game-complete? board-state)))
+
+(defmethod db/previous-games? :psql [_store]
+  (not-empty (state "previous_games")))
 
 (defmethod db/clear-current-game! :psql [_store]
   )
@@ -109,8 +111,7 @@
        json-str
        id])))
 
-(defmethod db/previous-games? :psql [_store]
-  (not-empty (state "previous_games")))
+
 
 (defn db-setup []
   (jdbc/execute! psql-spec

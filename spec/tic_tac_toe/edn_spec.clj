@@ -10,17 +10,17 @@
 
   (context "file"
 
-    #_(context "read edn"
-        (it "from correct file"
-          (should= "resources/state.edn"
-            sut/edn-file))
+    (context "read edn"
+      (it "from correct file"
+        (should= "resources/state.edn"
+          sut/edn-file))
 
-        (it "empty file"
-          (with-redefs [slurp (stub :slurp {:return "{}"})]
-            (should= {} (sut/edn-state))
-            (should-have-invoked :slurp {:with [sut/edn-file]})))
+      (it "empty file"
+        (with-redefs [slurp (stub :slurp {:return "{}"})]
+          (should= {} (sut/edn-state))
+          (should-have-invoked :slurp {:with [sut/edn-file]})))
 
-        )
+      )
 
     (context "set new game id"
       (it "return zero for empty file"
@@ -28,25 +28,25 @@
           (should= 0 (db/set-new-game-id {:store :file}))))
 
       (it "returns 1 for single game in file"
-        (with-redefs [slurp (stub :slurp {:return (pr-str [{:state {:id 0} :moves []}])})]
+        (with-redefs [slurp (stub :slurp {:return (pr-str {0 {:state {:id 0} :moves []}})})]
           (should= 1 (db/set-new-game-id {:store :file}))))
       )
 
     (context "find game by id"
-      (it "if query returns empty, return empty vector"
+      (it "nil if empty"
         (with-redefs [slurp (stub :slurp {:return ""})]
           (should-not (db/find-game-by-id {:store :file} 123))
           (should-have-invoked :slurp {:with [sut/edn-file]})))
 
       (it "returns game with one move"
-        (with-redefs [slurp (stub :slurp {:return (pr-str [{:state {:id           0
-                                                                    :screen       :game
-                                                                    :players      [:human :ai]
-                                                                    :markers      ["X" "O"]
-                                                                    :difficulties [:hard]
-                                                                    :store        :file
-                                                                    :board-size   :3x3}
-                                                            :moves [{:player "X" :position 0}]}])})]
+        (with-redefs [slurp (stub :slurp {:return (pr-str {0 {:state {:id           0
+                                                                      :screen       :game
+                                                                      :players      [:human :ai]
+                                                                      :markers      ["X" "O"]
+                                                                      :difficulties [:hard]
+                                                                      :store        :file
+                                                                      :board-size   :3x3}
+                                                              :moves [{:player "X" :position 0}]}})})]
           (let [game (db/find-game-by-id {:store :file} 0)]
             (should= :game (:screen game))
             (should= 0 (:id game))
@@ -58,36 +58,27 @@
             (should= :file (:store game)))))
 
       (it "returns game with multiple moves"
-        {:id           1
-         :screen       :game
-         :players      [:human :ai]
-         :markers      ["X" "O"]
-         :board        [["X"] ["O"] ["X"] [""] [""] [""] [""] [""] [""]]
-         :difficulties [:hard]
-         :store        :file
-         :board-size   :3x3
-         :turn         "p2"}
-
-        (with-redefs [slurp (stub :slurp {:return (pr-str [{:state {:id           1
-                                                                    :screen       :game
-                                                                    :players      [:human :ai]
-                                                                    :markers      ["X" "O"]
-                                                                    :difficulties [:hard]
-                                                                    :store        :file
-                                                                    :board-size   :3x3}
-                                                            :moves [{:player "X" :position 0}
-                                                                    {:player "O" :position 1}
-                                                                    {:player "X" :position 2}]}])})]
-          (let [game (db/find-game-by-id {:store :file} 1)]
-            (should= [["X"] ["O"] ["X"] [""] [""] [""] [""] [""] [""]] (:board game)))))
+          (with-redefs [slurp (stub :slurp {:return (pr-str {0 {:state {:id           0
+                                                                        :screen       :game
+                                                                        :players      [:human :ai]
+                                                                        :markers      ["X" "O"]
+                                                                        :difficulties [:hard]
+                                                                        :store        :file
+                                                                        :board-size   :3x3}
+                                                                :moves [{:player "X" :position 0}
+                                                                        {:player "O" :position 1}
+                                                                        {:player "X" :position 2}]}})})]
+            (let [game (db/find-game-by-id {:store :file} 0)]
+              (should= [["X"] ["O"] ["X"] [""] [""] [""] [""] [""] [""]] (:board game)))))
       )
 
-    (context "update game file"
+    (context "update current game"
       (it "creates game with move when none exist"
-        (with-redefs [spit (stub :spit)
-                      db/find-game-by-id (stub :find-game-by-id {:return nil})]
+        (with-redefs [slurp (stub :slurp {:return ""})
+                      spit (stub :spit)]
           (let [state {:id           1
                        :screen       :game
+                       :board-size   :3x3
                        :board        [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
                        :players      [:ai :ai]
                        :markers      ["X" "O"]
@@ -99,6 +90,7 @@
             (should-have-invoked :spit {:with [sut/edn-file
                                                {(:id state)
                                                 {:state {:id           (:id state)
+                                                         :board-size   :3x3
                                                          :screen       (:screen state)
                                                          :players      (:players state)
                                                          :difficulties (:difficulties state)}
@@ -210,6 +202,8 @@
                                                                        {:player "O" :position 1}]}})})]
           (should-not (db/previous-games? {:store :file}))))
       )
+
+
 
 
 
