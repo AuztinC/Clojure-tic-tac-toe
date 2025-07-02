@@ -11,7 +11,7 @@
                 :user "austincripe"
                 :password ""})
 
-(defn state [table]
+#_(defn state [table]
   (let [query (str "SELECT * FROM " table ";")]
     (jdbc/query psql-spec [query])))
 
@@ -88,7 +88,15 @@
     (previous-game-complete? board-state)))
 
 (defmethod db/previous-games? :psql [_store]
-  (not-empty (state "previous_games")))
+  (let [games (jdbc/query psql-spec ["SELECT * FROM games;"])
+        moves (group-by :gameid (jdbc/query psql-spec ["SELECT * FROM moves;"]))]
+    (when (seq games)
+      (->> (map #(assoc % :board (db/play-board % (get moves (:id %)))) games)
+        (filter (comp board/check-winner :board))
+        seq))))
+
+
+
 
 (defmethod db/clear-current-game! :psql [_store]
   )

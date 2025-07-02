@@ -199,10 +199,35 @@
 
   (context "previous games"
     (it "returns false if no games in file"
-      (with-redefs [jdbc/query (stub :query {:return {}})]
+      (with-redefs [jdbc/query (stub :query {:return nil})]
         (should-not (db/previous-games? {:store :psql}))))
 
-    (it "")
+    (it "returns true if previous game complete in file"
+      (with-redefs [jdbc/query (stub :query {:invoke (fn [_spec query-coll]
+                                                       (if (str/includes? (first query-coll) "games")
+                                                         [{:id 1 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :board-size "3x3"}
+                                                          {:id 2 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :board-size "3x3"}]
+                                                         [{:id 1 :gameid 2 :position 0 :player "X"}
+                                                          {:id 2 :gameid 2 :position 1 :player "O"}
+                                                          {:id 3 :gameid 2 :position 2 :player "X"}
+                                                          {:id 4 :gameid 2 :position 3 :player "O"}
+                                                          {:id 5 :gameid 2 :position 4 :player "X"}
+                                                          {:id 6 :gameid 2 :position 5 :player "O"}
+                                                          {:id 7 :gameid 2 :position 6 :player "X"}
+                                                          {:id 8 :gameid 2 :position 7 :player "O"}
+                                                          {:id 9 :gameid 2 :position 8 :player "X"}]))})]
+        (should (db/previous-games? {:store :psql}))))
+
+    (it "returns false if single game in progress"
+      (with-redefs [jdbc/query (stub :query {:invoke (fn [_spec query-coll]
+                                                       (if (str/includes? (first query-coll) "games")
+                                                         [{:id 2 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :board-size "3x3"}]
+                                                         [{:id 1 :gameid 2 :position 0 :player "X"}
+                                                          {:id 2 :gameid 2 :position 1 :player "O"}
+                                                          {:id 3 :gameid 2 :position 2 :player "X"}
+                                                          {:id 4 :gameid 2 :position 3 :player "O"}
+                                                          {:id 5 :gameid 2 :position 4 :player "X"}]))})]
+        (should-not (db/previous-games? {:store :psql}))))
     )
 
   #_(context "integration"
