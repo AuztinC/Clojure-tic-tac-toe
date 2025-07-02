@@ -9,8 +9,12 @@
   (-> (slurp edn-file)
     (edn/read-string)))
 
+(defn ->inspect [x]
+  (prn "->inspect: " x) x)
+
 (defmethod db/set-new-game-id :file [_store]
   (-> (edn-state)
+    (into (sorted-map))
     (last)
     (second)
     (get :state)
@@ -43,40 +47,22 @@
                          (:id state)
                          updated-game))))))
 
+
 (defmethod db/in-progress? :file [_store]
-  (let [games (edn-state)
-        [_ last-game] (last (into (sorted-map) games))
-        board (db/play-board (:state last-game) (:moves last-game))]
-    (some? (board/check-winner board))))
+  (when-let [games (edn-state)]
+    (let [[_ last-game] (last (into (sorted-map) games))
+          board (db/play-board (:state last-game) (:moves last-game))]
+      (when-not (board/check-winner board)
+        (db/file->state last-game)))))
+
 
 (defmethod db/previous-games? :file [_store]
   (if-let [games (edn-state)]
     (->> games
       vals
       (map #(db/play-board (:state %) (:moves %)))
-      (filter #(nil? (board/check-winner %)))
-      empty?)
+      (filter board/check-winner)
+      seq)
     false))
 
-(defmethod db/update-previous-games! :file [_store id move]
-  (let [state (edn-state)
-        previous-games (:previous-games state)
-        updated-games (mapv (fn [game]
-                              (if (= (:id game) id)
-                                (update game :moves conj move)
-                                game))
-                        previous-games)
-        new-state (assoc state :previous-games updated-games)]
-    (spit edn-file (prn-str new-state))))
 
-(defn compute-entry [state data]
-  (update state :previous-games (fnil conj []) data))
-
-(defmethod db/add-entry-to-previous! :file
-  [_store data]
-  (let [state (edn-state)
-        updated (compute-entry state data)]
-    (spit edn-file (prn-str updated))))
-
-(defmethod db/clear-current-game! :file [_store]
-  (spit edn-file (dissoc (edn-state) :current-game)))

@@ -37,7 +37,6 @@
                             16 :4x4
                             :3x3x3)}]
     (db/update-current-game! state nil)
-    (db/add-entry-to-previous! (:store state) data)
     state))
 
 (defn next-state [state selection]
@@ -105,7 +104,6 @@
         selection? (and (>= index 0) (< index 9) (= (first (nth board index)) ""))]
     (if selection?
       (do
-        (db/update-previous-games! store id entry)
         (-> state
           (assoc :board (assoc board index [marker]) :turn (init/next-player turn))
           (draw-game-screen)))
@@ -125,7 +123,6 @@
         selection? (and (>= index 0) (< index 16) (= (first (nth board index)) ""))]
     (if selection?
       (do
-        (db/update-previous-games! store id entry)
         (-> state
           (assoc :board (assoc board index [marker]) :turn (init/next-player turn))
           (draw-game-screen)))
@@ -166,7 +163,6 @@
                          (= (first (nth board index)) ""))]
         (if selection?
           (do
-            (db/update-previous-games! store id entry)
             (-> state
               (assoc :board (assoc board index [marker]) :turn (init/next-player turn))
               (draw-game-screen)))
@@ -214,7 +210,7 @@
             (assoc :id (db/set-new-game-id {:store (:store state)})
               :difficulties updated-difficulties
               :screen :game)
-            (init-data!))))
+            #_(init-data!))))
       state)))
 
 (defmethod mouse-pressed! :replay-confirm [state event]
@@ -231,7 +227,7 @@
    :screen :replay
    :turn "p1"
    :markers ["X" "O"]
-   :store :psql
+   :store (:store db-game)
    :players [:human :human]
    :difficulties []
    :replay-queue (:moves db-game)})
@@ -347,7 +343,6 @@
 
 (defn draw-game-over [state]
   (let [is3d? (= 27 (count (:board state)))]
-    (db/clear-current-game! {:store (:store state)})
     (q/background 150)
     (if is3d?
       (draw-3d-game-screen state)

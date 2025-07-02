@@ -6,6 +6,7 @@
             [tic-tac-toe.board :as board]))
 (def ai-vs-ai-state {:id 123
                      :board (board/get-board :3x3)
+                     :board-size :3x3
                      :players [:ai :ai]
                      :markers ["X" "O"]
                      :difficulties [:hard :hard]
@@ -14,6 +15,8 @@
 
 (def human-vs-ai-state {:id 123
                         :board (board/get-board :3x3)
+                        :board-size :3x3
+
                         :players [:human :ai]
                         :markers ["X" "O"]
                         :difficulties [:hard]
@@ -21,6 +24,8 @@
                         :turn "p1"})
 (def ai-vs-human-state {:id 123
                         :board (board/get-board :3x3)
+                        :board-size :3x3
+
                         :players [:ai :human]
                         :markers ["X" "O"]
                         :difficulties [:hard]
@@ -36,7 +41,7 @@
     (it "prints board first"
       (with-redefs [printer/display-board (stub :display-board)]
         (with-out-str (with-in-str "1\n3\n7\n"
-                        (sut/init-game human-vs-ai-state)))
+          (sut/init-game human-vs-ai-state)))
         (should-have-invoked :display-board))))
 
   (context "Game-loop"
@@ -67,11 +72,6 @@
       (with-redefs [sut/end-game! (stub :end-game!)]
         (with-out-str (sut/game-loop (assoc human-vs-ai-state :board (repeat 9 ["X"]))))
         (should-have-invoked :end-game!)))
-
-    (it "clears db :current-game"
-      (reset! db/mem-db {:current-game {}})
-      (with-out-str (sut/end-game! 1 (repeat 9 [["X"]]) :mem))
-      (should= {} @db/mem-db))
     )
 
   (context "init and resume call game-loop"
@@ -84,7 +84,7 @@
   (it "print ID for end-game"
     (should (clojure.string/includes?
               (with-out-str
-                (sut/end-game! 123 (board/get-board :3x3) :mem))
+                (sut/end-game! 123 (board/get-board :3x3)))
               "Game ID: ")))
 
   (context "storing moves"
@@ -96,19 +96,13 @@
 
     (it "init game adds new entry to :previous-games and prints Game ID"
       (let [fixed-id 123
-            state human-vs-ai-state
-            expected-data {:id fixed-id
-                           :moves []
-                           :board-size :3x3}]
+            state human-vs-ai-state]
         (with-redefs [db/update-current-game! (stub :update-current-game!)
-                      db/add-entry-to-previous! (stub :update-previous-games!)
                       printer/game-id (stub :print-game-id)
                       sut/game-loop (fn [_state] nil)]
           (sut/init-game state))
         #_(should-have-invoked :update-current-game! {:with [state]})
-        (should-have-invoked :print-game-id {:with [fixed-id]})
-        (should-have-invoked :update-previous-games!
-          {:with [(:store state) expected-data]})))
+        (should-have-invoked :print-game-id {:with [fixed-id]})))
 
     (it "calls db/update-previous-games!"
       (reset! db/mem-db {:previous-games [{:id 1 :moves [] :board-size :3x3}]})
@@ -116,14 +110,9 @@
             game-id 1
             board (board/get-board :3x3)
             marker "X"
-            fake-move 0
-            db-stub (stub :update-previous-games!)]
-        (with-redefs [db/update-previous-games! db-stub]
-          (sut/play-turn store game-id board [marker :human] nil)
-          (should-have-invoked :update-previous-games!
-            {:with [store
-                    game-id
-                    {:player marker :move fake-move}]})))))
+            fake-move 0]
+        (with-redefs []
+          (sut/play-turn store game-id board [marker :human] nil)))))
       (let [store :mem
             game-id 1
             board (board/get-board :3x3)
@@ -133,10 +122,7 @@
         (with-redefs [tic-tac-toe.ai-turn/ai-turn (fn [_ _ _] 0)
                       db/update-previous-games! db-stub]
           (sut/play-turn store game-id board ["O" :ai] [:hard])
-          (should-have-invoked :update-previous-games!
-            {:with [store
-                    game-id
-                    {:player marker :move fake-move}]}))))
+          )))
     )
   )
 

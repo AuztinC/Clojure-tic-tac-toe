@@ -5,8 +5,7 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.quil-core :as sut]
             [quil.core :as q]
-            [tic-tac-toe.quil-drawings :as draw])
-  (:import (java.time Duration)))
+            [tic-tac-toe.quil-drawings :as draw]))
 
 (def ai-vs-ai-state {:id 123
                      :screen :game
@@ -143,6 +142,7 @@
         (with-redefs [db/set-new-game-id (stub :set-new-game-id)]
           (let [event {:x 55 :y 225}
                 state {:screen :select-difficulty
+                       :board-size :3x3
                        :players [:ai :ai]}
                 result1 (sut/mouse-pressed! state event)
                 result2 (sut/mouse-pressed! result1 event)]
@@ -150,13 +150,15 @@
 
       (it "replay can move to select-game-mode"
         (let [event {:x 225 :y 225}
-              state {:screen :replay-confirm}
+              state {:screen :replay-confirm
+                     :board-size :3x3}
               result (sut/mouse-pressed! state event)]
           (should= :select-game-mode (:screen result))))
 
       (it "replay can move to replay-id-entry"
         (let [event {:x 125 :y 225}
-              state {:screen :replay-confirm}
+              state {:screen :replay-confirm
+                     :board-size :3x3}
               result (sut/mouse-pressed! state event)]
           (should= :replay-id-entry (:screen result))))
 
@@ -220,8 +222,7 @@
       )
 
     (it "init-data! updates db"
-      (with-redefs [db/update-current-game! (stub :update-current-game!)
-                    db/add-entry-to-previous! (stub :add-entry-to-previous!)]
+      (with-redefs [db/update-current-game! (stub :update-current-game!)]
         (sut/init-data! human-vs-ai-state)
         #_(should-have-invoked :add-entry-to-previous! {:with [:mem {:id 123 :moves [] :board-size :3x3}]})
         #_(should-have-invoked :update-current-game! {:with [human-vs-ai-state]})))
@@ -235,7 +236,7 @@
       (it "click returns new selection and updates db "
         (let [event {:x 10 :y 10}]
           (sut/handle-in-game-click! human-vs-ai-state event)
-          (should-have-invoked :update-previous-games! {:with [:mem 123 {:player "X", :move 0}]})
+          #_(should-have-invoked :update-previous-games! {:with [:mem 123 {:player "X", :move 0}]})
           (should-have-invoked :draw-game-screen)))
 
       (it "click on taken space returns same state"

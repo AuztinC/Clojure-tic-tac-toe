@@ -13,7 +13,8 @@
 (defn file->state [{:keys [state moves] :as _game}]
   (merge state
     {:board (play-board state moves)
-     :turn  (next-player moves)}))
+     :turn  (next-player moves)
+     :moves moves}))
 
 (def mem-db (atom {}))
 
@@ -91,35 +92,6 @@
       empty?)
     false))
 
-
-
-(defn compute-entry [state data]
-  (update state :previous-games (fnil conj []) data))
-
-(defmulti add-entry-to-previous!
-  (fn [store _data]
-    store))
-
-(defmethod add-entry-to-previous! :mem
-  [_store data]
-  (let [state @mem-db
-        updated (compute-entry state data)]
-    (reset! mem-db updated)))
-
-(defmethod add-entry-to-previous! :default
-    [_store data]
-    (add-entry-to-previous! :mem data))
-
-
-
-
-(defmulti clear-current-game! :store)
-
-(defmethod clear-current-game! :mem [_store]
-  (reset! mem-db {}))
-
-(defmethod clear-current-game! :default [_store]
-  (clear-current-game! {:store :mem}))
 
 
 

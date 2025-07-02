@@ -23,13 +23,19 @@
       )
 
     (context "set new game id"
-      (it "return zero for empty file"
+      (it "zero for empty file"
         (with-redefs [slurp (stub :slurp {:return ""})]
           (should= 0 (db/set-new-game-id {:store :file}))))
 
-      (it "returns 1 for single game in file"
+      (it "1 for single game in file"
         (with-redefs [slurp (stub :slurp {:return (pr-str {0 {:state {:id 0} :moves []}})})]
           (should= 1 (db/set-new-game-id {:store :file}))))
+
+      (it "3"
+        (with-redefs [slurp (stub :slurp {:return (pr-str {0 {:state {:id 0} :moves []}
+                                                           1 {:state {:id 1} :moves []}
+                                                           2 {:state {:id 2} :moves []}})})]
+          (should= 3 (db/set-new-game-id {:store :file}))))
       )
 
     (context "find game by id"
@@ -55,21 +61,22 @@
             (should= ["X" "O"] (:markers game))
             (should= [:hard] (:difficulties game))
             (should= "p2" (:turn game))
-            (should= :file (:store game)))))
+            (should= :file (:store game))
+            (should= [{:player "X" :position 0}] (:moves game)))))
 
       (it "returns game with multiple moves"
-          (with-redefs [slurp (stub :slurp {:return (pr-str {0 {:state {:id           0
-                                                                        :screen       :game
-                                                                        :players      [:human :ai]
-                                                                        :markers      ["X" "O"]
-                                                                        :difficulties [:hard]
-                                                                        :store        :file
-                                                                        :board-size   :3x3}
-                                                                :moves [{:player "X" :position 0}
-                                                                        {:player "O" :position 1}
-                                                                        {:player "X" :position 2}]}})})]
-            (let [game (db/find-game-by-id {:store :file} 0)]
-              (should= [["X"] ["O"] ["X"] [""] [""] [""] [""] [""] [""]] (:board game)))))
+        (with-redefs [slurp (stub :slurp {:return (pr-str {0 {:state {:id           0
+                                                                      :screen       :game
+                                                                      :players      [:human :ai]
+                                                                      :markers      ["X" "O"]
+                                                                      :difficulties [:hard]
+                                                                      :store        :file
+                                                                      :board-size   :3x3}
+                                                              :moves [{:player "X" :position 0}
+                                                                      {:player "O" :position 1}
+                                                                      {:player "X" :position 2}]}})})]
+          (let [game (db/find-game-by-id {:store :file} 0)]
+            (should= [["X"] ["O"] ["X"] [""] [""] [""] [""] [""] [""]] (:board game)))))
       )
 
     (context "update current game"
@@ -156,14 +163,14 @@
       )
 
     (context "in progress"
-      (it "returns if last game is complete"
+      (it "returns false if last game is not complete"
         (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
                                                                        :board-size   :3x3
                                                                        :screen       :game
                                                                        :players      [:ai :ai]
                                                                        :difficulties [:easy :hard]}
                                                                :moves (map #(assoc {} :player "X" :position %) (range 9))}})})]
-          (should (db/in-progress? {:store :file})))
+          (should-not (db/in-progress? {:store :file})))
         )
 
       (it "returns false if last game is not complete"
@@ -174,7 +181,7 @@
                                                                        :difficulties [:easy :hard]}
                                                                :moves [{:player "X" :position 0}
                                                                        {:player "O" :position 1}]}})})]
-          (should-not (db/in-progress? {:store :file})))
+          (should (db/in-progress? {:store :file})))
         )
       )
 
@@ -202,115 +209,6 @@
                                                                        {:player "O" :position 1}]}})})]
           (should-not (db/previous-games? {:store :file}))))
       )
-
-
-
-
-
-    #_(context "read edn"
-        (it "from correct file"
-          (should= "resources/state.edn"
-            sut/edn-file))
-
-        (it "empty file"
-          (with-redefs [slurp (stub :slurp {:return "{}"})]
-            (should= {} (sut/edn-state))
-            (should-have-invoked :slurp {:with [sut/edn-file]})))
-
-        (it "can read blank current game"
-          (let [contents {:current-game {}}]
-            (with-redefs [slurp (stub :slurp {:return (pr-str contents)})]
-              (should= contents (sut/edn-state)))))
-
-        (it "returns empty previous-games"
-          (with-redefs [sut/edn-state (fn [] {})]
-            (should= nil (db/previous-games? {:store :file}))))
-
-        (it "returns previous-games"
-          (with-redefs [sut/edn-state (fn [] {:previous-games {:id 1}})]
-            (should= {:id 1} (db/previous-games? {:store :file}))))
-        )
-
-    #_(context "write to edn"
-        (redefs-around [spit (stub :spit)])
-
-        (it "updates current game file"
-          (with-redefs [sut/edn-state (fn [] {})
-                        sut/update-game-file! (stub :update-game-file!)]
-            (let [state {:board        (board/get-board :3x3) :players [:human :ai] :markers ["X" "O"]
-                         :difficulties [:hard] :turn "p1" :store :file}]
-              (db/update-current-game! state 0)
-              (should-have-invoked :update-game-file!
-                {:with [state]}))))
-
-        (it "writes :current-game to the EDN file"
-          (with-redefs [sut/edn-state (fn [] {})]
-            (let [state {:board        (board/get-board :3x3)
-                         :players      [:human :ai]
-                         :markers      ["X" "O"]
-                         :difficulties [:hard]
-                         :turn         "p1"
-                         :store        :file}
-                  expected-str (prn-str {:current-game state})]
-              (sut/update-game-file! state)
-              (should-have-invoked :spit
-                {:with [sut/edn-file expected-str]}))))
-
-        (it "add new game to previous games file"
-          (let [data {:id         5
-                      :moves      [{:player "X" :move 0}]
-                      :board-size (case (count (board/get-board :3x3))
-                                    9 :3x3
-                                    16 :4x4
-                                    :3x3x3)}]
-            (with-redefs [sut/edn-state (fn [] {:previous-games []})]
-              (db/add-entry-to-previous! :file data)
-              (should-have-invoked :spit {:with [sut/edn-file (prn-str {:previous-games [data]})]})
-              (dissoc (sut/edn-state) (:id data)))))
-
-        (it "adds new move to :previous-games key using ID"
-          (with-redefs [sut/edn-state (fn [] {:previous-games [{:id 1 :moves [] :board-size :3x3}]})]
-            (db/update-previous-games! :file 1 {:player "X" :move 0})
-            (should-have-invoked :spit
-              {:with [sut/edn-file
-                      (prn-str {:previous-games [{:id 1 :moves [{:player "X" :move 0}] :board-size :3x3}]})]})))
-
-        (it "clear current game edn"
-          (with-redefs [sut/edn-state (fn [] {:current-game   {}
-                                              :previous-games []})]
-            (db/clear-current-game! {:store :file})
-            (should-have-invoked :spit {:with [sut/edn-file (dissoc (sut/edn-state) :current-game)]}))))
-
-    #_(context "receive game to replay"
-        (it "given id returns state"
-          (with-redefs [sut/edn-state (fn [] {:previous-games [{:id 1 :moves [{}] :board-size :3x3}]})]
-            (should-contain {:id         1
-                             :moves      [{}]
-                             :board-size :3x3} (db/find-game-by-id {:store :file} 1))))
-
-        (it "gets new id for new game"
-          (let [state-1 {:id         1
-                         :moves      [{:player "X" :move 0}]
-                         :board-size (case (count (board/get-board :3x3))
-                                       9 :3x3
-                                       16 :4x4
-                                       :3x3x3)}
-                state-2 {:id         2
-                         :moves      [{:player "X" :move 0}]
-                         :board-size (case (count (board/get-board :4x4))
-                                       9 :3x3
-                                       16 :4x4
-                                       :3x3x3)}]
-            (with-redefs [spit (stub :spit)
-                          sut/edn-state (fn [] {:previous-games [state-1 state-2]})]
-              (db/add-entry-to-previous! :file state-1)
-              (db/add-entry-to-previous! :file state-2)
-              (should= 3 (db/set-new-game-id {:store :file}))
-              (should-have-invoked :spit))))
-
-        (it "user gives bad id"
-          (should= () (db/find-game-by-id {:store :file} "S")))
-        )
     )
 
   )

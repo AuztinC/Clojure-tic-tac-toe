@@ -3,11 +3,11 @@
             [tic-tac-toe.printer :as printer]))
 
 (defn game-loop! []
-  (fn [acc {:keys [player move]}]
-    (let [new-board (assoc acc move [player])
+  (fn [acc {:keys [player position]}]
+    (let [new-board (assoc acc position [player])
           winner (board/check-winner new-board)]
           (printer/display-board new-board)
-          (println (str "Player " player " moves to: " move))
+          (println (str "Player " player " moves to: " position))
       (if winner
         (printer/output-result winner)
         new-board))))

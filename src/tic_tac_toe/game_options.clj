@@ -47,9 +47,14 @@
 (defn- setup-game [store player-types difficulty-count]
   (let [new-game-id (db/set-new-game-id {:store store})
         board (board/get-board (select-board))
+        board-size (case (count board)
+                     9 :3x3
+                     16 :4x4
+                     :3x3x3)
         difficulties (select-difficulty difficulty-count)]
     (init/init-game {:screen :main-menu
                      :id new-game-id
+                     :board-size board-size
                      :board board
                      :players player-types
                      :markers ["X" "O"]

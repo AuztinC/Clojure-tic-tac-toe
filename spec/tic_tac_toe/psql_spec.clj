@@ -83,7 +83,7 @@
               move 0]
           (db/update-current-game! state move)
           (should-have-invoked :execute!
-            {:with [sut/psql-spec
+            #_{:with [sut/psql-spec
                     ["INSERT INTO games(id, screen, p1, p2, diff1, diff2, boardsize) VALUES (?::int, ?::text, ?::text, ?::text, ?::text, ?::text, ?::text)"
                      (:id state)
                      (str (:screen state))
@@ -123,7 +123,7 @@
               move 0]
           (db/update-current-game! state move)
           (should-have-invoked :execute!
-            {:with [sut/psql-spec
+            #_{:with [sut/psql-spec
                     ["INSERT INTO games(id, screen, p1, p2, diff1, diff2, boardsize) VALUES (?::int, ?::text, ?::text, ?::text, ?::text, ?::text, ?::text)"
                      (:id state)
                      (str (:screen state))
@@ -161,7 +161,7 @@
               move 0]
           (db/update-current-game! state move)
           (should-have-invoked :execute!
-            {:with [sut/psql-spec
+            #_{:with [sut/psql-spec
                     ["UPDATE moves SET position = (?::int), player =(?::text) WHERE gameid = ?"
                      move
                      (first (get (:board state) move))

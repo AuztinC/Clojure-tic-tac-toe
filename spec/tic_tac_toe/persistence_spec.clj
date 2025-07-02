@@ -33,7 +33,8 @@
                            :board-size   :3x3}
                    :moves [{:player "X" :position 0}]}
             new-state (assoc (:state state) :board (db/play-board (:state state) (:moves state))
-                        :turn (db/next-player (:moves state)))]
+                        :turn (db/next-player (:moves state))
+                        :moves (:moves state))]
         (reset! sut/mem-db [state])
         (should= new-state (sut/find-game-by-id {:store :mem} 0)))))
 

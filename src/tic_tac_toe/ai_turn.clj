@@ -159,6 +159,4 @@
   (let [move (ai-turn board marker diff)
         entry {:player marker
                :move move}]
-    (do
-      (db/update-previous-games! store id entry)
-      move #_(assoc board move [marker]))))
+    move))

@@ -25,5 +25,4 @@
   (let [move (human-turn board marker)
         entry {:player marker
                :move move}]
-    (db/update-previous-games! store id entry)
     move #_(assoc board move [marker])))
