@@ -13,11 +13,13 @@
   (prn "->inspect: " x) x)
 
 (defmethod db/set-new-game-id :file [_store]
-  (->> (edn-state)
-    (filter (comp number? key))
-    (map (comp #(get-in % [:state :id] -1) val))
-    (apply max -1)
-    inc))
+  (-> (edn-state)
+    (into (sorted-map))
+    (last)
+    (second)
+    (get :state)
+    (get :id -1)
+    (inc)))
 
 (defmethod db/find-game-by-id :file [_store id]
   (let [previous-games (edn-state)
@@ -26,11 +28,18 @@
       (db/file->state game)
       nil)))
 
-#_(defn update-game-file! [state]
-    (spit edn-file
-      (-> (edn-state)
-        (assoc :current-game state)
-        (prn-str))))
+(defn- init-new-game [games state move]
+  (spit edn-file (assoc games
+                   :current-game-id (:id state)
+                   (:id state) {:state (dissoc state :board :markers :turn :store)
+                                :moves [{:player (first (get (:board state) move)) :position move}]})))
+
+(defn- update-game [current-game state move games current-id]
+  (println "updating game" state)
+  (let [updated-game (update current-game :moves conj {:player (first (get (:board state) move)) :position move})]
+    (spit edn-file (assoc games
+                     current-id
+                     updated-game))))
 
 (defmethod db/update-current-game! :file [state move]
   (let [games (edn-state)
@@ -38,28 +47,16 @@
         current-game (get games current-id)
         board (db/play-board (:state current-game) (:moves current-game))]
     (if (or (not= current-id (:id state)) (some? (board/check-winner board)) (nil? current-game))
-      (do
-        (spit edn-file (assoc games
-                         :current-game-id (:id state)
-                         (:id state) {:state (dissoc state :board :markers :turn :store)
-                                      :moves [{:player (first (get (:board state) move)) :position move}]}
-                         )))
-      (let [updated-game (update current-game :moves conj {:player (first (get (:board state) move)) :position move})]
-        (spit edn-file (assoc games
-                         current-id
-                         updated-game))))))
-
+      (init-new-game games state move)
+      (update-game current-game state move games current-id))))
 
 (defmethod db/in-progress? :file [_store]
   (when-let [games (edn-state)]
     (let [current-id (:current-game-id games)
           game (get games current-id)
-          [_ last-game] (last (into (sorted-map)
-                                (filter (comp number? key) games)))
-          board (db/play-board (:state last-game) (:moves last-game))]
-      (when-not (board/check-winner board)
-        (db/file->state last-game)))))
-
+          board (db/play-board (:state game) (:moves game))]
+      (when (and game (not (board/check-winner board)))
+        (db/file->state game)))))
 
 (defmethod db/previous-games? :file [_store]
   (if-let [games (edn-state)]

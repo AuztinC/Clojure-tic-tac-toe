@@ -12,9 +12,11 @@
 
 (defn file->state [{:keys [state moves] :as _game}]
   (merge state
-    {:board (play-board state moves)
+    {:store :file
+     :board (play-board state moves)
      :turn  (next-player moves)
-     :moves moves}))
+     :moves moves
+     :markers ["X" "O"]}))
 
 (def mem-db (atom {}))
 
@@ -37,14 +39,33 @@
       (file->state game)
       nil)))
 
-(defn update-atom! [state]
-  (reset! mem-db (assoc @mem-db :current-game state)))
-
 (defmulti update-current-game!
   (fn [state _move]
     (:store state)))
 
+(defn- init-new-game [games state move]
+  (reset! mem-db (assoc games
+                   :current-game-id (:id state)
+                   (:id state) {:state (dissoc state :board :markers :turn :store)
+                                :moves [{:player (first (get (:board state) move)) :position move}]})))
+
+(defn- update-game [current-game state move games current-id]
+  (println "updating game" state)
+  (let [updated-game (update current-game :moves conj {:player (first (get (:board state) move)) :position move})]
+    (reset! mem-db (assoc games
+                     current-id
+                     updated-game))))
+
 (defmethod update-current-game! :mem [state move]
+  (let [games @mem-db
+        current-id (:current-game-id games)
+        current-game (get games current-id)
+        board (play-board (:state current-game) (:moves current-game))]
+    (if (or (not= current-id (:id state)) (some? (board/check-winner board)) (nil? current-game))
+      (init-new-game games state move)
+      (update-game current-game state move games current-id))))
+
+#_(defmethod update-current-game! :mem [state move]
   (let [games @mem-db
         [_ last-game] (last (into (sorted-map) games))
         board (play-board (:state last-game) (:moves last-game))]
@@ -77,9 +98,11 @@
 
 (defmethod in-progress? :mem [_store]
   (let [games @mem-db
-        [_ last-game] (last (into (sorted-map) games))
-        board (play-board (:state last-game) (:moves last-game))]
-    (some? (board/check-winner board))))
+        current-id (:current-game-id games)
+        game (get games current-id)
+        board (play-board (:state game) (:moves game))]
+    (when (and (not (board/check-winner board)) game)
+      (file->state game))))
 
 (defmulti previous-games? :store)
 

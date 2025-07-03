@@ -8,7 +8,7 @@
 (defn should-initialize-db []
   (should-have-invoked :execute! {:with
                                   [pg/psql-spec
-                                   ["CREATE TABLE IF NOT EXISTS games(id SERIAL PRIMARY KEY, screen TEXT, p1 TEXT, p2 TEXT, diff1 TEXT, diff2 TEXT, boardsize TEXT)"]]})
+                                   ["CREATE TABLE IF NOT EXISTS games(id SERIAL PRIMARY KEY, screen TEXT, p1 TEXT, p2 TEXT, diff1 TEXT, diff2 TEXT, boardsize TEXT, active BOOLEAN)"]]})
   (should-have-invoked :execute! {:with
                                   [pg/psql-spec
                                    ["CREATE TABLE IF NOT EXISTS moves(id SERIAL PRIMARY KEY, gameId INTEGER NOT NULL, FOREIGN KEY(gameId) REFERENCES games(id), position INTEGER, player TEXT)"]]}))

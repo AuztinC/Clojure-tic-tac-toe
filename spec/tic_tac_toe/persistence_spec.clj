@@ -52,7 +52,8 @@
                      :store        :mem}
               move 0]
           (db/update-current-game! state move)
-          (should= {(:id state)
+          (should= {:current-game-id (:id state)
+                    (:id state)
                     {:state {:id           (:id state)
                              :board-size   :3x3
                              :screen       (:screen state)
@@ -82,7 +83,8 @@
         (reset! sut/mem-db old-state)
         (db/update-current-game! new-state move)
         (should= (merge old-state
-                   {(:id new-state)
+                   {:current-game-id (:id new-state)
+                    (:id new-state)
                     {:state {:id           (:id new-state)
                              :board-size   :3x3
                              :screen       (:screen new-state)
@@ -92,12 +94,13 @@
           @sut/mem-db)))
 
     (it "adds new move to current game"
-      (let [old-state {0 {:state {:id           0
-                                  :board-size   :3x3
-                                  :screen       :game
-                                  :players      [:ai :ai]
-                                  :difficulties [:easy :hard]}
-                          :moves [{:player "X" :position 0}]}}
+      (let [old-state {:current-game-id 0
+                       0 {:state {:id           0
+                                :board-size   :3x3
+                                :screen       :game
+                                :players      [:ai :ai]
+                                :difficulties [:easy :hard]}
+                        :moves [{:player "X" :position 0}]}}
             new-state {:id           0
                        :board-size   :3x3
                        :screen       :game
@@ -111,7 +114,8 @@
         (reset! sut/mem-db old-state)
         (db/update-current-game! new-state move)
         (should= (merge old-state
-                   {(:id new-state)
+                   {:current-game-id (:id new-state)
+                    (:id new-state)
                     {:state {:id           (:id new-state)
                              :board-size   :3x3
                              :screen       (:screen new-state)
@@ -122,26 +126,28 @@
           @sut/mem-db))))
 
   (context "in progress"
-    (it "returns true if last game is complete"
-      (reset! sut/mem-db {0 {:state {:id           0
+    (it "returns false if :current-game-id's game complete"
+      (reset! sut/mem-db {:current-game-id 0
+                          0 {:state {:id           0
                                      :board-size   :3x3
                                      :screen       :game
                                      :players      [:ai :ai]
                                      :difficulties [:easy :hard]}
                              :moves (map #(assoc {} :player "X" :position %) (range 9))}})
-      (should (sut/in-progress? {:store :mem})))
+      (should-not (sut/in-progress? {:store :mem})))
 
-    (it "returns false if last game is NOT complete"
-      (reset! sut/mem-db {0 {:state {:id           0
+    (it "returns true if :current-game-id's game complete"
+      (reset! sut/mem-db {:current-game-id 0
+                          0 {:state {:id           0
                                      :board-size   :3x3
                                      :screen       :game
                                      :players      [:ai :ai]
                                      :difficulties [:easy :hard]}
                              :moves [{:player "X" :position 0}
                                      {:player "O" :position 1}]}})
-      (should-not (sut/in-progress? {:store :mem}))))
+      (should (sut/in-progress? {:store :mem}))))
 
-  (context "in progress"
+  (context "previous games"
     (it "returns false if no games in file"
       (reset! sut/mem-db nil)
       (should-not (db/previous-games? {:store :mem})))

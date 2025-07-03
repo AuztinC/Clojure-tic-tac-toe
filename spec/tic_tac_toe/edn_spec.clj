@@ -149,7 +149,7 @@
                        :players      [:ai :ai]
                        :markers      ["X" "O"]
                        :difficulties [:easy :hard]
-                       :turn         "p1"
+                       :turn         "p2"
                        :store        :file}
                 move 1]
             (db/update-current-game! state move)
@@ -176,8 +176,9 @@
           (should-not (db/in-progress? {:store :file})))
         )
 
-      (it "returns false if last game is not complete"
-        (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
+      (it "returns true if last game is not complete"
+        (with-redefs [slurp (stub :slurp {:return (prn-str {:current-game-id 1
+                                                            1 {:state {:id           1
                                                                        :board-size   :3x3
                                                                        :screen       :game
                                                                        :players      [:ai :ai]
