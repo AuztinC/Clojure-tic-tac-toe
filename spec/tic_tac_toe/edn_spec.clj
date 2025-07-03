@@ -31,11 +31,10 @@
         (with-redefs [slurp (stub :slurp {:return (pr-str {0 {:state {:id 0} :moves []}})})]
           (should= 1 (db/set-new-game-id {:store :file}))))
 
-      (it "3"
+      (it "2"
         (with-redefs [slurp (stub :slurp {:return (pr-str {0 {:state {:id 0} :moves []}
-                                                           1 {:state {:id 1} :moves []}
-                                                           2 {:state {:id 2} :moves []}})})]
-          (should= 3 (db/set-new-game-id {:store :file}))))
+                                                           1 {:state {:id 1} :moves []}})})]
+          (should= 2 (db/set-new-game-id {:store :file}))))
       )
 
     (context "find game by id"
@@ -95,7 +94,8 @@
                 move 0]
             (db/update-current-game! state move)
             (should-have-invoked :spit {:with [sut/edn-file
-                                               {(:id state)
+                                               {:current-game-id 1
+                                                (:id state)
                                                 {:state {:id           (:id state)
                                                          :board-size   :3x3
                                                          :screen       (:screen state)
@@ -125,7 +125,8 @@
                   move 0]
               (db/update-current-game! state move)
               (should-have-invoked :spit {:with [sut/edn-file
-                                                 {0 old-state
+                                                 {:current-game-id 1
+                                                  0 old-state
                                                   1 {:state {:id           (:id state)
                                                              :board-size   (:board-size state)
                                                              :screen       (:screen state)
@@ -134,7 +135,8 @@
                                                      :moves [{:player "X" :position move}]}}]})))))
 
       (it "adds a move to game when in progress"
-        (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
+        (with-redefs [slurp (stub :slurp {:return (prn-str {:current-game-id 1
+                                                            1 {:state {:id           1
                                                                        :board-size   :3x3
                                                                        :screen       :game
                                                                        :players      [:ai :ai]
@@ -152,7 +154,8 @@
                 move 1]
             (db/update-current-game! state move)
             (should-have-invoked :spit {:with [sut/edn-file
-                                               {1
+                                               {:current-game-id 1
+                                                1
                                                 {:state {:id           (:id state)
                                                          :board-size   :3x3
                                                          :screen       (:screen state)

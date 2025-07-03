@@ -69,14 +69,12 @@
     (board/check-winner (:board state))
     (assoc state :screen :game-over)
 
-    ;; AI turn – schedule AI move next frame
     (and (not (:waiting-ai? state))
       (= :ai (case (:turn state)
                "p1" (first (:players state))
                "p2" (second (:players state)))))
     (assoc state :waiting-ai? true)
 
-    ;; AI move should now be performed
     (:waiting-ai? state)
     (let [selection (get-selection state)]
       (if selection
