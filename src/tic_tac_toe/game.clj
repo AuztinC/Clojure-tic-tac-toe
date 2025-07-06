@@ -21,8 +21,8 @@
       (and (= "p1" turn) (= :ai player-type)) (first difficulties)
       (and (= "p2" turn) (= :ai player-type)) (second difficulties))))
 
-(defn end-game! [id board]
-  (let [id id]
+(defn end-game! [{:keys [id board] :as state}]
+  (do
     (printer/display-board board)
     (printer/output-result (board/check-winner board))
     (printer/game-id id)))
@@ -30,7 +30,6 @@
 (defn next-state [state]
   (let [{board                           :board,
          [player1-type player2-type]     :players
-         [player1-marker player2-marker] :markers,
          difficulties                    :difficulties
          turn                            :turn
          id                              :id
@@ -42,15 +41,16 @@
           move (play-turn store id board player difficulty)
           next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
       (do
+        (prn "next state" next-state)
         (db/update-current-game! next-state move)
         next-state))))
 
 (defn game-loop [state]
-  (loop [{:keys [board id] :as state} state]
-    (if (board/check-winner board)
-      (end-game! id board)
+  (loop [state state]
+    (if (board/check-winner (:board state))
+      (end-game! state)
       (do
-        (printer/display-board board)
+        (printer/display-board (:board state))
         (recur (next-state state))))))
 
 (defn init-game [state]
@@ -59,7 +59,7 @@
     (game-loop state)))
 
 (defn ->inspect [x]
-  (prn "->inspect: " x ) x)
+  (prn "->inspect: " x) x)
 
 (defn resume-game [store]
   (game-loop (db/in-progress? {:store store})))

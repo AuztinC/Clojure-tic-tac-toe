@@ -4,7 +4,8 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.board :as board]))
-(def ai-vs-ai-state {:id 123
+(def ai-vs-ai-state {:active-game true
+                     :id 123
                      :board (board/get-board :3x3)
                      :board-size :3x3
                      :players [:ai :ai]
@@ -13,7 +14,8 @@
                      :store :mem
                      :turn "p1"})
 
-(def human-vs-ai-state {:id 123
+(def human-vs-ai-state {:active-game true
+                        :id 123
                         :board (board/get-board :3x3)
                         :board-size :3x3
 
@@ -22,7 +24,8 @@
                         :difficulties [:hard]
                         :store :mem
                         :turn "p1"})
-(def ai-vs-human-state {:id 123
+(def ai-vs-human-state {:active-game true
+                        :id 123
                         :board (board/get-board :3x3)
                         :board-size :3x3
 
@@ -84,7 +87,7 @@
   (it "print ID for end-game"
     (should (clojure.string/includes?
               (with-out-str
-                (sut/end-game! 123 (board/get-board :3x3)))
+                (sut/end-game! {:id 123 :board (board/get-board :3x3)}))
               "Game ID: ")))
 
   (context "storing moves"

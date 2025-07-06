@@ -82,7 +82,8 @@
       (it "creates game with move when none exist"
         (with-redefs [slurp (stub :slurp {:return ""})
                       spit (stub :spit)]
-          (let [state {:id           1
+          (let [state {:active-game  true
+                       :id           1
                        :screen       :game
                        :board-size   :3x3
                        :board        [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
@@ -94,13 +95,13 @@
                 move 0]
             (db/update-current-game! state move)
             (should-have-invoked :spit {:with [sut/edn-file
-                                               {:current-game-id 1
-                                                (:id state)
+                                               {(:id state)
                                                 {:state {:id           (:id state)
                                                          :board-size   :3x3
                                                          :screen       (:screen state)
                                                          :players      (:players state)
-                                                         :difficulties (:difficulties state)}
+                                                         :difficulties (:difficulties state)
+                                                         :active-game  true}
                                                  :moves [{:player "X" :position move}]}}]}))))
 
       (it "creates game with move when no game in progress"
@@ -113,7 +114,8 @@
                          :moves (map #(assoc {} :player "X" :position %) (range 9))}]
           (with-redefs [slurp (stub :slurp {:return (prn-str {0 old-state})})
                         spit (stub :spit)]
-            (let [state {:id           1
+            (let [state {:active-game  true
+                         :id           1
                          :board-size   :3x3
                          :screen       :game
                          :board        [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
@@ -125,27 +127,29 @@
                   move 0]
               (db/update-current-game! state move)
               (should-have-invoked :spit {:with [sut/edn-file
-                                                 {:current-game-id 1
-                                                  0 old-state
+                                                 {0 old-state
                                                   1 {:state {:id           (:id state)
                                                              :board-size   (:board-size state)
                                                              :screen       (:screen state)
                                                              :players      (:players state)
-                                                             :difficulties (:difficulties state)}
+                                                             :difficulties (:difficulties state)
+                                                             :active-game  true}
                                                      :moves [{:player "X" :position move}]}}]})))))
 
       (it "adds a move to game when in progress"
-        (with-redefs [slurp (stub :slurp {:return (prn-str {:current-game-id 1
-                                                            1 {:state {:id           1
+        (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
                                                                        :board-size   :3x3
                                                                        :screen       :game
                                                                        :players      [:ai :ai]
-                                                                       :difficulties [:easy :hard]}
+                                                                       :difficulties [:easy :hard]
+                                                                       :active-game  true}
                                                                :moves [{:player "X" :position 0}]}})})
                       spit (stub :spit)]
-          (let [state {:id           1
+          (let [state {:active-game  true
+                       :id           1
                        :screen       :game
                        :board        [["X"] ["O"] [""] [""] [""] [""] [""] [""] [""]]
+                       :board-size   :3x3
                        :players      [:ai :ai]
                        :markers      ["X" "O"]
                        :difficulties [:easy :hard]
@@ -154,15 +158,44 @@
                 move 1]
             (db/update-current-game! state move)
             (should-have-invoked :spit {:with [sut/edn-file
-                                               {:current-game-id 1
-                                                1
-                                                {:state {:id           (:id state)
-                                                         :board-size   :3x3
-                                                         :screen       (:screen state)
-                                                         :players      (:players state)
-                                                         :difficulties (:difficulties state)}
-                                                 :moves [{:player "X" :position 0}
-                                                         {:player "O" :position move}]}}]}))))
+                                               {1 {:state {:id           (:id state)
+                                                           :board-size   :3x3
+                                                           :screen       (:screen state)
+                                                           :players      (:players state)
+                                                           :difficulties (:difficulties state)
+                                                           :active-game  true}
+                                                   :moves [{:player "X" :position 0}
+                                                           {:player "O" :position move}]}}]}))))
+
+      (it "updates active game when game over"
+        (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
+                                                                       :board-size   :3x3
+                                                                       :screen       :game
+                                                                       :players      [:ai :ai]
+                                                                       :difficulties [:easy :hard]
+                                                                       :active-game  true}
+                                                               :moves (map #(assoc {} :player "X" :position %) (range 9))}})})
+                      spit (stub :spit)]
+          (let [state {:active-game  true
+                       :id           1
+                       :screen       :game
+                       :board        [["X"] ["O"] [""] [""] [""] [""] [""] [""] [""]]
+                       :board-size   :3x3
+                       :players      [:ai :ai]
+                       :markers      ["X" "O"]
+                       :difficulties [:easy :hard]
+                       :turn         "p2"
+                       :store        :file}
+                move 1]
+            (db/update-current-game! state move)
+            (should-have-invoked :spit {:with [sut/edn-file
+                                               {1 {:state {:id           (:id state)
+                                                           :board-size   :3x3
+                                                           :screen       (:screen state)
+                                                           :players      (:players state)
+                                                           :difficulties (:difficulties state)
+                                                           :active-game  true}
+                                                   :moves [{:player "O", :position 1} {:player "X", :position 0} {:player "X", :position 1} {:player "X", :position 2} {:player "X", :position 3} {:player "X", :position 4} {:player "X", :position 5} {:player "X", :position 6} {:player "X", :position 7} {:player "X", :position 8}]}}]}))))
       )
 
     (context "in progress"
@@ -177,15 +210,15 @@
         )
 
       (it "returns true if last game is not complete"
-        (with-redefs [slurp (stub :slurp {:return (prn-str {:current-game-id 1
-                                                            1 {:state {:id           1
+        (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
                                                                        :board-size   :3x3
                                                                        :screen       :game
                                                                        :players      [:ai :ai]
-                                                                       :difficulties [:easy :hard]}
+                                                                       :difficulties [:easy :hard]
+                                                                       :active-game  true}
                                                                :moves [{:player "X" :position 0}
                                                                        {:player "O" :position 1}]}})})]
-          (should (db/in-progress? {:store :file})))
+          (should (db/in-progress? {:store       :file})))
         )
       )
 
@@ -203,7 +236,7 @@
                                                                :moves (map #(assoc {} :player "X" :position %) (range 9))}})})]
           (should (db/previous-games? {:store :file}))))
 
-      (it "returns true if previous game complete in file"
+      (it "returns false if previous game complete not in file"
         (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
                                                                        :board-size   :3x3
                                                                        :screen       :game

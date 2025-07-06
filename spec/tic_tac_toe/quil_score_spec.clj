@@ -59,13 +59,13 @@
   (context "state changes"
 
     (it "update-state calls game loop if no winner"
-      (with-redefs [sut/game-loop (stub :game-loop)]
+      (with-redefs [sut/game-loop! (stub :game-loop)]
         (sut/update-state ai-vs-ai-state)
         (should-have-invoked :game-loop)))
 
     (it "update-state returns state not in game"
       (let [state (assoc ai-vs-ai-state :screen :select-game-mode)]
-       (with-redefs [sut/game-loop (stub :game-loop)]
+       (with-redefs [sut/game-loop! (stub :game-loop)]
         (should= state (sut/update-state state))
         (should-not-have-invoked :game-loop))))
 
@@ -221,22 +221,24 @@
 
       )
 
-    (it "init-data! updates db"
-      (with-redefs [db/update-current-game! (stub :update-current-game!)]
-        (sut/init-data! human-vs-ai-state)
-        #_(should-have-invoked :add-entry-to-previous! {:with [:mem {:id 123 :moves [] :board-size :3x3}]})
-        #_(should-have-invoked :update-current-game! {:with [human-vs-ai-state]})))
-
     (context "human input"
 
       (redefs-around [q/width (stub :q/width {:return 400})
-                      db/update-previous-games! (stub :update-previous-games!)
+                      db/update-current-game! (stub :update-current-game!)
                       sut/draw-game-screen (stub :draw-game-screen)])
 
       (it "click returns new selection and updates db "
         (let [event {:x 10 :y 10}]
           (sut/handle-in-game-click! human-vs-ai-state event)
-          #_(should-have-invoked :update-previous-games! {:with [:mem 123 {:player "X", :move 0}]})
+          (should-have-invoked :update-current-game! {:with [{:screen :game,
+                                                              :store :mem,
+                                                              :board-size :3x3,
+                                                              :turn "p2",
+                                                              :markers ["X" "O"],
+                                                              :id 123,
+                                                              :players [:human :ai],
+                                                              :board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]],
+                                                              :typed-id ""} 0]})
           (should-have-invoked :draw-game-screen)))
 
       (it "click on taken space returns same state"
@@ -252,8 +254,7 @@
                       db/update-previous-games! (stub :update-previous-games!)
                       init/play-turn (stub :play-turn {:return [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]})]
           (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (sut/get-selection ai-vs-ai-state))
-          (should-have-invoked :sleep)))
+          (should-have-invoked :sleep))))
 
-      )
     )
   )

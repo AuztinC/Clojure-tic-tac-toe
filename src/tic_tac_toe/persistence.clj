@@ -94,9 +94,9 @@
                   games)]
     (reset! mem-db {:previous-games updated})))
 
-(defmulti in-progress? :store)
+(defmulti in-progress? (fn [state] (:store state)) )
 
-(defmethod in-progress? :mem [_store]
+(defmethod in-progress? :mem [_state]
   (let [games @mem-db
         current-id (:current-game-id games)
         game (get games current-id)
