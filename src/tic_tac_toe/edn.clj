@@ -41,21 +41,14 @@
 
 (defmethod db/update-current-game! :file [state move]
   (let [games (edn-state)
-        current-game (second (first (filter #(= (:active-game (:state (second %))) true) games))) #_(get games current-id)
-        board (db/play-board (:state current-game) (:moves current-game))
+        current-game (second (first (filter #(= (:active-game (:state (second %))) true) games)))
         winner? (board/check-winner (assoc (:board state) move [(first (get (:board state) move))]))]
-    (prn "in update " winner?)
     (if (nil? current-game)
       (let [state (assoc state :active-game true)]
-        (prn "new game")
         (init-new-game games state move))
       (if winner?
-        (do
-          (prn "game over update" current-game)
-          (update-game (assoc-in current-game [:state :active-game] false) state move games))
-        (do
-          (prn "update")
-          (update-game current-game state move games))))))
+        (update-game (assoc-in current-game [:state :active-game] false) state move games)
+        (update-game current-game state move games)))))
 
 (defmethod db/in-progress? :file [_state]
   (when-let [games (edn-state)]

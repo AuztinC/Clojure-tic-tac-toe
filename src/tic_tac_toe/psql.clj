@@ -18,7 +18,8 @@
               :markers      ["X" "O"]
               :difficulties (mapv keyword [(:diff1 game) (:diff2 game)])
               :turn         (db/next-player moves)
-              :store        :psql}]
+              :store        :psql
+              :active-game  (:active game)}]
     (assoc game :board (db/play-board game moves))))
 
 (defn state->psql [state]
@@ -51,6 +52,17 @@
 (defn previous-game-complete? [board]
   (empty? (board/open-positions board)))
 
+;(defmethod db/update-current-game! :file [state move]
+;  (let [games (edn-state)
+;        current-game (second (first (filter #(= (:active-game (:state (second %))) true) games)))
+;        winner? (board/check-winner (assoc (:board state) move [(first (get (:board state) move))]))]
+;    (if (nil? current-game)
+;      (let [state (assoc state :active-game true)]
+;        (init-new-game games state move))
+;      (if winner?
+;        (update-game (assoc-in current-game [:state :active-game] false) state move games)
+;        (update-game current-game state move games)))))
+
 ;; TODO ARC - DO WE WANT ACTIVE KEY IN DB?
 ;; TODO ARC - this will create a need to find and change active status when making new game
 ;; TODO ARC - should I have a table just for current-active instead?
@@ -59,9 +71,11 @@
         game (first (jdbc/query psql-spec ["SELECT * FROM games WHERE active = true;"]))
         moves (jdbc/query psql-spec ["SELECT * FROM moves WHERE gameid = ?"
                                      (:id game)])
-        cleaned-game (psql->state game moves)]
-    (prn "update current game " cleaned-game)
-    (if (or #_(not= (:id cleaned-game) (:id state)) (some? (board/check-winner (:board psql-state))) (nil? psql-state))
+        cleaned-game (psql->state game moves)
+        winner? (board/check-winner (assoc (:board state) move [(first (get (:board state) move))]))]
+    (prn "update current game " game)
+    (if (nil? game)
+
       (let [[id screen p1 p2 diff1 diff2 boardsize] (state->psql state)]
         (prn "IN NEW GAME")
         (jdbc/execute! psql-spec
@@ -71,13 +85,23 @@
                                   (:id state)
                                   move
                                   (first (get (:board state) move))]))
-      (do
-        (prn "updatre")
-        (jdbc/execute! psql-spec
-          ["UPDATE moves SET position = (?::int), player =(?::text) WHERE gameid = ?"
-           move
-           (first (get (:board state) move))
-           (:id state)])))))
+      (if winner?
+        (do
+          (jdbc/execute! psql-spec
+            ["UPDATE games SET active = false WHERE id = ?"
+             (:id state)])
+          (jdbc/execute! psql-spec
+            ["UPDATE moves SET position = (?::int), player =(?::text) WHERE gameid = ?"
+             move
+             (first (get (:board state) move))
+             (:id state)]))
+        (do
+          (prn "update" )
+          (jdbc/execute! psql-spec
+            ["UPDATE moves SET position = (?::int), player =(?::text) WHERE gameid = ?"
+             move
+             (first (get (:board state) move))
+             (:id state)]))))))
 
 (defmethod db/in-progress? :psql [_store]
   (let [game (last (jdbc/query psql-spec ["SELECT * FROM games;"]))

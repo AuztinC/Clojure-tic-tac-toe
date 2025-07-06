@@ -41,7 +41,6 @@
           move (play-turn store id board player difficulty)
           next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
       (do
-        (prn "next state" next-state)
         (db/update-current-game! next-state move)
         next-state))))
 

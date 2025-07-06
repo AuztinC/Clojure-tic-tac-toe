@@ -45,25 +45,43 @@
 
 (defn- init-new-game [games state move]
   (reset! mem-db (assoc games
-                   :current-game-id (:id state)
                    (:id state) {:state (dissoc state :board :markers :turn :store)
                                 :moves [{:player (first (get (:board state) move)) :position move}]})))
 
-(defn- update-game [current-game state move games current-id]
-  (println "updating game" state)
+(defn- update-game [current-game state move games]
   (let [updated-game (update current-game :moves conj {:player (first (get (:board state) move)) :position move})]
     (reset! mem-db (assoc games
-                     current-id
+                     (:id state)
                      updated-game))))
+
+
+#_(defmethod db/update-current-game! :file [state move]
+  (let [games (edn-state)
+        current-game (second (first (filter #(= (:active-game (:state (second %))) true) games))) #_(get games current-id)
+        board (db/play-board (:state current-game) (:moves current-game))
+        winner? (board/check-winner (assoc (:board state) move [(first (get (:board state) move))]))]
+    (prn "in update " winner?)
+    (if (nil? current-game)
+      (let [state (assoc state :active-game true)]
+        (prn "new game")
+        (init-new-game games state move))
+      (if winner?
+        (do
+          (prn "game over update" current-game)
+          (update-game (assoc-in current-game [:state :active-game] false) state move games))
+        (do
+          (prn "update")
+          (update-game current-game state move games))))))
 
 (defmethod update-current-game! :mem [state move]
   (let [games @mem-db
-        current-id (:current-game-id games)
-        current-game (get games current-id)
-        board (play-board (:state current-game) (:moves current-game))]
-    (if (or (not= current-id (:id state)) (some? (board/check-winner board)) (nil? current-game))
+        current-game (second (first (filter #(= (:active-game (:state (second %))) true) games)))
+        winner? (board/check-winner (assoc (:board state) move [(first (get (:board state) move))]))]
+    (if (nil? current-game)
       (init-new-game games state move)
-      (update-game current-game state move games current-id))))
+      (if winner?
+        (update-game (assoc-in current-game [:state :active-game] false) state move games)
+        (update-game current-game state move games)))))
 
 #_(defmethod update-current-game! :mem [state move]
   (let [games @mem-db

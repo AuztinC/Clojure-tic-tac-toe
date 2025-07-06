@@ -79,7 +79,8 @@
                      :markers ["X" "O"]
                      :difficulties [:easy :hard]
                      :turn "p2"
-                     :store :psql}
+                     :store :psql
+                     :active-game true}
               move 0]
           (db/update-current-game! state move)
           (should-have-invoked :execute!
@@ -106,16 +107,10 @@
       (should-not (sut/previous-game-complete? [["X"] [""] [""] [""] [""] [""] [""] [""] [""]])))
 
     (it "creates game with move when no game in progress"
-      (with-redefs [db/find-game-by-id (stub :find-game-by-id {:return [{:id 1
-                                                                         :screen :game
-                                                                         :board (repeat 9 ["X"])
-                                                                         :players [:ai :ai]
-                                                                         :markers ["X" "O"]
-                                                                         :difficulties [:easy :hard]
-                                                                         :turn "p2"
-                                                                         :store :psql}]})
+      (with-redefs [jdbc/query (stub :query {:return {}})
                     jdbc/execute! (stub :execute!)]
         (let [state {:id 2
+                     :active-game true
                      :screen :game
                      :board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
                      :players [:ai :ai]
@@ -143,21 +138,48 @@
                      move
                      (first (get (:board state) move))]]}))))
 
-    #_(it "adds a move to game when in progress"
-      (with-redefs [db/find-game-by-id (stub :find-game-by-id {:return [{:id 1
-                                                                         :board-size :3x3
-                                                                         :screen :game
-                                                                         :board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
-                                                                         :players [:ai :ai]
-                                                                         :markers ["X" "O"]
-                                                                         :difficulties [:easy :hard]
-                                                                         :turn "p2"
-                                                                         :store :psql}]})
+    (it "adds a move to game when in progress"
+      (with-redefs [jdbc/query (stub :query {:invoke (fn [_spec query-coll]
+                                                       (if (str/includes? (first query-coll) "games")
+                                                         [{:id 1 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :boardsize "3x3" :active true}]
+                                                         [{:id 1 :gameid 1 :position 0 :player "X"}
+                                                          {:id 2 :gameid 1 :position 1 :player "O"}
+                                                          {:id 3 :gameid 1 :position 2 :player "X"}
+                                                          {:id 4 :gameid 1 :position 3 :player "O"}
+                                                          {:id 5 :gameid 1 :position 4 :player "X"}
+                                                          {:id 6 :gameid 1 :position 5 :player "O"}
+                                                          {:id 7 :gameid 1 :position 6 :player "O"}
+                                                          {:id 8 :gameid 1 :position 7 :player "X"}]))})
                     jdbc/execute! (stub :execute!)]
         (let [state {:id 1
                      :board-size :3x3
                      :screen :game
-                     :board [["X"] ["O"] [""] [""] [""] [""] [""] [""] [""]]
+                     :board [["X"] ["O"] ["X"] ["O"] ["X"] ["O"] ["O"] ["X"] ["O"]]
+                     :players [:ai :ai]
+                     :markers ["X" "O"]
+                     :difficulties [:easy :hard]
+                     :turn "p2"
+                     :store :psql}
+              move 8]
+          (db/update-current-game! state move)
+          (should-have-invoked :execute!
+            {:with [sut/psql-spec
+                    ["UPDATE moves SET position = (?::int), player =(?::text) WHERE gameid = ?"
+                     move
+                     (first (get (:board state) move))
+                     (:id state)]]})
+          (should-have-invoked :execute!
+            {:with [sut/psql-spec
+                    ["UPDATE games SET active = false WHERE id = ?"
+                     (:id state)]]}))))
+
+    (it "adds a move and sets active false when game over"
+      (with-redefs [jdbc/query (stub :query {:return {:id 1 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :boardsize "3x3" :active true}})
+                    jdbc/execute! (stub :execute!)]
+        (let [state {:id 1
+                     :board-size :3x3
+                     :screen :game
+                     :board [["X"] ["O"] ["X"] [""] [""] ["X"] [""] [""] [""]]
                      :players [:ai :ai]
                      :markers ["X" "O"]
                      :difficulties [:easy :hard]
