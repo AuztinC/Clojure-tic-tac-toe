@@ -19,6 +19,8 @@
                     :default :mem)]
     (cond
       (flags "--gui") (gui/start-gui store)
-      (flags "--cli") (opt/watch-replay? store)
-      :else (opt/watch-replay? store))))
+      (flags "--cli") (opt/cli-loop {:screen :replay-confirm
+                                          :store store})
+      :else (opt/cli-loop {:screen :replay-confirm
+                           :store store}))))
 

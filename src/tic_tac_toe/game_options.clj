@@ -6,72 +6,73 @@
             [tic-tac-toe.replay :as replay]))
 
 (declare select-board)
-(defn- retry-select-board []
+(defn- retry-select-board [state]
   (do
     (println "Oops, try again.")
-    (select-board)))
+    (select-board state)))
 
-(defn select-board []
+(defn select-board [state]
   (printer/print-board-selection)
   (let [player-choice (read-line)]
     (cond
-      (= "1" player-choice) :3x3
-      (= "2" player-choice) :4x4
-      (= "3" player-choice) :3x3x3
-      :else (retry-select-board))))
+      (= "1" player-choice) (assoc state :board-size :3x3 :screen :select-difficulty)
+      (= "2" player-choice) (assoc state :board-size :4x4 :screen :select-difficulty)
+      (= "3" player-choice) (assoc state :board-size :3x3x3 :screen :select-difficulty)
+      :else (retry-select-board state))))
 
 (declare select-difficulty)
 (defn- retry-difficulty []
   (println "Not a difficulty, retry."))
 
-(defn select-difficulty [iterations]
+(defn select-difficulty [state]
   (printer/print-difficulty)
   (loop [out []]
-    (printer/print-difficulty-iteration (count out))
-    (if (= iterations (count out))
-      out
-      (let [player-choice (read-line)]
-        (cond
-          (= "1" player-choice) (recur (conj out :easy))
-          (= "2" player-choice) (recur (conj out :medium))
-          (= "3" player-choice) (recur (conj out :hard))
-          :else (do
-                  (retry-difficulty)
-                  (recur out)))))))
+
+    (if (= (:difficulty-count state) (count out))
+      (let [id (db/set-new-game-id {:store (:store state)})
+            board (board/get-board (:board-size state))]
+        (assoc (dissoc state :difficulty-count)
+          :difficulties out
+          :screen :game
+          :id id
+          :board board
+          :turn "p1"
+          :markers ["X" "O"]))
+      (do
+        (printer/print-difficulty-iteration (count out))
+        (let [player-choice (read-line)]
+          (cond
+            (= "1" player-choice) (recur (conj out :easy))
+            (= "2" player-choice) (recur (conj out :medium))
+            (= "3" player-choice) (recur (conj out :hard))
+            :else (do
+                    (retry-difficulty)
+                    (recur out))))))))
 
 (declare select-game)
 (defn- retry-select-game [store]
   (println "Not a game-mode, retry.")
   (select-game store))
 
-(defn- setup-game [store player-types difficulty-count]
-  (let [new-game-id (db/set-new-game-id {:store store})
-        board (board/get-board (select-board))
-        board-size (case (count board)
-                     9 :3x3
-                     16 :4x4
-                     :3x3x3)
-        difficulties (select-difficulty difficulty-count)]
-    (init/init-game {:screen :main-menu
-                     :active true
-                     :id new-game-id
-                     :board-size board-size
-                     :board board
-                     :players player-types
-                     :markers ["X" "O"]
-                     :difficulties difficulties
-                     :turn "p1"
-                     :store store})))
-
-(defn select-game [store]
+(defn select-game [state]
   (printer/print-game-options)
   (let [choice (read-line)]
     (case choice
-      "1" (setup-game store [:human :ai] 1)
-      "2" (setup-game store [:ai :human] 1)
-      "3" (setup-game store [:human :human] 0)
-      "4" (setup-game store [:ai :ai] 2)
-      (retry-select-game store))))
+      "1" (assoc state :players [:human :ai]
+            :screen :select-board
+            :difficulty-count 1)
+      "2" (assoc state :players [:ai :human]
+            :screen :select-board
+            :difficulty-count 1)
+      "3" (assoc state :players [:human :human]
+            :screen :select-board
+            :difficulty-count 0)
+      "4" (assoc state :players [:ai :ai]
+            :screen :select-board
+            :difficulty-count 2)
+      (do
+        (retry-select-game state)
+        state))))
 
 (defn print-load-game []
   (println "Previous game detected! Resume?
@@ -84,16 +85,16 @@
     (println "I'm sorry, that's not an option. Try again")
     (load-game store)))
 
-(defn load-game [store]
-  (if (db/in-progress? {:store store})
+(defn load-game [state]
+  (if-let [game (db/in-progress? {:store (:store state)})]
     (do
       (print-load-game)
       (let [choice (read-line)]
         (case choice
-          "1" (init/resume-game store)
-          "2" (select-game store)
-          (retry-load-game store))))
-    (select-game store)))
+          "1" (merge state (assoc game :screen :game))
+          "2" (assoc state :screen :select-game-mode)
+          (retry-load-game state))))
+    (assoc state :screen :select-game-mode)))
 
 (declare dispatch-id)
 (defn retry-dispatch-id [store]
@@ -101,14 +102,14 @@
     (println "Game not found! Let's try that again.")
     (dispatch-id store)))
 
-(defn dispatch-id [store]
+(defn dispatch-id [{:keys [store] :as state}]
   (println "Please enter your game ID: ")
   (let [id-str (read-line)
         id (Integer/parseInt id-str)
         game (db/find-game-by-id {:store store} id)]
     (if (nil? game)
       (retry-dispatch-id store)
-      (replay/replay game))))
+      (assoc game :screen :replay))))
 
 (declare watch-replay?)
 (defn retry-watch-replay [store]
@@ -116,8 +117,8 @@
     (println "Bad input, try again.")
     (watch-replay? store)))
 
-(defn watch-replay? [store]
-  (if (db/previous-games? {:store store})
+(defn watch-replay? [state]
+  (if (db/previous-games? {:store (:store state)})
     (do
       (println "Would you like to watch a replay?
   You'll need a match ID.
@@ -125,39 +126,24 @@
   2: No")
       (let [choice (read-line)]
         (case choice
-          "1" (dispatch-id store)
-          "2" (load-game store)
-          (retry-watch-replay store))))
-    (load-game store)))
-
-;(case (:screen state)
-;    :game-over (draw-game-over state)
-;    :in-progress-game (draw/draw-in-progress-game state)
-;    :select-game-mode (draw/draw-select-game-mode state)
-;    :select-board (draw/draw-select-board state)
-;    :select-difficulty (draw/draw-select-difficulty state)
-;    :replay-confirm (draw/draw-replay-screen state)
-;    :replay-id-entry (draw/draw-replay-id-entry state)
-;    :replay (watch-replay state)
-;    :game (cond
-;            (or (= :3x3 (:board-size state)) (= :4x4 (:board-size state)))
-;            (draw-game-screen state)
-;
-;            (= :3x3x3 (:board-size state))
-;            (draw-3d-game-screen state))
-;    :else (draw/draw-select-game-mode state))
+          "1" (assoc state :screen :replay-id-entry)
+          "2" (assoc state :screen :in-progress-game)
+          (retry-watch-replay state))))
+    (assoc state :screen :in-progress-game)))
 
 (defn cli-loop [state]
   (loop [state state]
     (let [new-state (case (:screen state)
                       :select-game-mode (select-game state)
-                      :select-board (select-board)
+                      :select-board (select-board state)
                       :select-difficulty (select-difficulty state)
                       :in-progress-game (load-game state)
                       :replay-confirm (watch-replay? state)
                       :replay-id-entry (dispatch-id state)
                       :replay (replay/replay state)
-                      :game (init/game-loop state)
+                      :game (do
+                              (prn "starting game" state)
+                              (init/game-loop state))
                       state)]
       (when new-state
         (recur new-state)))))
