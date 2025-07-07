@@ -41,18 +41,18 @@
 
 (defmethod db/update-current-game! :file [state move]
   (let [games (edn-state)
-        current-game (second (first (filter #(= (:active-game (:state (second %))) true) games)))
+        current-game (second (first (filter #(= (:active (:state (second %))) true) games)))
         winner? (board/check-winner (assoc (:board state) move [(first (get (:board state) move))]))]
     (if (nil? current-game)
-      (let [state (assoc state :active-game true)]
+      (let [state (assoc state :active true)]
         (init-new-game games state move))
       (if winner?
-        (update-game (assoc-in current-game [:state :active-game] false) state move games)
+        (update-game (assoc-in current-game [:state :active] false) state move games)
         (update-game current-game state move games)))))
 
 (defmethod db/in-progress? :file [_state]
   (when-let [games (edn-state)]
-    (let [game (second (first (filter #(= (:active-game (:state (second %))) true) games)))
+    (let [game (second (first (filter #(= (:active (:state (second %))) true) games)))
           board (db/play-board (:state game) (:moves game))]
       (when (and game (not (board/check-winner board)))
         (db/file->state game)))))
@@ -65,5 +65,16 @@
       (filter board/check-winner)
       seq)
     false))
+
+(defmethod db/clear-active :file [_store]
+  (when-let [games (edn-state)]
+    (let [current (second (first (filter #(= (:active (:state (second %))) true) games)))
+          parsed (db/file->state current)
+          updated (assoc parsed :active false)]
+      (prn "updated game" updated)
+      (spit edn-file
+        (assoc games
+          (:id updated)
+          updated)))))
 
 

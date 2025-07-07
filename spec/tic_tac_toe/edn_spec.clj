@@ -82,7 +82,7 @@
       (it "creates game with move when none exist"
         (with-redefs [slurp (stub :slurp {:return ""})
                       spit (stub :spit)]
-          (let [state {:active-game  true
+          (let [state {:active       true
                        :id           1
                        :screen       :game
                        :board-size   :3x3
@@ -101,7 +101,7 @@
                                                          :screen       (:screen state)
                                                          :players      (:players state)
                                                          :difficulties (:difficulties state)
-                                                         :active-game  true}
+                                                         :active       true}
                                                  :moves [{:player "X" :position move}]}}]}))))
 
       (it "creates game with move when no game in progress"
@@ -114,7 +114,7 @@
                          :moves (map #(assoc {} :player "X" :position %) (range 9))}]
           (with-redefs [slurp (stub :slurp {:return (prn-str {0 old-state})})
                         spit (stub :spit)]
-            (let [state {:active-game  true
+            (let [state {:active       true
                          :id           1
                          :board-size   :3x3
                          :screen       :game
@@ -133,7 +133,7 @@
                                                              :screen       (:screen state)
                                                              :players      (:players state)
                                                              :difficulties (:difficulties state)
-                                                             :active-game  true}
+                                                             :active       true}
                                                      :moves [{:player "X" :position move}]}}]})))))
 
       (it "adds a move to game when in progress"
@@ -142,10 +142,10 @@
                                                                        :screen       :game
                                                                        :players      [:ai :ai]
                                                                        :difficulties [:easy :hard]
-                                                                       :active-game  true}
+                                                                       :active       true}
                                                                :moves [{:player "X" :position 0}]}})})
                       spit (stub :spit)]
-          (let [state {:active-game  true
+          (let [state {:active       true
                        :id           1
                        :screen       :game
                        :board        [["X"] ["O"] [""] [""] [""] [""] [""] [""] [""]]
@@ -163,7 +163,7 @@
                                                            :screen       (:screen state)
                                                            :players      (:players state)
                                                            :difficulties (:difficulties state)
-                                                           :active-game  true}
+                                                           :active       true}
                                                    :moves [{:player "X" :position 0}
                                                            {:player "O" :position move}]}}]}))))
 
@@ -173,10 +173,10 @@
                                                                        :screen       :game
                                                                        :players      [:ai :ai]
                                                                        :difficulties [:easy :hard]
-                                                                       :active-game  true}
+                                                                       :active       true}
                                                                :moves (map #(assoc {} :player "X" :position %) (range 9))}})})
                       spit (stub :spit)]
-          (let [state {:active-game  true
+          (let [state {:active       true
                        :id           1
                        :screen       :game
                        :board        [["X"] ["O"] [""] [""] [""] [""] [""] [""] [""]]
@@ -194,7 +194,7 @@
                                                            :screen       (:screen state)
                                                            :players      (:players state)
                                                            :difficulties (:difficulties state)
-                                                           :active-game  true}
+                                                           :active       true}
                                                    :moves [{:player "O", :position 1} {:player "X", :position 0} {:player "X", :position 1} {:player "X", :position 2} {:player "X", :position 3} {:player "X", :position 4} {:player "X", :position 5} {:player "X", :position 6} {:player "X", :position 7} {:player "X", :position 8}]}}]}))))
       )
 
@@ -215,10 +215,10 @@
                                                                        :screen       :game
                                                                        :players      [:ai :ai]
                                                                        :difficulties [:easy :hard]
-                                                                       :active-game  true}
+                                                                       :active       true}
                                                                :moves [{:player "X" :position 0}
                                                                        {:player "O" :position 1}]}})})]
-          (should (db/in-progress? {:store       :file})))
+          (should (db/in-progress? {:store :file})))
         )
       )
 
@@ -245,7 +245,36 @@
                                                                :moves [{:player "X" :position 0}
                                                                        {:player "O" :position 1}]}})})]
           (should-not (db/previous-games? {:store :file}))))
+
       )
+
+    (context "clear current active"
+      (it "sets previous active false"
+        (with-redefs [slurp (stub :slurp {:return (prn-str {1 {:state {:id           1
+                                                                       :board-size   :3x3
+                                                                       :screen       :game
+                                                                       :players      [:ai :ai]
+                                                                       :difficulties [:easy :hard]
+                                                                       :active       true}
+                                                               :moves [{:player "X" :position 0}
+                                                                       {:player "O" :position 1}]}})})
+                      spit (stub :spit)]
+          (let [state {1 {:id           1
+                          :store        :file
+                          :board-size   :3x3
+                          :screen       :game
+                          :players      [:ai :ai]
+                          :difficulties [:easy :hard]
+                          :active       false
+                          :board        [["X"] ["O"] [""] [""] [""] [""] [""] [""] [""]]
+                          :turn         "p1",
+                          :markers      ["X" "O"]
+                          :moves        [{:player "X" :position 0}
+                                         {:player "O" :position 1}]}}]
+            (db/clear-active {:store :file})
+            (should-have-invoked :spit
+              {:with [sut/edn-file
+                      state]})))))
     )
 
   )

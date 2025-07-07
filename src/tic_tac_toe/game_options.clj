@@ -53,7 +53,7 @@
                      :3x3x3)
         difficulties (select-difficulty difficulty-count)]
     (init/init-game {:screen :main-menu
-                     :active-game true
+                     :active true
                      :id new-game-id
                      :board-size board-size
                      :board board

@@ -87,7 +87,7 @@
         current-id (:current-game-id games)
         game (get games current-id)
         board (play-board (:state game) (:moves game))]
-    (when (and (not (board/check-winner board)) game)
+    (when (and (not (board/check-winner board)) games)
       (file->state game))))
 
 (defmulti previous-games? :store)
@@ -102,6 +102,16 @@
     false))
 
 (defmulti clear-active :store)
+
+(defmethod clear-active :mem [_store]
+  (when-let [games @mem-db]
+    (let [current (second (first (filter #(= (:active (:state (second %))) true) games)))
+          parsed (file->state current)
+          updated (assoc parsed :active false)]
+      (reset! mem-db
+        (assoc games
+          (:id updated)
+          updated)))))
 
 
 

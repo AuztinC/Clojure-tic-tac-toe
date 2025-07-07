@@ -46,6 +46,7 @@
 
 (defn game-loop [state]
   (loop [state state]
+    (prn "gameloop state" state)
     (if (board/check-winner (:board state))
       (end-game! state)
       (do

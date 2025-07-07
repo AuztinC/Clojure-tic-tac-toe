@@ -80,7 +80,7 @@
                      :difficulties [:easy :hard]
                      :turn         "p2"
                      :store        :psql
-                     :active-game  true}
+                     :active  true}
               move 0]
           (db/update-current-game! state move)
           (should-have-invoked :execute!
@@ -110,7 +110,7 @@
       (with-redefs [jdbc/query (stub :query {:return {}})
                     jdbc/execute! (stub :execute!)]
         (let [state {:id           2
-                     :active-game  true
+                     :active  true
                      :screen       :game
                      :board        [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
                      :players      [:ai :ai]
@@ -218,8 +218,18 @@
       (with-redefs [jdbc/query
                     (stub :query {:invoke (fn [_spec query-coll]
                                             (if (str/includes? (first query-coll) "games")
-                                              [()]
-                                              [()]))})]
+                                              [{:id 1 :screen "game" :p1 "ai" :p2 "ai"
+                                                :diff1 "easy" :diff2 "hard" :boardsize "3x3"
+                                                :active false}]
+                                              [{:id 1 :gameid 1 :position 0 :player "X"}
+                                               {:id 2 :gameid 1 :position 1 :player "O"}
+                                               {:id 3 :gameid 1 :position 2 :player "X"}
+                                               {:id 4 :gameid 1 :position 3 :player "O"}
+                                               {:id 5 :gameid 1 :position 4 :player "X"}
+                                               {:id 6 :gameid 1 :position 5 :player "O"}
+                                               {:id 7 :gameid 1 :position 6 :player "X"}
+                                               {:id 8 :gameid 1 :position 7 :player "O"}
+                                               {:id 9 :gameid 1 :position 8 :player "X"}]))})]
         (should-not (db/in-progress? {:store :psql}))))
 
     (it "returns true if last game NOT complete"
@@ -236,7 +246,7 @@
                   :difficulties [:easy :hard],
                   :moves        [{:id 1, :gameid 2, :position 0, :player "X"} {:id 2, :gameid 2, :position 1, :player "O"} {:id 3, :gameid 2, :position 2, :player "X"}],
                   :board-size   :3x3,
-                  :active-game  false,
+                  :active  false,
                   :turn         "p2",
                   :markers      ["X" "O"],
                   :id           1,
