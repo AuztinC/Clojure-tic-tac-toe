@@ -13,10 +13,13 @@
 (defn psql->state [game moves]
   (let [game {:id           (:id game)
               :board-size   (keyword (:boardsize game))
-              :screen       (keyword (read-string (:screen game)))
-              :players      (mapv read-string [(:p1 game) (:p2 game)])
+              :screen       (keyword (when (seq (:screen game))
+                                       (read-string (:screen game))))
+              :players      (when (and (seq (:p1 game)) (seq (:p2 game)))
+                              (mapv keyword (mapv read-string [(:p1 game) (:p2 game)])))
               :markers      ["X" "O"]
-              :difficulties (mapv read-string (filter seq [(:diff1 game) (:diff2 game)]))
+              :difficulties (when (and (seq (:diff1 game)) (seq (:diff2 game)))
+                              (mapv keyword (mapv read-string [(:diff1 game) (:diff2 game)])))
               :turn         (db/next-player moves)
               :store        :psql
               :active-game  (:active game)
@@ -91,12 +94,14 @@
              (first (get (:board state) move))]))))))
 
 (defmethod db/in-progress? :psql [_store]
-  (let [game (last (jdbc/query psql-spec ["SELECT * FROM games;"]))
+  (let [game (first (jdbc/query psql-spec ["SELECT * FROM games WHERE active = true;"]))
         moves (jdbc/query psql-spec ["SELECT * FROM moves WHERE gameid = ?;"
                                      (:id game)])
-        board-state (db/play-board game moves)]
-    (prn "in-progress? board" game)
-    (not (previous-game-complete? board-state))))
+        parse-game (psql->state game moves)
+        board (db/play-board parse-game (:games parse-game))]
+    (prn "in-progress? board" parse-game)
+    (when (and game (not (board/check-winner board)))
+      (psql->state game moves))))
 
 (defn ->inspect [x]
   (prn "->inspect: " x) x)
