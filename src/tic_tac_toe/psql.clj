@@ -65,9 +65,9 @@
         winner? (board/check-winner (assoc (:board state) move [(first (get (:board state) move))]))]
     (prn "update current game " game)
     (if (nil? game)
-
       (let [[id screen p1 p2 diff1 diff2 boardsize] (state->psql state)]
         (prn "IN NEW GAME")
+
         (jdbc/execute! psql-spec
           ["INSERT INTO games(id, screen, p1, p2, diff1, diff2, boardsize, active) VALUES (?::int, ?::text, ?::text, ?::text, ?::text, ?::text, ?::text, true);"
            id screen p1 p2 diff1 diff2 boardsize])
@@ -99,7 +99,6 @@
                                      (:id game)])
         parse-game (psql->state game moves)
         board (db/play-board parse-game (:games parse-game))]
-    (prn "in-progress? board" parse-game)
     (when (and game (not (board/check-winner board)))
       (psql->state game moves))))
 
@@ -113,6 +112,12 @@
       (->> (map #(psql->state % (get moves (:id %))) games)
         (filter (comp board/check-winner :board))
         seq))))
+
+(defmethod db/clear-active :psql [_store]
+  (when-let [game (first (jdbc/query psql-spec ["SELECT * FROM games WHERE active = true;"]))]
+    (jdbc/execute! psql-spec
+      ["UPDATE games SET active = false WHERE id = ?"
+       (:id game)])))
 
 (defn db-setup []
   (jdbc/execute! psql-spec

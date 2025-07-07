@@ -54,25 +54,6 @@
                      (:id state)
                      updated-game))))
 
-
-#_(defmethod db/update-current-game! :file [state move]
-  (let [games (edn-state)
-        current-game (second (first (filter #(= (:active-game (:state (second %))) true) games))) #_(get games current-id)
-        board (db/play-board (:state current-game) (:moves current-game))
-        winner? (board/check-winner (assoc (:board state) move [(first (get (:board state) move))]))]
-    (prn "in update " winner?)
-    (if (nil? current-game)
-      (let [state (assoc state :active-game true)]
-        (prn "new game")
-        (init-new-game games state move))
-      (if winner?
-        (do
-          (prn "game over update" current-game)
-          (update-game (assoc-in current-game [:state :active-game] false) state move games))
-        (do
-          (prn "update")
-          (update-game current-game state move games))))))
-
 (defmethod update-current-game! :mem [state move]
   (let [games @mem-db
         current-game (second (first (filter #(= (:active-game (:state (second %))) true) games)))
@@ -82,19 +63,6 @@
       (if winner?
         (update-game (assoc-in current-game [:state :active-game] false) state move games)
         (update-game current-game state move games)))))
-
-#_(defmethod update-current-game! :mem [state move]
-  (let [games @mem-db
-        [_ last-game] (last (into (sorted-map) games))
-        board (play-board (:state last-game) (:moves last-game))]
-    (if (or (some? (board/check-winner board)) (empty? last-game))
-      (reset! mem-db (assoc games
-                       (:id state) {:state (dissoc state :board :markers :turn :store)
-                                    :moves [{:player (first (get (:board state) move)) :position move}]}))
-      (let [updated-game (update last-game :moves conj {:player (first (get (:board state) move)) :position move})]
-        (reset! mem-db (assoc games
-                         (:id state)
-                         updated-game))))))
 
 (defmethod update-current-game! :default [state _move]
   (update-current-game! (assoc state :store :mem) 0))
@@ -132,6 +100,8 @@
       (filter #(nil? (board/check-winner %)))
       empty?)
     false))
+
+(defmulti clear-active :store)
 
 
 

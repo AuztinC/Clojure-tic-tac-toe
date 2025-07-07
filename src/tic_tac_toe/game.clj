@@ -54,6 +54,7 @@
 
 (defn init-game [state]
   (do
+    (db/clear-active {:store :psql})
     (printer/game-id (get state :id))
     (game-loop state)))
 
