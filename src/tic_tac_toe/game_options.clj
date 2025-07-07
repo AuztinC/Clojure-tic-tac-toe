@@ -130,5 +130,37 @@
           (retry-watch-replay store))))
     (load-game store)))
 
+;(case (:screen state)
+;    :game-over (draw-game-over state)
+;    :in-progress-game (draw/draw-in-progress-game state)
+;    :select-game-mode (draw/draw-select-game-mode state)
+;    :select-board (draw/draw-select-board state)
+;    :select-difficulty (draw/draw-select-difficulty state)
+;    :replay-confirm (draw/draw-replay-screen state)
+;    :replay-id-entry (draw/draw-replay-id-entry state)
+;    :replay (watch-replay state)
+;    :game (cond
+;            (or (= :3x3 (:board-size state)) (= :4x4 (:board-size state)))
+;            (draw-game-screen state)
+;
+;            (= :3x3x3 (:board-size state))
+;            (draw-3d-game-screen state))
+;    :else (draw/draw-select-game-mode state))
+
+(defn cli-loop [state]
+  (loop [state state]
+    (let [new-state (case (:screen state)
+                      :select-game-mode (select-game state)
+                      :select-board (select-board)
+                      :select-difficulty (select-difficulty state)
+                      :in-progress-game (load-game state)
+                      :replay-confirm (watch-replay? state)
+                      :replay-id-entry (dispatch-id state)
+                      :replay (replay/replay state)
+                      :game (init/game-loop state)
+                      state)]
+      (when new-state
+        (recur new-state)))))
+
 
 

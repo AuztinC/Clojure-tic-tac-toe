@@ -342,11 +342,11 @@
       (if winner
         (do
           (println "Winner found in replay")
-          #_(assoc updated-state :screen :game-over))
+          (assoc updated-state :screen :game-over))
         updated-state))) ; keep going next frame
     (do
       (println "Replay finished")
-      #_(assoc state :screen :game-over))))
+      (assoc state :screen :game-over))))
 
 (defn draw [state]
   (case (:screen state)
@@ -357,7 +357,7 @@
     :select-difficulty (draw/draw-select-difficulty state)
     :replay-confirm (draw/draw-replay-screen state)
     :replay-id-entry (draw/draw-replay-id-entry state)
-    :replay (draw-game-screen state)
+    :replay (watch-replay state)
     :game (cond
             (or (= :3x3 (:board-size state)) (= :4x4 (:board-size state)))
             (draw-game-screen state)
