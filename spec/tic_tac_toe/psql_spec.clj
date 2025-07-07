@@ -39,7 +39,7 @@
       (with-redefs [jdbc/query
                     (stub :query {:invoke (fn [spec query-coll]
                                             (if (str/includes? (first query-coll) "games")
-                                              [{:id 1 :screen "game" :p1 "ai" :p2 "ai" :diff1 "easy" :diff2 "hard" :boardsize "3x3"}]
+                                              [{:id 1 :screen "game" :p1 ":ai" :p2 ":ai" :diff1 ":easy" :diff2 ":hard" :boardsize "3x3"}]
                                               [{:id 1 :gameid 1 :position 0 :player "X"}]))})]
         (let [game (db/find-game-by-id {:store :psql} 1)]
           (should= :game (:screen game))
@@ -164,10 +164,10 @@
           (db/update-current-game! state move)
           (should-have-invoked :execute!
             {:with [sut/psql-spec
-                    ["UPDATE moves SET position = (?::int), player =(?::text) WHERE gameid = ?"
+                    ["INSERT INTO moves(gameid, position, player) VALUES (?::int, ?::int, ?::text)"
+                     (:id state)
                      move
-                     (first (get (:board state) move))
-                     (:id state)]]})
+                     (first (get (:board state) move))]]})
           (should-have-invoked :execute!
             {:with [sut/psql-spec
                     ["UPDATE games SET active = false WHERE id = ?"
@@ -189,10 +189,10 @@
           (db/update-current-game! state move)
           (should-have-invoked :execute!
             {:with [sut/psql-spec
-                    ["UPDATE moves SET position = (?::int), player =(?::text) WHERE gameid = ?"
+                    ["INSERT INTO moves(gameid, position, player) VALUES (?::int, ?::int, ?::text)"
+                     (:id state)
                      move
-                     (first (get (:board state) move))
-                     (:id state)]]}))))
+                     (first (get (:board state) move))]]}))))
     )
 
   (context "in progress? "

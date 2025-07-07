@@ -13,6 +13,7 @@
         new-board))))
 
 (defn replay [state]
+  (prn "replay state " state)
   (let [{moves :moves, size :board-size} state
         board (board/get-board size)]
     (reduce (game-loop!)
