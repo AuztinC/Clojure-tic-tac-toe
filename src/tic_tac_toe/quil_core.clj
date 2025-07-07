@@ -52,6 +52,7 @@
         move))))
 
 (defn game-loop! [state]
+  (q/frame-rate 30)
   (cond
     (board/check-winner (:board state))
     (assoc state :screen :game-over)
@@ -207,11 +208,6 @@
       (assoc state :screen :replay-id-entry)
       :else state)))
 
-(defn build-replay-state [db-game]
-  (merge db-game {:screen       :replay
-                  :players      [:human :human]
-                  :replay-queue (:moves db-game)}))
-
 (defn- add-to-typed-id [state clicked-digit]
   (let [new-id (str (:typed-id state) clicked-digit)]
     (if (<= (count new-id) 2)
@@ -222,11 +218,10 @@
   (let [id-str (:typed-id state)
         id (Integer/parseInt id-str)
         game (db/find-game-by-id {:store (:store state)} id)]
+    (println "game" game)
     (if (empty? game)
       (assoc state :typed-id "Game not found")
-      (do
-        (assoc state :screen :replay)
-        game))))
+      (assoc game :screen :replay))))
 
 (defmethod mouse-pressed! :replay-id-entry [state event]
   (let [{:keys [x y]} event
@@ -332,6 +327,27 @@
     (q/fill 255 100 100)
     (q/text (str "Game Over " (board/check-winner (:board state)) " wins!") (/ (q/width) 2) 20)))
 
+(defn watch-replay [state]
+  (q/frame-rate 1)
+  (if-let [[next-move & remaining] (:moves state)]
+    (do
+      (println "watch-replay frame" state)
+      (let [{:keys [player position]} next-move
+          new-board (assoc (:board state) position [player])
+          winner (board/check-winner new-board)
+          updated-state (-> state
+                          (assoc :board new-board)
+                          (assoc :moves remaining)
+                          (assoc :turn (init/next-player (:turn state))))]
+      (if winner
+        (do
+          (println "Winner found in replay")
+          #_(assoc updated-state :screen :game-over))
+        updated-state))) ; keep going next frame
+    (do
+      (println "Replay finished")
+      #_(assoc state :screen :game-over))))
+
 (defn draw [state]
   (case (:screen state)
     :game-over (draw-game-over state)
@@ -340,10 +356,8 @@
     :select-board (draw/draw-select-board state)
     :select-difficulty (draw/draw-select-difficulty state)
     :replay-confirm (draw/draw-replay-screen state)
-    :replay (if (= 27 (count (:board state)))
-              (draw-3d-game-screen state)
-              (draw-game-screen state))
     :replay-id-entry (draw/draw-replay-id-entry state)
+    :replay (draw-game-screen state)
     :game (cond
             (or (= :3x3 (:board-size state)) (= :4x4 (:board-size state)))
             (draw-game-screen state)
@@ -352,25 +366,16 @@
             (draw-3d-game-screen state))
     :else (draw/draw-select-game-mode state)))
 
+
+
+
 (defn update-state [state]
   (case (:screen state)
     :game
     (game-loop! state)
 
-    :replay
-    (if-let [[next-move & remaining] (:moves state)]
-      (let [{:keys [player move]} next-move
-            new-board (assoc (:board state) move [player])
-            winner (board/check-winner new-board)]
-        (sleep)
-        (let [base-state (assoc state
-                           :board new-board
-                           :moves remaining
-                           :turn (init/next-player (:turn state)))]
-          (if winner
-            (assoc base-state :screen :game-over)
-            base-state)))
-      (assoc state :screen :game-over))
+    ;:replay
+    ;(watch-replay state)
 
     state))
 
