@@ -12,10 +12,10 @@
 
 (defn file->state [{:keys [state moves] :as _game}]
   (merge state
-    {:store :file
-     :board (play-board state moves)
-     :turn  (next-player moves)
-     :moves moves
+    {:store   :file
+     :board   (play-board state moves)
+     :turn    (next-player moves)
+     :moves   moves
      :markers ["X" "O"]}))
 
 (def mem-db (atom {}))
@@ -56,10 +56,11 @@
 
 (defmethod update-current-game! :mem [state move]
   (let [games @mem-db
-        current-game (second (first (filter #(= (:active-game (:state (second %))) true) games)))
+        current-game (second (first (filter #(= (:active (:state (second %))) true) games)))
         winner? (board/check-winner (assoc (:board state) move [(first (get (:board state) move))]))]
     (if (nil? current-game)
-      (init-new-game games state move)
+      (do
+        (init-new-game games state move))
       (if winner?
         (update-game (assoc-in current-game [:state :active-game] false) state move games)
         (update-game current-game state move games)))))
@@ -67,20 +68,7 @@
 (defmethod update-current-game! :default [state _move]
   (update-current-game! (assoc state :store :mem) 0))
 
-(defmulti update-previous-games!
-  (fn [store _id _move]
-    store))
-
-(defmethod update-previous-games! :mem [_store id move]
-  (let [games (:previous-games @mem-db)
-        updated (mapv (fn [game]
-                        (if (= (:id game) id)
-                          (update game :moves conj move)
-                          game))
-                  games)]
-    (reset! mem-db {:previous-games updated})))
-
-(defmulti in-progress? (fn [state] (:store state)) )
+(defmulti in-progress? (fn [state] (:store state)))
 
 (defmethod in-progress? :mem [_state]
   (let [games @mem-db

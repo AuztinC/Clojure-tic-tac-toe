@@ -97,7 +97,7 @@
             saved-state (:current-game @db/mem-db)]
         #_(should= new-state saved-state)))
 
-    (it "init game adds new entry to :previous-games and prints Game ID"
+    (it "init game  prints Game ID"
       (let [fixed-id 123
             state human-vs-ai-state]
         (with-redefs [db/update-current-game! (stub :update-current-game!)
@@ -107,25 +107,6 @@
         #_(should-have-invoked :update-current-game! {:with [state]})
         (should-have-invoked :print-game-id {:with [fixed-id]})))
 
-    (it "calls db/update-previous-games!"
-      (reset! db/mem-db {:previous-games [{:id 1 :moves [] :board-size :3x3}]})
-      (with-out-str (with-in-str "0"(let [store :mem
-            game-id 1
-            board (board/get-board :3x3)
-            marker "X"
-            fake-move 0]
-        (with-redefs []
-          (sut/play-turn store game-id board [marker :human] nil)))))
-      (let [store :mem
-            game-id 1
-            board (board/get-board :3x3)
-            marker "O"
-            fake-move 0
-            db-stub (stub :update-previous-games!)]
-        (with-redefs [tic-tac-toe.ai-turn/ai-turn (fn [_ _ _] 0)
-                      db/update-previous-games! db-stub]
-          (sut/play-turn store game-id board ["O" :ai] [:hard])
-          )))
     )
   )
 

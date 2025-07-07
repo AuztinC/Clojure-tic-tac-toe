@@ -251,7 +251,6 @@
       (it "get-selection returns next board and sleeps"
         (with-redefs [sut/sleep (stub :sleep)
                       sut/next-state (stub :next-state {:invoke :init})
-                      db/update-previous-games! (stub :update-previous-games!)
                       init/play-turn (stub :play-turn {:return [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]})]
           (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (sut/get-selection ai-vs-ai-state))
           (should-have-invoked :sleep))))

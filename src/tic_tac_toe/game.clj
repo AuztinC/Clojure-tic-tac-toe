@@ -46,7 +46,6 @@
 
 (defn game-loop [state]
   (loop [state state]
-    (prn "gameloop state" state)
     (if (board/check-winner (:board state))
       (end-game! state)
       (do
@@ -55,7 +54,7 @@
 
 (defn init-game [state]
   (do
-    (db/clear-active {:store :psql})
+    (db/clear-active {:store (:store state)})
     (printer/game-id (get state :id))
     (game-loop state)))
 

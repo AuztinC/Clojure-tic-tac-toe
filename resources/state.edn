@@ -1,0 +1,1 @@
+{0 {:state {:waiting-ai? false, :screen :game, :difficulties [:hard], :board-size :3x3, :active false, :id 0, :players [:human :ai], :typed-id ""}, :moves [{:player "X", :position 0} {:player "O", :position 4} {:player "X", :position 1} {:player "O", :position 2} {:player "X", :position 6} {:player "O", :position 3} {:player "X", :position 8} {:player "O", :position 5}]}}

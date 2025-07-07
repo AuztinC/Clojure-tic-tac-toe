@@ -42,7 +42,7 @@
     (it "creates game with move when none exist"
       (with-redefs [db/find-game-by-id (stub :find-game-by-id {:return nil})]
         (let [state {:id           1
-                     :active-game  true
+                     :active       true
                      :screen       :game
                      :board-size   :3x3
                      :board        [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
@@ -59,7 +59,7 @@
                              :screen       (:screen state)
                              :players      (:players state)
                              :difficulties (:difficulties state)
-                             :active-game  true}
+                             :active       true}
                      :moves [{:player "X" :position move}]}}
             @sut/mem-db))))
 
@@ -70,10 +70,10 @@
                                   :players      [:ai :ai]
                                   :difficulties [:easy :hard]
                                   :store        :mem
-                                  :active-game  false}
+                                  :active       false}
                           :moves (map #(assoc {} :player "X" :position %) (range 9))}}
             new-state {:id           1
-                       :active-game  true
+                       :active       true
                        :board-size   :3x3
                        :screen       :game
                        :board        [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
@@ -92,7 +92,7 @@
                              :screen       (:screen new-state)
                              :players      (:players new-state)
                              :difficulties (:difficulties new-state)
-                             :active-game  true}
+                             :active       true}
                      :moves [{:player "X" :position move}]}})
           @sut/mem-db)))
 
@@ -102,7 +102,7 @@
                                   :screen       :game
                                   :players      [:ai :ai]
                                   :difficulties [:easy :hard]
-                                  :active-game  true}
+                                  :active       true}
                           :moves [{:player "X" :position 0}]}}
             new-state {:id           0
                        :board-size   :3x3
@@ -112,7 +112,8 @@
                        :markers      ["X" "O"]
                        :difficulties [:easy :hard]
                        :turn         "p2"
-                       :store        :mem}
+                       :store        :mem
+                       :active       true}
             move 1]
         (reset! sut/mem-db old-state)
         (db/update-current-game! new-state move)
@@ -123,7 +124,7 @@
                              :screen       (:screen new-state)
                              :players      (:players new-state)
                              :difficulties (:difficulties new-state)
-                             :active-game  true}
+                             :active       true}
                      :moves [{:player "X" :position 0}
                              {:player "O" :position 1}]}})
           @sut/mem-db))))
@@ -160,7 +161,8 @@
                                      :board-size   :3x3
                                      :screen       :game
                                      :players      [:ai :ai]
-                                     :difficulties [:easy :hard]}
+                                     :difficulties [:easy :hard]
+                                     :active       false}
                              :moves (map #(assoc {} :player "X" :position %) (range 9))}})
       (should (db/previous-games? {:store :mem})))
     )

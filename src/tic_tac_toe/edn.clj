@@ -71,7 +71,6 @@
     (let [current (second (first (filter #(= (:active (:state (second %))) true) games)))
           parsed (db/file->state current)
           updated (assoc parsed :active false)]
-      (prn "updated game" updated)
       (spit edn-file
         (assoc games
           (:id updated)
