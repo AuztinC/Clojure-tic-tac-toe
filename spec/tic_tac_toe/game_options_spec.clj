@@ -25,7 +25,6 @@
           (should-have-invoked :select-game {:times 2}))))
 
     (it "selects human v ai"
-
       (with-out-str
         (with-in-str "1"
           (let [out (sut/select-game {:store :mem})]
@@ -94,13 +93,6 @@
   2: No\n" out))))
 
     (it "watch replay returns :replay-entry-id state"
-      #_(with-redefs [sut/dispatch-id (fn [_store]
-                                      (println "Please enter your game ID: ")
-                                      (let [id-str (read-line)
-                                            id (Integer/parseInt id-str)]
-                                        (db/find-game-by-id id)))
-                    db/find-game-by-id (stub :unpack-game)]
-        )
       (with-out-str
         (with-in-str "1"
           (let [out (sut/watch-replay? {:store :mem})]
@@ -112,8 +104,7 @@
 
     (it "retry replay for bad input"
       (with-redefs [sut/dispatch-id (stub :dispatch-id)
-                    sut/watch-replay? (stub :watch-replay? {:invoke sut/watch-replay?})
-                    ]
+                    sut/watch-replay? (stub :watch-replay? {:invoke sut/watch-replay?})]
         (let [out (with-out-str (with-in-str "W\n1\n1" (sut/watch-replay? {:store :mem})))]
           (should-contain "Bad input" out)
           (should-have-invoked :watch-replay? {:times 2}))))

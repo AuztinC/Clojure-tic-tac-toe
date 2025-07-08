@@ -7,10 +7,6 @@
             [tic-tac-toe.ai-turn]
             [tic-tac-toe.quil-core :as gui]))
 
-(defn ->inspect [x]
-  (prn "->inspect " x)
-  x)
-
 (defn -main [& args]
   (let [flags     (set args)
         store     (cond

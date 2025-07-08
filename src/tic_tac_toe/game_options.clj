@@ -27,7 +27,6 @@
 (defn select-difficulty [state]
   (printer/print-difficulty)
   (loop [out []]
-
     (if (= (:difficulty-count state) (count out))
       (let [id (db/set-new-game-id {:store (:store state)})
             board (board/get-board (:board-size state))]
