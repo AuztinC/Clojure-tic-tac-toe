@@ -21,6 +21,6 @@
       move
       (bad-move board marker))))
 
-(defmethod init/play-turn :human [board [marker _] _]
+(defmethod init/next-position [:human :cli] [{:keys [board] :as _state} [marker _] _]
   (let [move (human-turn board marker)]
     move))

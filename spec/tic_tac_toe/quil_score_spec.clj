@@ -1,5 +1,6 @@
 (ns tic-tac-toe.quil-score_spec
   (:require [speclj.core :refer :all]
+            [speclj.stub :as stub]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
             [tic-tac-toe.persistence :as db]
@@ -7,26 +8,26 @@
             [quil.core :as q]
             [tic-tac-toe.quil-drawings :as draw]))
 
-(def ai-vs-ai-state {:id 123
-                     :screen :game
+(def ai-vs-ai-state {:id         123
+                     :screen     :game
                      :board-size :3x3
-                     :board (board/get-board :3x3)
-                     :markers ["X" "O"]
-                     :moves []
-                     :store :mem
-                     :typed-id ""
-                     :turn "p1"
-                     :players [:ai :ai]})
+                     :board      (board/get-board :3x3)
+                     :markers    ["X" "O"]
+                     :moves      []
+                     :store      :mem
+                     :typed-id   ""
+                     :turn       "p1"
+                     :players    [:ai :ai]})
 
-(def human-vs-ai-state {:id 123
-                        :screen :game
+(def human-vs-ai-state {:id         123
+                        :screen     :game
                         :board-size :3x3
-                        :board (board/get-board :3x3)
-                        :markers ["X" "O"]
-                        :store :mem
-                        :typed-id ""
-                        :turn "p1"
-                        :players [:human :ai]})
+                        :board      (board/get-board :3x3)
+                        :markers    ["X" "O"]
+                        :store      :mem
+                        :typed-id   ""
+                        :turn       "p1"
+                        :players    [:human :ai]})
 
 (describe "quil"
   (with-stubs)
@@ -58,15 +59,15 @@
   (context "state changes"
 
     #_(it "update-state calls game loop if no winner"
-      (with-redefs [sut/game-loop! (stub :game-loop)]
-        (sut/update-state ai-vs-ai-state)
-        (should-have-invoked :game-loop)))
+        (with-redefs [sut/game-loop! (stub :game-loop)]
+          (sut/update-state ai-vs-ai-state)
+          (should-have-invoked :game-loop)))
 
     #_(it "update-state returns state not in game"
-      (let [state (assoc ai-vs-ai-state :screen :select-game-mode)]
-       (with-redefs [sut/game-loop! (stub :game-loop)]
-        (should= state (sut/update-state state))
-        (should-not-have-invoked :game-loop))))
+        (let [state (assoc ai-vs-ai-state :screen :select-game-mode)]
+          (with-redefs [sut/game-loop! (stub :game-loop)]
+            (should= state (sut/update-state state))
+            (should-not-have-invoked :game-loop))))
 
     (context "mouse pressed"
       (it "selects human vs human"
@@ -132,7 +133,7 @@
       (it "selects single difficulty"
         (with-redefs [db/set-new-game-id (stub :set-new-game-id)]
           (let [event {:x 55 :y 225}
-                state {:screen :select-difficulty
+                state {:screen  :select-difficulty
                        :players [:human :ai]}
                 result (sut/mouse-pressed! state event)]
             (should= :hard (first (:difficulties result))))))
@@ -140,30 +141,30 @@
       (it "selects two difficulties ai vs ai"
         (with-redefs [db/set-new-game-id (stub :set-new-game-id)]
           (let [event {:x 55 :y 225}
-                state {:screen :select-difficulty
+                state {:screen     :select-difficulty
                        :board-size :3x3
-                       :players [:ai :ai]}
+                       :players    [:ai :ai]}
                 result1 (sut/mouse-pressed! state event)
                 result2 (sut/mouse-pressed! result1 event)]
             (should= [:hard :hard] (:difficulties result2)))))
 
       (it "replay can move to select-game-mode"
         (let [event {:x 225 :y 225}
-              state {:screen :replay-confirm
+              state {:screen     :replay-confirm
                      :board-size :3x3}
               result (sut/mouse-pressed! state event)]
           (should= :select-game-mode (:screen result))))
 
       (it "replay can move to replay-id-entry"
         (let [event {:x 125 :y 225}
-              state {:screen :replay-confirm
+              state {:screen     :replay-confirm
                      :board-size :3x3}
               result (sut/mouse-pressed! state event)]
           (should= :replay-id-entry (:screen result))))
 
       (it "clears typed-id"
         (let [event {:x 85 :y 305}
-              state {:screen :replay-id-entry
+              state {:screen   :replay-id-entry
                      :typed-id "123"}
               result (sut/mouse-pressed! state event)]
           (should= "" (:typed-id result))))
@@ -171,7 +172,7 @@
       (it "id entry adds game not found for bad entry"
         (with-redefs [db/find-game-by-id (stub :find-game-by-id)]
           (let [event {:x 225 :y 305}
-                state {:screen :replay-id-entry
+                state {:screen   :replay-id-entry
                        :typed-id "1"}
                 result (sut/mouse-pressed! state event)]
             (should= "Game not found" (:typed-id result))
@@ -181,7 +182,7 @@
         (with-redefs [draw/digit-positions {1 [175 255]}
                       db/find-game-by-id (stub :find-game-by-id)]
           (let [event {:x 175 :y 255}
-                state {:screen :replay-id-entry
+                state {:screen   :replay-id-entry
                        :typed-id ""}
                 result (sut/mouse-pressed! state event)]
             (should= "1" (:typed-id result)))))
@@ -190,7 +191,7 @@
         (with-redefs [draw/digit-positions {1 [175 255]}
                       db/find-game-by-id (stub :find-game-by-id {:return {:id 1}})]
           (let [event {:x 225 :y 305}
-                state {:screen :replay-id-entry
+                state {:screen   :replay-id-entry
                        :typed-id "1"}]
             (sut/mouse-pressed! state event)
             #_(should-have-invoked :replay {:with [{:id 1}]}))))
@@ -229,15 +230,15 @@
       (it "click returns new selection and updates db "
         (let [event {:x 10 :y 10}]
           (sut/handle-in-game-click! human-vs-ai-state event)
-          (should-have-invoked :update-current-game! {:with [{:screen :game,
-                                                              :store :mem,
+          (should-have-invoked :update-current-game! {:with [{:screen     :game,
+                                                              :store      :mem,
                                                               :board-size :3x3,
-                                                              :turn "p2",
-                                                              :markers ["X" "O"],
-                                                              :id 123,
-                                                              :players [:human :ai],
-                                                              :board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]],
-                                                              :typed-id ""} 0]})
+                                                              :turn       "p2",
+                                                              :markers    ["X" "O"],
+                                                              :id         123,
+                                                              :players    [:human :ai],
+                                                              :board      [["X"] [""] [""] [""] [""] [""] [""] [""] [""]],
+                                                              :typed-id   ""} 0]})
           (should-have-invoked :draw-game-screen)))
 
       (it "click on taken space returns same state"
@@ -246,12 +247,27 @@
           (should= new-state (sut/handle-in-game-click! new-state event))))
       )
 
+    (context "start gui"
+      ;; TODO ARC - test for test of sketch
+      (redefs-around [q/sketch (stub :sketch)])
+
+      #_(it "quil parameters"
+        ;...
+        )
+
+      (it "initial state"
+        (sut/start-gui :mem)
+        (let [{:keys [setup]} (apply hash-map (stub/last-invocation-of :sketch))
+              initial-state (setup)]
+          (should= :gui (:ui initial-state))
+          )))
+
     #_(context "ai turns"
-      (focus-it "get-selection returns next board and sleeps"
-        (with-redefs [sut/sleep (stub :sleep)
-                      game/next-state (stub :next-state {:invoke :init})
-                      game/play-turn (stub :play-turn {:return 0})]
-          (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (game/next-state ai-vs-ai-state)))))
+        (focus-it "get-selection returns next board and sleeps"
+          (with-redefs [sut/sleep (stub :sleep)
+                        game/next-state (stub :next-state {:invoke :init})
+                        game/next-position (stub :play-turn {:return 0})]
+            (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (game/next-state ai-vs-ai-state)))))
 
     )
   )

@@ -155,8 +155,6 @@
       (= :medium difficulty) (medium board marker open-positions)
       (= :easy difficulty) (easy open-positions))))
 
-(defmethod init/play-turn :ai [board [marker _] diff]
-  (let [move (ai-turn board marker diff)
-        entry {:player marker
-               :move move}]
+(defmethod init/next-position [:ai :cli] [{:keys [board]} [marker _] diff]
+  (let [move (ai-turn board marker diff)]
     move))

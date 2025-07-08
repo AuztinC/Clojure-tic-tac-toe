@@ -1,5 +1,6 @@
 (ns tic-tac-toe.main-spec
   (:require [speclj.core :refer :all]
+            [speclj.stub :as stub]
             [tic-tac-toe.main :as sut]
             [tic-tac-toe.game-options :as opt]
             [tic-tac-toe.quil-core :as gui]
@@ -7,42 +8,44 @@
 
 (describe "Main"
   (with-stubs)
+
+  (redefs-around [opt/cli-loop (stub :cli-loop)])
+
   (context "dispatches all available db's"
     (it "defaults to :mem with no tag"
-      (with-redefs [opt/cli-loop (stub :cli-loop)]
-        (sut/-main)
-        (should-have-invoked :cli-loop {:with [{:screen :replay-confirm, :store :mem}]})))
+      (sut/-main)
+      (let [[state] (stub/last-invocation-of :cli-loop)]
+        (should= :mem (:store state))))
 
     (it "-file calls with :file"
-      (with-redefs [opt/cli-loop (stub :cli-loop)]
-        (apply sut/-main ["-file"])
-        (should-have-invoked :cli-loop {:with [{:screen :replay-confirm, :store :file}]})))
+      (apply sut/-main ["-file"])
+      (let [[state] (stub/last-invocation-of :cli-loop)]
+        (should= :file (:store state))))
 
     (context "-psql"
       (helper/stub-jdbc)
 
       (it "returns :psql with flag"
-        (with-redefs [opt/cli-loop (stub :cli-loop)]
-          (apply sut/-main ["-psql"])
-          (should-have-invoked :cli-loop {:with [{:screen :replay-confirm, :store :psql}]})))
+        (apply sut/-main ["-psql"])
+        (let [[state] (stub/last-invocation-of :cli-loop)]
+          (should= :psql (:store state))))
 
       (it "initializes db"
-        (with-redefs [opt/cli-loop (stub :cli-loop)]
-          (apply sut/-main ["-psql"])
-          (helper/should-initialize-db)))
+        (apply sut/-main ["-psql"])
+        (helper/should-initialize-db))
       ))
 
 
   (context "gui"
     (it "default to cli"
-      (with-redefs [opt/cli-loop (stub :cli-loop)]
-        (apply sut/-main [""])
-        (should-have-invoked :cli-loop {:with [{:screen :replay-confirm, :store :mem}]})))
+      (apply sut/-main [""])
+      (let [[state] (stub/last-invocation-of :cli-loop)]
+        (should= :cli (:ui state))))
 
     (it "--cli launches command line ui"
-      (with-redefs [opt/cli-loop (stub :cli-loop)]
-        (apply sut/-main ["--cli"])
-        (should-have-invoked :cli-loop {:with [{:screen :replay-confirm, :store :mem}]})))
+      (apply sut/-main ["--cli"])
+      (let [[state] (stub/last-invocation-of :cli-loop)]
+        (should= :cli (:ui state))))
 
     (it "--gui launches quil"
       (with-redefs [gui/start-gui (stub :start-gui)]

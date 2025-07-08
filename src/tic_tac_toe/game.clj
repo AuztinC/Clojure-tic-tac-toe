@@ -3,16 +3,19 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
 
-(defmulti play-turn (fn [_board [_ player-type] & _] player-type))
+(defn position-dispatch [{:keys [ui] :as _state} [_ player-type] & _]
+  [player-type ui])
+(defmulti next-position position-dispatch)
 
 (defn next-player [turn]
   (if (= "p1" turn) "p2" "p1"))
 
 (defn ->players
-  [turn player1-marker player1-type player2-marker player2-type]
-  (if (= "p1" turn)
-    [player1-marker player1-type]
-    [player2-marker player2-type]))
+  [{:keys [turn players]}]
+  (let [[p1-type p2-type] players]
+    (if (= "p1" turn)
+      ["X" p1-type]
+      ["O" p2-type])))
 
 (defn ->difficulties [turn player-type difficulties]
   (if (= 1 (count difficulties))
@@ -30,15 +33,12 @@
 (defn next-state [state]
   (if (board/check-winner (:board state))
     (assoc state :screen :game-over)
-    (let [{board                       :board,
-           [player1-type player2-type] :players
-           difficulties                :difficulties
-           turn                        :turn} state]
-      (let [[marker player-type :as player] (->players turn
-                                              "X" player1-type
-                                              "O" player2-type)
+    (let [{board        :board,
+           difficulties :difficulties
+           turn         :turn} state]
+      (let [[marker player-type :as player] (->players state)
             difficulty (->difficulties turn player-type difficulties)
-            move (play-turn board player difficulty)
+            move (next-position state player difficulty)
             next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
         (do
           (db/update-current-game! next-state move)

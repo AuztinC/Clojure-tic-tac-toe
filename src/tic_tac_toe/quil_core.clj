@@ -30,46 +30,46 @@
   (Thread/sleep 500))
 
 #_(defn next-state [state selection]
-  (let [{:keys [turn markers]} state
-        marker (case turn
-                 "p1" (first markers)
-                 "p2" (second markers))
-        next-turn (init/next-player turn)
-        updated (assoc state :board (assoc (:board state) selection [marker]) :turn next-turn)]
-    (db/update-current-game! updated selection)
-    updated))
+    (let [{:keys [turn markers]} state
+          marker (case turn
+                   "p1" (first markers)
+                   "p2" (second markers))
+          next-turn (init/next-player turn)
+          updated (assoc state :board (assoc (:board state) selection [marker]) :turn next-turn)]
+      (db/update-current-game! updated selection)
+      updated))
 
 #_(defn get-selection [state]
-  (let [{:keys [store id board markers difficulties turn players]} state
-        [marker player] (case turn
-                          "p1" [(first markers) (first players)]
-                          "p2" [(second markers) (second players)])
-        difficulty (init/->difficulties turn :ai difficulties)]
-    (when (= :ai player)
-      (sleep)
-      (when-let [move (init/play-turn store id board [marker :ai] difficulty)]
-        move))))
+    (let [{:keys [store id board markers difficulties turn players]} state
+          [marker player] (case turn
+                            "p1" [(first markers) (first players)]
+                            "p2" [(second markers) (second players)])
+          difficulty (init/->difficulties turn :ai difficulties)]
+      (when (= :ai player)
+        (sleep)
+        (when-let [move (init/next-position store id board [marker :ai] difficulty)]
+          move))))
 
 #_(defn game-loop! [state]
-  (q/frame-rate 30)
-  (cond
-    (board/check-winner (:board state))
-    (assoc state :screen :game-over)
+    (q/frame-rate 30)
+    (cond
+      (board/check-winner (:board state))
+      (assoc state :screen :game-over)
 
-    (and (not (:waiting-ai? state))
-      (= :ai (case (:turn state)
-               "p1" (first (:players state))
-               "p2" (second (:players state)))))
-    (assoc state :waiting-ai? true)
+      (and (not (:waiting-ai? state))
+        (= :ai (case (:turn state)
+                 "p1" (first (:players state))
+                 "p2" (second (:players state)))))
+      (assoc state :waiting-ai? true)
 
-    (:waiting-ai? state)
-    (let [selection (get-selection state)]
-      (if selection
-        (-> state
-          (assoc :waiting-ai? false)
-          (next-state selection))
-        (assoc state :waiting-ai? false)))
-    :else state))
+      (:waiting-ai? state)
+      (let [selection (get-selection state)]
+        (if selection
+          (-> state
+            (assoc :waiting-ai? false)
+            (next-state selection))
+          (assoc state :waiting-ai? false)))
+      :else state))
 
 (defmulti handle-in-game-click!
   (fn [state _event] (:board-size state)))
@@ -130,8 +130,8 @@
   (let [{:keys [x y]} event
         {:keys [board turn markers]} state
         marker (case turn
-          "p1" (first markers)
-          "p2" (second markers))
+                 "p1" (first markers)
+                 "p2" (second markers))
         cell-size (/ (q/width) 9)
         layer-size (* 3 cell-size)
         layer (find-layer x y layer-size)]
@@ -385,13 +385,14 @@
     (q/sketch
       :title "Tic-Tac-Toe"
       :size [400 400]
-      :setup #(hash-map
-                :screen starting-screen
-                :markers ["X" "O"]
-                :store store
-                :typed-id ""
-                :turn "p1"
-                :waiting-ai? true)
+      :setup (constantly
+               {:screen      starting-screen
+                :markers     ["X" "O"]
+                :store       store
+                :typed-id    ""
+                :turn        "p1"
+                :waiting-ai? true
+                :ui          :gui})
       :update update-state
       :draw draw
       :mouse-pressed mouse-pressed!

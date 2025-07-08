@@ -4,7 +4,8 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.board :as board]))
-(def ai-vs-ai-state {:active-game  true
+(def ai-vs-ai-state {:ui :cli
+                     :active-game  true
                      :id           123
                      :board        (board/get-board :3x3)
                      :board-size   :3x3
@@ -14,7 +15,8 @@
                      :store        :mem
                      :turn         "p1"})
 
-(def human-vs-ai-state {:active-game  true
+(def human-vs-ai-state {:ui :cli
+                        :active-game  true
                         :id           123
                         :board        (board/get-board :3x3)
                         :board-size   :3x3
@@ -24,7 +26,8 @@
                         :difficulties [:hard]
                         :store        :mem
                         :turn         "p1"})
-(def ai-vs-human-state {:active-game  true
+(def ai-vs-human-state {:ui :cli
+                        :active-game  true
                         :id           123
                         :board        (board/get-board :3x3)
                         :board-size   :3x3

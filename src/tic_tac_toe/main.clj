@@ -8,15 +8,14 @@
             [tic-tac-toe.quil-core :as gui]))
 
 (defn -main [& args]
-  (let [flags     (set args)
-        store     (cond
-                    (flags "-file") :file
-                    (flags "-psql") (do (pg/db-setup) :psql)
-                    :default :mem)]
+  (let [flags (set args)
+        store (cond
+                (flags "-file") :file
+                (flags "-psql") (do (pg/db-setup) :psql)
+                :default :mem)]
     (cond
       (flags "--gui") (gui/start-gui store)
-      (flags "--cli") (opt/cli-loop {:screen :replay-confirm
-                                          :store store})
       :else (opt/cli-loop {:screen :replay-confirm
-                           :store store}))))
+                           :store  store
+                           :ui :cli}))))
 
