@@ -21,8 +21,6 @@
       move
       (bad-move board marker))))
 
-(defmethod init/play-turn :human [store id board [marker _] _]
-  (let [move (human-turn board marker)
-        entry {:player marker
-               :move move}]
-    move #_(assoc board move [marker])))
+(defmethod init/play-turn :human [board [marker _] _]
+  (let [move (human-turn board marker)]
+    move))

@@ -29,7 +29,7 @@
 (defn sleep []
   (Thread/sleep 500))
 
-(defn next-state [state selection]
+#_(defn next-state [state selection]
   (let [{:keys [turn markers]} state
         marker (case turn
                  "p1" (first markers)
@@ -39,7 +39,7 @@
     (db/update-current-game! updated selection)
     updated))
 
-(defn get-selection [state]
+#_(defn get-selection [state]
   (let [{:keys [store id board markers difficulties turn players]} state
         [marker player] (case turn
                           "p1" [(first markers) (first players)]
@@ -47,11 +47,10 @@
         difficulty (init/->difficulties turn :ai difficulties)]
     (when (= :ai player)
       (sleep)
-      (let [move (init/play-turn store id board [marker :ai] difficulty)]
-        (when (nil? move))
+      (when-let [move (init/play-turn store id board [marker :ai] difficulty)]
         move))))
 
-(defn game-loop! [state]
+#_(defn game-loop! [state]
   (q/frame-rate 30)
   (cond
     (board/check-winner (:board state))
@@ -78,7 +77,7 @@
 (declare draw-game-screen)
 (defmethod handle-in-game-click! :3x3 [state event]
   (let [{:keys [x y]} event
-        {:keys [markers turn board store id]} state
+        {:keys [board turn markers]} state
         marker (case turn
                  "p1" (first markers)
                  "p2" (second markers))
@@ -86,18 +85,19 @@
         col (int (/ x cell-size))
         row (int (/ y cell-size))
         index (+ (* row 3) col)
-        selection? (and (>= index 0) (< index 9) (= (first (nth board index)) ""))]
+        selection? (and (>= index 0) (< index 9) (= (first (nth board index)) ""))
+        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (init/next-player turn))]
     (if selection?
       (do
+        (db/update-current-game! updated-board index)
         (-> state
-          (next-state index)
-          #_(assoc :board (assoc board index [marker]) :turn (init/next-player turn))
+          (assoc :board (assoc (:board state) index [marker]) :turn (init/next-player turn))
           (draw-game-screen)))
       state)))
 
 (defmethod handle-in-game-click! :4x4 [state event]
   (let [{:keys [x y]} event
-        {:keys [markers turn board store id]} state
+        {:keys [board turn markers]} state
         marker (case turn
                  "p1" (first markers)
                  "p2" (second markers))
@@ -105,12 +105,13 @@
         col (int (/ x cell-size))
         row (int (/ y cell-size))
         index (+ (* row 4) col)
-        entry {:player marker :move index}
-        selection? (and (>= index 0) (< index 16) (= (first (nth board index)) ""))]
+        selection? (and (>= index 0) (< index 16) (= (first (nth board index)) ""))
+        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (init/next-player turn))]
     (if selection?
       (do
+        (db/update-current-game! updated-board index)
         (-> state
-          (assoc :board (assoc board index [marker]) :turn (init/next-player turn))
+          (assoc :board (assoc (:board state) index [marker]) :turn (init/next-player turn))
           (draw-game-screen)))
       state)))
 
@@ -127,10 +128,10 @@
 
 (defmethod handle-in-game-click! :3x3x3 [state event]
   (let [{:keys [x y]} event
-        {:keys [markers turn board store id]} state
+        {:keys [board turn markers]} state
         marker (case turn
-                 "p1" (first markers)
-                 "p2" (second markers))
+          "p1" (first markers)
+          "p2" (second markers))
         cell-size (/ (q/width) 9)
         layer-size (* 3 cell-size)
         layer (find-layer x y layer-size)]
@@ -143,15 +144,15 @@
             col (int (/ local-x cell-size))
             row (int (/ local-y cell-size))
             index (+ (* layer 9) (+ (* row 3) col))
-            entry {:player marker :move index}
             selection? (and (>= index 0)
                          (< index 27)
-                         (= (first (nth board index)) ""))]
+                         (= (first (nth board index)) ""))
+            updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (init/next-player turn))]
         (if selection?
           (do
+            (db/update-current-game! updated-board index)
             (-> state
-              (next-state index)
-              #_(assoc :board (assoc board index [marker]) :turn (init/next-player turn))
+              (assoc :board (assoc (:board state) index [marker]) :turn (init/next-player turn))
               (draw-game-screen)))
           state))
       state)))
@@ -168,7 +169,7 @@
       (in-button? x y 220 220 70 50)
       (assoc state :players [:human :ai] :screen :select-board)
       (in-button? x y 320 220 70 50)
-      (assoc state :mode :ai-v-ai :players [:ai :ai] :screen :select-board)
+      (assoc state :players [:ai :ai] :screen :select-board)
       :else state)))
 
 (defmethod mouse-pressed! :select-board [state event]
@@ -366,7 +367,7 @@
 (defn update-state [state]
   (case (:screen state)
     :game
-    (game-loop! state)
+    (init/next-state state)
 
     :replay
     (watch-replay state)

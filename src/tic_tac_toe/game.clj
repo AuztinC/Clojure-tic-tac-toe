@@ -3,7 +3,7 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
 
-(defmulti play-turn (fn [_store _id _board [_ player-type] & _] player-type))
+(defmulti play-turn (fn [_board [_ player-type] & _] player-type))
 
 (defn next-player [turn]
   (if (= "p1" turn) "p2" "p1"))
@@ -28,25 +28,25 @@
     (printer/game-id id)))
 
 (defn next-state [state]
-  (let [{board                           :board,
-         [player1-type player2-type]     :players
-         difficulties                    :difficulties
-         turn                            :turn
-         id                              :id
-         store                           :store} state]
-    (let [[marker player-type :as player] (->players turn
-                                            "X" player1-type
-                                            "O" player2-type)
-          difficulty (->difficulties turn player-type difficulties)
-          move (play-turn store id board player difficulty)
-          next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
-      (do
-        (db/update-current-game! next-state move)
-        next-state))))
+  (if (board/check-winner (:board state))
+    (assoc state :screen :game-over)
+    (let [{board                       :board,
+           [player1-type player2-type] :players
+           difficulties                :difficulties
+           turn                        :turn} state]
+      (let [[marker player-type :as player] (->players turn
+                                              "X" player1-type
+                                              "O" player2-type)
+            difficulty (->difficulties turn player-type difficulties)
+            move (play-turn board player difficulty)
+            next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
+        (do
+          (db/update-current-game! next-state move)
+          next-state)))))
 
 (defn game-loop [state]
   (loop [state state]
-    (if (board/check-winner (:board state))
+    (if (= :game-over (:screen state))
       (end-game! state)
       (do
         (printer/display-board (:board state))

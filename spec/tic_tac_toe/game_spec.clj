@@ -4,36 +4,36 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.board :as board]))
-(def ai-vs-ai-state {:active-game true
-                     :id 123
-                     :board (board/get-board :3x3)
-                     :board-size :3x3
-                     :players [:ai :ai]
-                     :markers ["X" "O"]
+(def ai-vs-ai-state {:active-game  true
+                     :id           123
+                     :board        (board/get-board :3x3)
+                     :board-size   :3x3
+                     :players      [:ai :ai]
+                     :markers      ["X" "O"]
                      :difficulties [:hard :hard]
-                     :store :mem
-                     :turn "p1"})
+                     :store        :mem
+                     :turn         "p1"})
 
-(def human-vs-ai-state {:active-game true
-                        :id 123
-                        :board (board/get-board :3x3)
-                        :board-size :3x3
-
-                        :players [:human :ai]
-                        :markers ["X" "O"]
+(def human-vs-ai-state {:active-game  true
+                        :id           123
+                        :board        (board/get-board :3x3)
+                        :board-size   :3x3
+                        :screen       :game
+                        :players      [:human :ai]
+                        :markers      ["X" "O"]
                         :difficulties [:hard]
-                        :store :mem
-                        :turn "p1"})
-(def ai-vs-human-state {:active-game true
-                        :id 123
-                        :board (board/get-board :3x3)
-                        :board-size :3x3
+                        :store        :mem
+                        :turn         "p1"})
+(def ai-vs-human-state {:active-game  true
+                        :id           123
+                        :board        (board/get-board :3x3)
+                        :board-size   :3x3
 
-                        :players [:ai :human]
-                        :markers ["X" "O"]
+                        :players      [:ai :human]
+                        :markers      ["X" "O"]
                         :difficulties [:hard]
-                        :store :mem
-                        :turn "p1"})
+                        :store        :mem
+                        :turn         "p1"})
 
 (describe "tic tac toe"
   (with-stubs)
@@ -44,7 +44,7 @@
     (it "prints board first"
       (with-redefs [printer/display-board (stub :display-board)]
         (with-out-str (with-in-str "1\n3\n7\n"
-          (sut/init-game human-vs-ai-state)))
+                        (sut/game-loop human-vs-ai-state)))
         (should-have-invoked :display-board))))
 
   (context "Game-loop"
@@ -65,15 +65,14 @@
                 "X wins!\n")))
     (it "ai-vs-ai"
       (should (clojure.string/includes?
-                (with-out-str
-                  (sut/init-game
-                    ai-vs-ai-state))
+                (with-out-str (sut/init-game
+                                ai-vs-ai-state))
                 "tie"))))
 
   (context "game over"
     (it "game over calls game-end!"
       (with-redefs [sut/end-game! (stub :end-game!)]
-        (with-out-str (sut/game-loop (assoc human-vs-ai-state :board (repeat 9 ["X"]))))
+        (with-out-str (sut/game-loop {:screen :game-over}))
         (should-have-invoked :end-game!)))
     )
 
@@ -91,11 +90,12 @@
               "Game ID: ")))
 
   (context "storing moves"
-    (it "stores a new move to :current-game"
-      (let [new-state (sut/next-state
-                        ai-vs-ai-state)
-            saved-state (:current-game @db/mem-db)]
-        #_(should= new-state saved-state)))
+    ;; TODO ARC - update tests for next-state
+    #_(it "stores a new move to :current-game"
+        (let [new-state (sut/next-state
+                          ai-vs-ai-state)
+              saved-state (:current-game @db/mem-db)]
+          #_(should= new-state saved-state)))
 
     (it "init game  prints Game ID"
       (let [fixed-id 123
