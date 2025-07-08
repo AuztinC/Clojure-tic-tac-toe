@@ -259,18 +259,13 @@
                                                                :moves [{:player "X" :position 0}
                                                                        {:player "O" :position 1}]}})})
                       spit (stub :spit)]
-          (let [state {1 {:id           1
-                          :store        :file
-                          :board-size   :3x3
-                          :screen       :game
-                          :players      [:ai :ai]
-                          :difficulties [:easy :hard]
-                          :active       false
-                          :board        [["X"] ["O"] [""] [""] [""] [""] [""] [""] [""]]
-                          :turn         "p1",
-                          :markers      ["X" "O"]
-                          :moves        [{:player "X" :position 0}
-                                         {:player "O" :position 1}]}}]
+          (let [state {1 {:state {:id 1,
+                                  :board-size :3x3,
+                                  :screen :game,
+                                  :players [:ai :ai],
+                                  :difficulties [:easy :hard],
+                                  :active false},
+                          :moves [{:player "X", :position 0} {:player "O", :position 1}]}}]
             (db/clear-active {:store :file})
             (should-have-invoked :spit
               {:with [sut/edn-file

@@ -141,7 +141,7 @@
                       :replay-id-entry (dispatch-id state)
                       :replay (replay/replay state)
                       :game (do
-                              (prn "starting game" state)
+                              (db/clear-active {:store (:store state)})
                               (init/game-loop state))
                       state)]
       (when new-state

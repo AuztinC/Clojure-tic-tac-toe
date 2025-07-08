@@ -93,13 +93,11 @@
 
 (defmethod clear-active :mem [_store]
   (when-let [games @mem-db]
-    (let [current (second (first (filter #(= (:active (:state (second %))) true) games)))
-          parsed (file->state current)
-          updated (assoc parsed :active false)]
-      (reset! mem-db
-        (assoc games
-          (:id updated)
-          updated)))))
+    (if-let [[id game] (first (filter (fn [[_ g]]
+                                        (get-in g [:state :active]))
+                                games))]
+      (let [updated-game (assoc game :state (assoc (:state game) :active false))]
+        (reset! mem-db (assoc games id updated-game))))))
 
 
 

@@ -155,6 +155,14 @@
       (= :medium difficulty) (medium board marker open-positions)
       (= :easy difficulty) (easy open-positions))))
 
+(defn sleep []
+  (Thread/sleep 500))
+
 (defmethod init/next-position [:ai :cli] [{:keys [board]} [marker _] diff]
-  (let [move (ai-turn board marker diff)]
-    move))
+  (ai-turn board marker diff))
+
+(defmethod init/next-position [:ai :gui] [{:keys [board players]} [marker _] diff]
+  (do
+    (if (= [:ai :ai] players)
+      (sleep))
+    (ai-turn board marker diff)))

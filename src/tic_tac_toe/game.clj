@@ -58,9 +58,3 @@
     (printer/game-id (get state :id))
     (game-loop state)))
 
-(defn ->inspect [x]
-  (prn "->inspect: " x) x)
-
-(defn resume-game [store]
-  (game-loop (db/in-progress? {:store store})))
-

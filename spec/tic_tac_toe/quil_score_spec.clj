@@ -131,7 +131,8 @@
           (should= :easy (sut/->difficulty x y))))
 
       (it "selects single difficulty"
-        (with-redefs [db/set-new-game-id (stub :set-new-game-id)]
+        (with-redefs [db/clear-active (stub :clear-active)
+                      db/set-new-game-id (stub :set-new-game-id)]
           (let [event {:x 55 :y 225}
                 state {:screen  :select-difficulty
                        :players [:human :ai]}
@@ -139,7 +140,8 @@
             (should= :hard (first (:difficulties result))))))
 
       (it "selects two difficulties ai vs ai"
-        (with-redefs [db/set-new-game-id (stub :set-new-game-id)]
+        (with-redefs [db/clear-active (stub :clear-active)
+                      db/set-new-game-id (stub :set-new-game-id)]
           (let [event {:x 55 :y 225}
                 state {:screen     :select-difficulty
                        :board-size :3x3

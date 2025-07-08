@@ -26,8 +26,7 @@
 (defn click-clear? [x y pos-x pos-y]
   (in-button? x y pos-x pos-y 40 50))
 
-(defn sleep []
-  (Thread/sleep 500))
+
 
 #_(defn next-state [state selection]
     (let [{:keys [turn markers]} state
@@ -194,10 +193,12 @@
             updated-difficulties (conj (vec (:difficulties state)) difficulty)]
         (if (< (count updated-difficulties) ai-count)
           (assoc state :difficulties updated-difficulties)
-          (-> state
-            (assoc :id (db/set-new-game-id {:store (:store state)})
-              :difficulties updated-difficulties
-              :screen :game))))
+          (do
+            (db/clear-active {:store (:store state)})
+            (-> state
+              (assoc :id (db/set-new-game-id {:store (:store state)})
+                :difficulties updated-difficulties
+                :screen :game)))))
       state)))
 
 (defmethod mouse-pressed! :replay-confirm [state event]
@@ -367,7 +368,12 @@
 (defn update-state [state]
   (case (:screen state)
     :game
-    (init/next-state state)
+    (let [player (case (:turn state)
+                   "p1" (first (:players state))
+                   "p2" (second (:players state)))]
+      (if (= :ai player)
+        (init/next-state state)
+        state))
 
     :replay
     (watch-replay state)
@@ -386,13 +392,12 @@
       :title "Tic-Tac-Toe"
       :size [400 400]
       :setup (constantly
-               {:screen      starting-screen
-                :markers     ["X" "O"]
-                :store       store
-                :typed-id    ""
-                :turn        "p1"
-                :waiting-ai? true
-                :ui          :gui})
+               {:screen   starting-screen
+                :markers  ["X" "O"]
+                :store    store
+                :typed-id ""
+                :turn     "p1"
+                :ui       :gui})
       :update update-state
       :draw draw
       :mouse-pressed mouse-pressed!

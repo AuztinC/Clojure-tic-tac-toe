@@ -68,12 +68,11 @@
 
 (defmethod db/clear-active :file [_store]
   (when-let [games (edn-state)]
-    (let [current (second (first (filter #(= (:active (:state (second %))) true) games)))
-          parsed (db/file->state current)
-          updated (assoc parsed :active false)]
-      (spit edn-file
-        (assoc games
-          (:id updated)
-          updated)))))
+    (if-let [[id game] (first (filter (fn [[_ g]]
+                                        (get-in g [:state :active]))
+                                games))]
+      (let [updated-game (assoc game :state (assoc (:state game) :active false))]
+        (spit edn-file (assoc games id updated-game))))))
+
 
 
