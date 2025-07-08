@@ -141,6 +141,7 @@
                       :replay-id-entry (dispatch-id state)
                       :replay (replay/replay state)
                       :game (do
+                              (printer/game-id (get state :id))
                               (db/clear-active {:store (:store state)})
                               (init/game-loop state))
                       state)]

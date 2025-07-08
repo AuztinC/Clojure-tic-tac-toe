@@ -2,7 +2,7 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe.human-turn :as sut]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.game :as init]
+            [tic-tac-toe.game :as game]
             [tic-tac-toe.printer :as printer]))
 
 (describe "human-turn"
@@ -35,4 +35,11 @@
       (with-out-str (with-in-str "9" (sut/human-turn (board/get-board :3x3) "O")))
       (should-have-invoked :human-turn))
     )
+
+  (context "next position"
+    (redefs-around [read-line (fn [] "1")])
+    (with-out-str
+      (with-in-str "1"
+       (it "invokes next position cli"
+        (should= 1 (game/next-position {:board (board/get-board :3x3) :ui :cli :players [:human :ai]} ["X" :human] [:hard]))))))
   )

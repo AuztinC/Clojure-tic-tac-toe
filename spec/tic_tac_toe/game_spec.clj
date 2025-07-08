@@ -4,7 +4,7 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
             [tic-tac-toe.board :as board]))
-(def ai-vs-ai-state {:ui :cli
+(def ai-vs-ai-state {:ui           :cli
                      :active-game  true
                      :id           123
                      :board        (board/get-board :3x3)
@@ -15,7 +15,7 @@
                      :store        :mem
                      :turn         "p1"})
 
-(def human-vs-ai-state {:ui :cli
+(def human-vs-ai-state {:ui           :cli
                         :active-game  true
                         :id           123
                         :board        (board/get-board :3x3)
@@ -26,12 +26,12 @@
                         :difficulties [:hard]
                         :store        :mem
                         :turn         "p1"})
-(def ai-vs-human-state {:ui :cli
+(def ai-vs-human-state {:ui           :cli
                         :active-game  true
                         :id           123
                         :board        (board/get-board :3x3)
                         :board-size   :3x3
-
+                        :screen       :game
                         :players      [:ai :human]
                         :markers      ["X" "O"]
                         :difficulties [:hard]
@@ -56,19 +56,19 @@
       (should (clojure.string/includes?
                 (with-out-str
                   (with-in-str "0\n3\n7\n"
-                    (sut/init-game
+                    (sut/game-loop
                       human-vs-ai-state)))
                 "O wins!\n")))
     (it "ai-vs-human"
       (should (clojure.string/includes?
                 (with-out-str
                   (with-in-str "0\n3\n7\n"
-                    (sut/init-game
+                    (sut/game-loop
                       ai-vs-human-state)))
                 "X wins!\n")))
     (it "ai-vs-ai"
       (should (clojure.string/includes?
-                (with-out-str (sut/init-game
+                (with-out-str (sut/game-loop
                                 ai-vs-ai-state))
                 "tie"))))
 
@@ -82,7 +82,7 @@
   (context "init and resume call game-loop"
     (it "init"
       (with-redefs [sut/game-loop (stub :game-loop)]
-        (with-out-str (with-in-str "1\n7\n3" (sut/init-game human-vs-ai-state)))
+        (with-out-str (with-in-str "1\n7\n3" (sut/game-loop human-vs-ai-state)))
         (should-have-invoked :game-loop)))
     )
 
@@ -92,23 +92,21 @@
                 (sut/end-game! {:id 123 :board (board/get-board :3x3)}))
               "Game ID: ")))
 
-  (context "storing moves"
+  (context "Next-state stores a new move, updates turn and board"
     ;; TODO ARC - update tests for next-state
-    #_(it "stores a new move to :current-game"
-        (let [new-state (sut/next-state
-                          ai-vs-ai-state)
-              saved-state (:current-game @db/mem-db)]
-          #_(should= new-state saved-state)))
-
-    (it "init game  prints Game ID"
-      (let [fixed-id 123
-            state human-vs-ai-state]
-        (with-redefs [db/update-current-game! (stub :update-current-game!)
-                      printer/game-id (stub :print-game-id)
-                      sut/game-loop (fn [_state] nil)]
-          (sut/init-game state))
-        #_(should-have-invoked :update-current-game! {:with [state]})
-        (should-have-invoked :print-game-id {:with [fixed-id]})))
+    (redefs-around [db/update-current-game! (stub :update-current-game!)
+                    sut/next-position (stub :next-position {:return 0})])
+    (it "AI turn"
+      (let [new-state (sut/next-state ai-vs-ai-state)]
+        (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
+        (should= "p2" (:turn new-state))
+        (should-have-invoked :update-current-game! {:with [new-state 0]})))
+    (it "Human turn"
+      (let [new-state (sut/next-state human-vs-ai-state)]
+        (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
+        (should= "p2" (:turn new-state))
+        (should-have-invoked :update-current-game! {:with [new-state 0]}))
+      )
 
     )
   )

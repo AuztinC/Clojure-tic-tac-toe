@@ -11,7 +11,7 @@
   (with-stubs)
 
   (context "select-game"
-    (redefs-around [init/init-game (stub :init-game {:return :init})])
+    #_(redefs-around [init/init-game (stub :init-game {:return :init})])
 
     (it "prints game options"
       (with-redefs [read-line (fn [] "1")]

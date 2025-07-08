@@ -52,9 +52,3 @@
         (printer/display-board (:board state))
         (recur (next-state state))))))
 
-(defn init-game [state]
-  (do
-    (db/clear-active {:store (:store state)})
-    (printer/game-id (get state :id))
-    (game-loop state)))
-

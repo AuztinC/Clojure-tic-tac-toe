@@ -1,7 +1,7 @@
 (ns tic-tac-toe.human-turn
   (:require [tic-tac-toe.printer :as printer]
             [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.game :as init]))
+            [tic-tac-toe.game :as game]))
 
 (defn- empty-space? [board move]
   (= [""] (get board move)))
@@ -21,6 +21,6 @@
       move
       (bad-move board marker))))
 
-(defmethod init/next-position [:human :cli] [{:keys [board] :as _state} [marker _] _]
+(defmethod game/next-position [:human :cli] [{:keys [board] :as _state} [marker _] _]
   (let [move (human-turn board marker)]
     move))
