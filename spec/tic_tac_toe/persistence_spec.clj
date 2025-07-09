@@ -153,7 +153,7 @@
 
   (context "previous games"
     (it "returns false if no games in file"
-      (reset! sut/mem-db nil)
+      (reset! sut/mem-db {})
       (should-not (db/previous-games? {:store :mem})))
 
     (it "returns true if previous game complete in file"

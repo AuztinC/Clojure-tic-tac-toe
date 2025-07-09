@@ -75,8 +75,8 @@
 
 (defn print-load-game []
   (println "Previous game detected! Resume?
-  1: Yes
-  2: No"))
+  1: Continue Game
+  2: No Thanks"))
 
 (declare load-game)
 (defn retry-load-game [store]
@@ -101,7 +101,7 @@
     (println "Game not found! Let's try that again.")
     (dispatch-id store)))
 
-(defn dispatch-id [{:keys [store] :as state}]
+(defn dispatch-id [{:keys [store] :as _state}]
   (println "Please enter your game ID: ")
   (let [id-str (read-line)
         id (Integer/parseInt id-str)

@@ -3,7 +3,7 @@
             [quil.middleware :as m]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.game :as init]
+            [tic-tac-toe.game :as game]
             [tic-tac-toe.quil-drawings :as draw]))
 
 (defn in-button? [mx my x y w h]
@@ -33,7 +33,7 @@
           marker (case turn
                    "p1" (first markers)
                    "p2" (second markers))
-          next-turn (init/next-player turn)
+          next-turn (game/next-player turn)
           updated (assoc state :board (assoc (:board state) selection [marker]) :turn next-turn)]
       (db/update-current-game! updated selection)
       updated))
@@ -43,10 +43,10 @@
           [marker player] (case turn
                             "p1" [(first markers) (first players)]
                             "p2" [(second markers) (second players)])
-          difficulty (init/->difficulties turn :ai difficulties)]
+          difficulty (game/->difficulties turn :ai difficulties)]
       (when (= :ai player)
         (sleep)
-        (when-let [move (init/next-position store id board [marker :ai] difficulty)]
+        (when-let [move (game/next-position store id board [marker :ai] difficulty)]
           move))))
 
 #_(defn game-loop! [state]
@@ -85,12 +85,12 @@
         row (int (/ y cell-size))
         index (+ (* row 3) col)
         selection? (and (>= index 0) (< index 9) (= (first (nth board index)) ""))
-        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (init/next-player turn))]
+        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (game/next-player turn))]
     (if selection?
       (do
         (db/update-current-game! updated-board index)
         (-> state
-          (assoc :board (assoc (:board state) index [marker]) :turn (init/next-player turn))
+          (assoc :board (assoc (:board state) index [marker]) :turn (game/next-player turn))
           (draw-game-screen)))
       state)))
 
@@ -105,12 +105,12 @@
         row (int (/ y cell-size))
         index (+ (* row 4) col)
         selection? (and (>= index 0) (< index 16) (= (first (nth board index)) ""))
-        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (init/next-player turn))]
+        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (game/next-player turn))]
     (if selection?
       (do
         (db/update-current-game! updated-board index)
         (-> state
-          (assoc :board (assoc (:board state) index [marker]) :turn (init/next-player turn))
+          (assoc :board (assoc (:board state) index [marker]) :turn (game/next-player turn))
           (draw-game-screen)))
       state)))
 
@@ -146,12 +146,12 @@
             selection? (and (>= index 0)
                          (< index 27)
                          (= (first (nth board index)) ""))
-            updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (init/next-player turn))]
+            updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (game/next-player turn))]
         (if selection?
           (do
             (db/update-current-game! updated-board index)
             (-> state
-              (assoc :board (assoc (:board state) index [marker]) :turn (init/next-player turn))
+              (assoc :board (assoc (:board state) index [marker]) :turn (game/next-player turn))
               (draw-game-screen)))
           state))
       state)))
@@ -338,7 +338,7 @@
           updated-state (-> state
                           (assoc :board new-board)
                           (assoc :moves remaining)
-                          (assoc :turn (init/next-player (:turn state))))]
+                          (assoc :turn (game/next-player (:turn state))))]
       (if winner
         (assoc updated-state :screen :game-over)
         updated-state))
@@ -362,9 +362,6 @@
             (draw-3d-game-screen state))
     :else (draw/draw-select-game-mode state)))
 
-
-
-
 (defn update-state [state]
   (case (:screen state)
     :game
@@ -372,7 +369,7 @@
                    "p1" (first (:players state))
                    "p2" (second (:players state)))]
       (if (= :ai player)
-        (init/next-state state)
+        (game/next-state state)
         state))
 
     :replay

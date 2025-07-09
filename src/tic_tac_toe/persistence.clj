@@ -1,7 +1,6 @@
 (ns tic-tac-toe.persistence
   (:require [tic-tac-toe.board :as board]))
 
-;; TODO ARC - Refactor turn in game logic
 (defn next-player [moves]
   (if (= (:player (last moves)) "X") "p2" "p1"))
 
@@ -81,13 +80,14 @@
 (defmulti previous-games? :store)
 
 (defmethod previous-games? :mem [_store]
-  (if-let [games @mem-db]
-    (->> games
-      vals
-      (map #(play-board (:state %) (:moves %)))
-      (filter #(nil? (board/check-winner %)))
-      empty?)
-    false))
+  (let [games @mem-db]
+    (if (empty? games)
+      false
+      (->> games
+        vals
+        (map #(play-board (:state %) (:moves %)))
+        (filter #(nil? (board/check-winner %)))
+        empty?))))
 
 (defmulti clear-active :store)
 
