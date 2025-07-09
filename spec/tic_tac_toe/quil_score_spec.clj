@@ -239,7 +239,7 @@
 
     (redefs-around [q/width (stub :q/width {:return 400})
                     db/update-current-game! (stub :update-current-game!)
-                    sut/draw-game-screen (stub :draw-game-screen)])
+                    sut/setup-2d-game (stub :setup-2d-game)])
 
     (it "click returns new selection and updates db "
       (let [event {:x 10 :y 10}]
@@ -253,12 +253,19 @@
                                                             :players    [:human :ai],
                                                             :board      [["X"] [""] [""] [""] [""] [""] [""] [""] [""]],
                                                             :typed-id   ""} 0]})
-        (should-have-invoked :draw-game-screen)))
+        (should-have-invoked :setup-2d-game)))
 
     (it "click on taken space returns same state"
       (let [event {:x 10 :y 10}
             new-state (assoc human-vs-ai-state :board [["X"] [""] [""] [""] [""] [""] [""] [""] [""]])]
         (should= new-state (sut/handle-in-game-click! new-state event))))
+
+    (it "checks winner for human vs human"
+      (with-redefs [board/check-winner (stub :check-winner {:return "X Wins!"})]
+        (let [result (sut/update-state {:screen :game :players [:human :human] :turn "p1"})]
+          (should-have-invoked :check-winner)
+          (should= :game-over (:screen result)))))
+
     )
 
   (context "start gui"
@@ -266,14 +273,12 @@
 
     (it "quil parameters"
       (sut/start-gui :mem)
-      (with-redefs [sut/draw (stub :draw)
-                    sut/update-state (stub :update-state)]
-        (let [{:keys [title size update draw]} (apply hash-map (stub/last-invocation-of :sketch))]
-          (should= "Tic-Tac-Toe" title)
-          (should= [400 400] size)
-          #_(should-have-invoked :draw (draw {:screen :game}))
-          #_(should-have-invoked :update-state (update {}))
-          )))
+      (let [{:keys [title size update draw mouse-pressed middleware]} (apply hash-map (stub/last-invocation-of :sketch))]
+        (should= "Tic-Tac-Toe" title)
+        (should= [400 400] size)
+        (should= sut/draw draw)
+        (should= sut/update-state update)
+        (should= sut/mouse-pressed! mouse-pressed)))
 
     (it "initial state"
       (reset! db/mem-db {})
@@ -292,6 +297,14 @@
       (with-redefs [game/next-position (stub :play-turn {:return 0})]
         (let [result (sut/update-state ai-vs-human-state)]
           (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board result))
-          (should= "p2" (:turn result))))))
+          (should= "p2" (:turn result)))))
+
+    (it "allows game loop to check winner with ai games"
+      (with-redefs [game/next-state (stub :next-state)
+                    board/check-winner (stub :check-winner)]
+        (sut/update-state {:screen :game :players [:human :ai] :turn "p2"})
+        (should-not-have-invoked :check-winner)
+        (should-have-invoked :next-state)))
+    )
 
   )

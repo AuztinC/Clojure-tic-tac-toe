@@ -42,16 +42,16 @@
   (with-stubs)
   (before (reset! db/mem-db {}))
 
-  (context "prints-game"
-
-    (it "prints board first"
-      (with-redefs [printer/display-board (stub :display-board)]
-        (with-out-str (with-in-str "1\n3\n7\n"
-                        (sut/game-loop human-vs-ai-state)))
-        (should-have-invoked :display-board))))
-
   (context "Game-loop"
     (tags :slow)
+
+    (it "prints board"
+      (with-redefs [printer/display-board (stub :display-board)]
+        (with-out-str
+          (with-in-str "1\n3\n7\n"
+            (sut/game-loop human-vs-ai-state)))
+        (should-have-invoked :display-board {:times 8})))
+
     (it "Human-vs-ai"
       (should (clojure.string/includes?
                 (with-out-str
@@ -77,14 +77,14 @@
       (with-redefs [sut/end-game! (stub :end-game!)]
         (with-out-str (sut/game-loop {:screen :game-over}))
         (should-have-invoked :end-game!)))
+
+    (it "next-state checks winner, sets screen to :game-over"
+      (with-redefs [board/check-winner (stub :check-winner {:return "X Wins!"})]
+        (let [result (sut/next-state {:screen :game})]
+          (should-have-invoked :check-winner)
+          (should= :game-over (:screen result)))))
     )
 
-  (context "init and resume call game-loop"
-    (it "init"
-      (with-redefs [sut/game-loop (stub :game-loop)]
-        (with-out-str (with-in-str "1\n7\n3" (sut/game-loop human-vs-ai-state)))
-        (should-have-invoked :game-loop)))
-    )
 
   (it "print ID for end-game"
     (should (clojure.string/includes?
