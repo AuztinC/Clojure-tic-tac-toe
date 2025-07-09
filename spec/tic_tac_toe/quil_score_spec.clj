@@ -44,7 +44,8 @@
   (with-stubs)
   (redefs-around [q/fill (stub :fill)
                   q/rect (stub :rect)
-                  q/text (stub :text)])
+                  q/text (stub :text)
+                  q/frame-rate (stub :frame-rate)])
 
   (it "draw-button"
     (draw/draw-button "text" 10 10 10 10)
@@ -266,6 +267,34 @@
           (should-have-invoked :check-winner)
           (should= :game-over (:screen result)))))
 
+    )
+
+  (context "replay"
+    (it "switches frame rate to slow down game"
+      (let [state {:screen :replay
+                   :board  (board/get-board :3x3)
+                   :moves  [{:player "X" :position 0}]}
+            result (sut/watch-replay state)]
+        (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board result))
+        (should-have-invoked :frame-rate {:with [2]}))))
+
+  (context "find-game-size"
+    (redefs-around [sut/setup-2d-game (stub :setup-2d-game)
+                    sut/setup-3d-game (stub :setup-3d-game)])
+    (it "sets up 2d for game :3x3"
+      (sut/find-game-size {:board-size :3x3})
+      (should-have-invoked :setup-2d-game)
+      (should-not-have-invoked :setup-3d-game))
+
+    (it "sets up 2d for game :4x4"
+      (sut/find-game-size {:board-size :4x4})
+      (should-have-invoked :setup-2d-game)
+      (should-not-have-invoked :setup-3d-game))
+
+    (it "sets up 3d for game :3x3x"
+      (sut/find-game-size {:board-size :3x3x3})
+      (should-not-have-invoked :setup-2d-game)
+      (should-have-invoked :setup-3d-game))
     )
 
   (context "start gui"

@@ -308,6 +308,14 @@
         updated-state))
     (assoc state :screen :game-over)))
 
+(defn find-game-size [state]
+  (cond
+    (or (= :3x3 (:board-size state)) (= :4x4 (:board-size state)))
+    (setup-2d-game state)
+
+    (= :3x3x3 (:board-size state))
+    (setup-3d-game state)))
+
 (defn draw [state]
   (case (:screen state)
     :game-over (draw-game-over state)
@@ -317,13 +325,8 @@
     :select-difficulty (draw/draw-select-difficulty state)
     :replay-confirm (draw/draw-replay-screen state)
     :replay-id-entry (draw/draw-replay-id-entry state)
-    :replay (setup-2d-game state)
-    :game (cond
-            (or (= :3x3 (:board-size state)) (= :4x4 (:board-size state)))
-            (setup-2d-game state)
-
-            (= :3x3x3 (:board-size state))
-            (setup-3d-game state))
+    :replay (find-game-size state)
+    :game (find-game-size state)
     :else (draw/draw-select-game-mode state)))
 
 (defn update-state [state]
