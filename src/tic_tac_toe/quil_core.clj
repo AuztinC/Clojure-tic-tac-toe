@@ -26,50 +26,6 @@
 (defn click-clear? [x y pos-x pos-y]
   (in-button? x y pos-x pos-y 40 50))
 
-
-
-#_(defn next-state [state selection]
-    (let [{:keys [turn markers]} state
-          marker (case turn
-                   "p1" (first markers)
-                   "p2" (second markers))
-          next-turn (game/next-player turn)
-          updated (assoc state :board (assoc (:board state) selection [marker]) :turn next-turn)]
-      (db/update-current-game! updated selection)
-      updated))
-
-#_(defn get-selection [state]
-    (let [{:keys [store id board markers difficulties turn players]} state
-          [marker player] (case turn
-                            "p1" [(first markers) (first players)]
-                            "p2" [(second markers) (second players)])
-          difficulty (game/->difficulties turn :ai difficulties)]
-      (when (= :ai player)
-        (sleep)
-        (when-let [move (game/next-position store id board [marker :ai] difficulty)]
-          move))))
-
-#_(defn game-loop! [state]
-    (q/frame-rate 30)
-    (cond
-      (board/check-winner (:board state))
-      (assoc state :screen :game-over)
-
-      (and (not (:waiting-ai? state))
-        (= :ai (case (:turn state)
-                 "p1" (first (:players state))
-                 "p2" (second (:players state)))))
-      (assoc state :waiting-ai? true)
-
-      (:waiting-ai? state)
-      (let [selection (get-selection state)]
-        (if selection
-          (-> state
-            (assoc :waiting-ai? false)
-            (next-state selection))
-          (assoc state :waiting-ai? false)))
-      :else state))
-
 (defmulti handle-in-game-click!
   (fn [state _event] (:board-size state)))
 
@@ -258,6 +214,9 @@
 (defmethod mouse-pressed! :game [state event]
   (handle-in-game-click! state event))
 
+(defmethod mouse-pressed! :game-over [state _event]
+  state)
+
 (defn draw-game-screen [state]
   (let [turn (case (:turn state)
                "p1" "X"
@@ -289,7 +248,25 @@
           (q/text (str "Game Id: " (:id state)) 50 10))))
     state))
 
-(defn draw-3d-game-screen [state]
+(defn draw-3d-game [layers board-square size cell-size]
+  (doseq [[layer-idx layer] (map-indexed vector layers)]
+    (let [offset (* layer-idx board-square)]
+      (doseq [i (range 1 size)]
+        (q/line (+ offset (* i cell-size)) offset (+ offset (* i cell-size)) (+ offset board-square))
+        (q/line offset (+ offset (* i cell-size)) (+ offset board-square) (+ offset (* i cell-size)))
+        (doseq [idx (range (count layer))]
+          (let [row (quot idx size)
+                col (mod idx size)
+                val (first (nth layer idx))
+                x (+ offset (* col cell-size))
+                y (+ offset (* row cell-size))]
+            (when (not= val "")
+              (q/text-align :center :center)
+              (q/text-size 28)
+              (q/fill 0)
+              (q/text val (+ x (/ cell-size 2)) (+ y (/ cell-size 2))))))))))
+
+(defn setup-3d-game [state]
   (let [turn (case (:turn state)
                "p1" "X"
                "p2" "O"
@@ -300,22 +277,7 @@
         board-square (* size cell-size)]
     (q/background 150)
     (q/stroke 0)
-    (doseq [[layer-idx layer] (map-indexed vector layers)]
-      (let [offset (* layer-idx board-square)]
-        (doseq [i (range 1 size)]
-          (q/line (+ offset (* i cell-size)) offset (+ offset (* i cell-size)) (+ offset board-square))
-          (q/line offset (+ offset (* i cell-size)) (+ offset board-square) (+ offset (* i cell-size)))
-          (doseq [idx (range (count layer))]
-            (let [row (quot idx size)
-                  col (mod idx size)
-                  val (first (nth layer idx))
-                  x (+ offset (* col cell-size))
-                  y (+ offset (* row cell-size))]
-              (when (not= val "")
-                (q/text-align :center :center)
-                (q/text-size 28)
-                (q/fill 0)
-                (q/text val (+ x (/ cell-size 2)) (+ y (/ cell-size 2)))))))))
+    (draw-3d-game layers board-square size cell-size)
     (q/text (str "Turn: " turn) (/ (q/width) 2) (- (q/height) 20))
     (q/text-size 15)
     (q/text (str "Game Id: " (:id state)) (/ (q/width) 2) 10)))
@@ -324,7 +286,7 @@
   (let [is3d? (= 27 (count (:board state)))]
     (q/background 150)
     (if is3d?
-      (draw-3d-game-screen state)
+      (setup-3d-game state)
       (draw-game-screen state))
     (q/fill 255 100 100)
     (q/text (str "Game Over " (board/check-winner (:board state)) " wins!") (/ (q/width) 2) 20)))
@@ -359,7 +321,7 @@
             (draw-game-screen state)
 
             (= :3x3x3 (:board-size state))
-            (draw-3d-game-screen state))
+            (setup-3d-game state))
     :else (draw/draw-select-game-mode state)))
 
 (defn update-state [state]
@@ -370,7 +332,10 @@
                    "p2" (second (:players state)))]
       (if (= :ai player)
         (game/next-state state)
-        state))
+        (let [winner? (board/check-winner (:board state))]
+          (if winner?
+            (assoc state :screen :game-over)
+            state))))
 
     :replay
     (watch-replay state)
