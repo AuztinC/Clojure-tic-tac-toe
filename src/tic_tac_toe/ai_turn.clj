@@ -166,3 +166,9 @@
     (if (= [:ai :ai] players)
       (sleep))
     (ai-turn board marker diff)))
+
+(defmethod init/next-position [:ai :web] [{:keys [board players]} [marker _] diff]
+  (do
+    (if (= [:ai :ai] players)
+      (sleep))
+    (ai-turn board marker diff)))
