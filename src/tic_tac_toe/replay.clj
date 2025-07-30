@@ -1,5 +1,6 @@
 (ns tic-tac-toe.replay
   (:require [tic-tac-toe.board :as board]
+            [tic-tac-toe.game :as game]
             [tic-tac-toe.printer :as printer]))
 
 (defn game-loop! []
