@@ -29,7 +29,7 @@
                            :players      [:human :ai]
                            :markers      ["X" "O"]
                            :difficulties [:hard]
-                           :store        :file
+                           :store        :mem
                            :board-size   :3x3}
                    :moves [{:player "X" :position 0}]}
             new-state (assoc (:state state) :board (db/play-board (:state state) (:moves state))
