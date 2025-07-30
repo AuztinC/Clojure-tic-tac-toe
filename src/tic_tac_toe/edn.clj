@@ -60,9 +60,9 @@
 (defmethod db/previous-games? :file [_store]
   (if-let [games (edn-state)]
     (->> games
-      vals
-      (map #(db/play-board (:state %) (:moves %)))
-      (filter board/check-winner)
+      (map (fn [[_ {:keys [state moves]}]]
+             (assoc state :board (db/play-board state moves))))
+      (filter (comp board/check-winner :board))
       seq)
     false))
 

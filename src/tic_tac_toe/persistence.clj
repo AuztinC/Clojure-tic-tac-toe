@@ -85,9 +85,9 @@
       false
       (->> games
         vals
-        (map #(play-board (:state %) (:moves %)))
+        (map #(play-board % (:moves %)))
         (filter #(nil? (board/check-winner %)))
-        empty?))))
+        #_empty?))))
 
 (defmulti clear-active :store)
 
