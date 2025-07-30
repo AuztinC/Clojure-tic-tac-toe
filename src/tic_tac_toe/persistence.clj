@@ -80,14 +80,13 @@
 (defmulti previous-games? :store)
 
 (defmethod previous-games? :mem [_store]
-  (let [games @mem-db]
-    (if (empty? games)
-      false
-      (->> games
-        vals
-        (map #(play-board % (:moves %)))
-        (filter #(nil? (board/check-winner %)))
-        #_empty?))))
+  (if-let [games @mem-db]
+    (->> games
+      (map (fn [[_ {:keys [state moves]}]]
+             (assoc state :board (play-board state moves))))
+      (filter (comp board/check-winner :board))
+      seq)
+    false))
 
 (defmulti clear-active :store)
 
