@@ -33,9 +33,9 @@
 
 (defmethod find-game-by-id :mem [_store id]
   (let [previous-games @mem-db
-        game (first (filter #(= id (:id (:state %))) previous-games))]
+        game (get previous-games id)]
     (if game
-      (file->state game)
+      (assoc (file->state game) :store :mem)
       nil)))
 
 (defmulti update-current-game!
