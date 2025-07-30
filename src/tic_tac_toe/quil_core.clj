@@ -4,7 +4,8 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.game :as game]
-            [tic-tac-toe.quil-drawings :as draw]))
+            [tic-tac-toe.quil-drawings :as draw]
+            [tic-tac-toe.replay :as replay]))
 
 (defn in-button? [mx my x y w h]
   (and (>= mx x) (<= mx (+ x w))
@@ -295,18 +296,7 @@
 
 (defn watch-replay [state]
   (q/frame-rate 2)
-  (if-let [[next-move & remaining] (:moves state)]
-    (let [{:keys [player position]} next-move
-          new-board (assoc (:board state) position [player])
-          winner (board/check-winner new-board)
-          updated-state (-> state
-                          (assoc :board new-board)
-                          (assoc :moves remaining)
-                          (assoc :turn (game/next-player (:turn state))))]
-      (if winner
-        (assoc updated-state :screen :game-over)
-        updated-state))
-    (assoc state :screen :game-over)))
+  (replay/apply-next-replay-move state))
 
 (defn find-game-size [state]
   (cond

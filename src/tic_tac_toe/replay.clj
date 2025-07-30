@@ -19,3 +19,17 @@
     (reduce (game-loop!)
       board
       moves)))
+
+(defn apply-next-replay-move [state]
+  (if-let [[next-move & remaining] (:moves state)]
+    (let [{:keys [player position]} next-move
+          new-board (assoc (:board state) position [player])
+          winner (board/check-winner new-board)
+          updated-state (-> state
+                          (assoc :board new-board)
+                          (assoc :moves remaining)
+                          (assoc :turn (game/next-player (:turn state))))]
+      (if winner
+        (assoc updated-state :screen :game-over)
+        updated-state))
+    (assoc state :screen :game-over)))
