@@ -5,7 +5,8 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.game :as game]
             [tic-tac-toe.quil-drawings :as draw]
-            [tic-tac-toe.replay :as replay]))
+            [tic-tac-toe.replay :as replay]
+            [tic-tac-toe.human-turn :as ht]))
 
 (defn in-button? [mx my x y w h]
   (and (>= mx x) (<= mx (+ x w))
@@ -105,11 +106,8 @@
                          (= (first (nth board index)) ""))
             updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (game/next-player turn))]
         (if selection?
-          (do
-            (db/update-current-game! updated-board index)
-            (-> state
-              (assoc :board (assoc (:board state) index [marker]) :turn (game/next-player turn))
-              (setup-2d-game)))
+          (let [updated (ht/apply-human-move state index)]
+            (setup-2d-game updated))
           state))
       state)))
 
