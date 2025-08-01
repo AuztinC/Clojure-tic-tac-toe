@@ -1,4 +1,4 @@
-(defproject tic-tac-toe "0.1.0-SNAPSHOT"
+#_(defproject tic-tac-toe "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -11,4 +11,4 @@
                  [quil "4.3.1563"]]
   :profiles {:dev {:dependencies [[speclj "3.9.0"]]}}
   :plugins [[speclj "3.9.0"]]
-  :test-paths ["spec", "src"])
+  :test-paths ["spec/clj" "spec/cljs" "spec/cljc" "src/clj" "src/cljs" "src/cljc"])

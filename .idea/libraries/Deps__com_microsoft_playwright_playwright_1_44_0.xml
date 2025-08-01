@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Deps: com.microsoft.playwright/playwright:1.44.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/microsoft/playwright/playwright/1.44.0/playwright-1.44.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

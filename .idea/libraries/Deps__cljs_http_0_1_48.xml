@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Deps: cljs-http:0.1.48">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/cljs-http/cljs-http/0.1.48/cljs-http-0.1.48.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
