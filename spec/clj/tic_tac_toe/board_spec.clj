@@ -1,5 +1,15 @@
 (ns tic-tac-toe.board_spec
-  (:require [speclj.core :refer :all]
+  (:require [speclj.core :refer [describe
+                                 with-stubs
+                                 should
+                                 before
+                                 context
+                                 tags
+                                 stub
+                                 it
+                                 should-have-invoked
+                                 should-not
+                                 should=]]
             [tic-tac-toe.board :as sut]
             [tic-tac-toe.printer :as printer]))
 

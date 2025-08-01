@@ -1,5 +1,15 @@
 (ns tic-tac-toe.game_spec
-  (:require [speclj.core :refer :all]
+  (:require [speclj.core :refer [describe
+                                 with-stubs
+                                 should
+                                 before
+                                 context
+                                 tags
+                                 stub
+                                 it
+                                 should-have-invoked
+                                 redefs-around
+                                 should=]]
             [tic-tac-toe.game :as sut]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]

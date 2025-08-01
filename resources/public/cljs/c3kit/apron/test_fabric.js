@@ -22,8 +22,8 @@ return ((cljs.core.sequential_QMARK_.call(null,v)) || (cljs.core.set_QMARK_.call
 c3kit.apron.test_fabric._normal_tester = (function c3kit$apron$test_fabric$_normal_tester(f,v){
 return (function (ev){
 if(c3kit.apron.test_fabric.multi_QMARK_.call(null,ev)){
-return cljs.core.some.call(null,(function (p1__7342_SHARP_){
-return f.call(null,p1__7342_SHARP_,v);
+return cljs.core.some.call(null,(function (p1__7350_SHARP_){
+return f.call(null,p1__7350_SHARP_,v);
 }),ev);
 } else {
 var and__5023__auto__ = (!((ev == null)));
@@ -46,9 +46,9 @@ return v_set_QMARK_.call(null,ev);
 });
 });
 c3kit.apron.test_fabric._tester = (function c3kit$apron$test_fabric$_tester(form){
-var pred__7349 = cljs.core._EQ_;
-var expr__7350 = cljs.core.first.call(null,form);
-if(cljs.core.truth_(pred__7349.call(null,new cljs.core.Symbol(null,">",">",1085014381,null),expr__7350))){
+var pred__7351 = cljs.core._EQ_;
+var expr__7352 = cljs.core.first.call(null,form);
+if(cljs.core.truth_(pred__7351.call(null,new cljs.core.Symbol(null,">",">",1085014381,null),expr__7352))){
 var v = cljs.core.second.call(null,form);
 if(typeof v === 'number'){
 return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core._GT_,v);
@@ -56,7 +56,7 @@ return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core._GT_,v);
 return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core.comp.call(null,cljs.core.pos_QMARK_,cljs.core.compare),v);
 }
 } else {
-if(cljs.core.truth_(pred__7349.call(null,new cljs.core.Symbol(null,"<","<",993667236,null),expr__7350))){
+if(cljs.core.truth_(pred__7351.call(null,new cljs.core.Symbol(null,"<","<",993667236,null),expr__7352))){
 var v = cljs.core.second.call(null,form);
 if(typeof v === 'number'){
 return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core._LT_,v);
@@ -64,7 +64,7 @@ return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core._LT_,v);
 return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core.comp.call(null,cljs.core.neg_QMARK_,cljs.core.compare),v);
 }
 } else {
-if(cljs.core.truth_(pred__7349.call(null,new cljs.core.Symbol(null,">=",">=",1016916022,null),expr__7350))){
+if(cljs.core.truth_(pred__7351.call(null,new cljs.core.Symbol(null,">=",">=",1016916022,null),expr__7352))){
 var v = cljs.core.second.call(null,form);
 if(typeof v === 'number'){
 return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core._GT__EQ_,v);
@@ -72,7 +72,7 @@ return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core._GT__EQ_,v);
 return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core.comp.call(null,cljs.core.not,cljs.core.neg_QMARK_,cljs.core.compare),v);
 }
 } else {
-if(cljs.core.truth_(pred__7349.call(null,new cljs.core.Symbol(null,"<=","<=",1244895369,null),expr__7350))){
+if(cljs.core.truth_(pred__7351.call(null,new cljs.core.Symbol(null,"<=","<=",1244895369,null),expr__7352))){
 var v = cljs.core.second.call(null,form);
 if(typeof v === 'number'){
 return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core._LT__EQ_,v);
@@ -80,16 +80,16 @@ return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core._LT__EQ_,v);
 return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core.comp.call(null,cljs.core.not,cljs.core.pos_QMARK_,cljs.core.compare),v);
 }
 } else {
-if(cljs.core.truth_(pred__7349.call(null,new cljs.core.Symbol(null,"like","like",726481451,null),expr__7350))){
+if(cljs.core.truth_(pred__7351.call(null,new cljs.core.Symbol(null,"like","like",726481451,null),expr__7352))){
 return c3kit.apron.test_fabric.pattern_comparator.call(null,cljs.core.second.call(null,form),true);
 } else {
-if(cljs.core.truth_(pred__7349.call(null,new cljs.core.Symbol(null,"ilike","ilike",1487249058,null),expr__7350))){
+if(cljs.core.truth_(pred__7351.call(null,new cljs.core.Symbol(null,"ilike","ilike",1487249058,null),expr__7352))){
 return c3kit.apron.test_fabric.pattern_comparator.call(null,clojure.string.upper_case.call(null,cljs.core.second.call(null,form)),false);
 } else {
-if(cljs.core.truth_(pred__7349.call(null,new cljs.core.Symbol(null,"not=","not=",1466536204,null),expr__7350))){
+if(cljs.core.truth_(pred__7351.call(null,new cljs.core.Symbol(null,"not=","not=",1466536204,null),expr__7352))){
 return cljs.core.complement.call(null,c3kit.apron.test_fabric._or_tester.call(null,cljs.core.rest.call(null,form)));
 } else {
-if(cljs.core.truth_(pred__7349.call(null,new cljs.core.Symbol(null,"=","=",-1501502141,null),expr__7350))){
+if(cljs.core.truth_(pred__7351.call(null,new cljs.core.Symbol(null,"=","=",-1501502141,null),expr__7352))){
 return c3kit.apron.test_fabric._or_tester.call(null,cljs.core.rest.call(null,form));
 } else {
 return c3kit.apron.test_fabric._or_tester.call(null,form);
@@ -125,10 +125,10 @@ return c3kit.apron.test_fabric._normal_tester.call(null,cljs.core._EQ_,v);
 }
 }
 });
-c3kit.apron.test_fabric.kv__GT_tester = (function c3kit$apron$test_fabric$kv__GT_tester(p__7354){
-var vec__7355 = p__7354;
-var k = cljs.core.nth.call(null,vec__7355,(0),null);
-var v = cljs.core.nth.call(null,vec__7355,(1),null);
+c3kit.apron.test_fabric.kv__GT_tester = (function c3kit$apron$test_fabric$kv__GT_tester(p__7356){
+var vec__7357 = p__7356;
+var k = cljs.core.nth.call(null,vec__7357,(0),null);
+var v = cljs.core.nth.call(null,vec__7357,(1),null);
 var tester = c3kit.apron.test_fabric.get_tester_by_type.call(null,v);
 var key_path = c3kit.apron.test_fabric.ensure_key.call(null,k);
 return (function (e){

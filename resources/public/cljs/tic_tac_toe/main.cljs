@@ -7,8 +7,8 @@
   [:div
    {:id "bob"}
    [:a {:href "/"} ]
-   [:p "Hi there my friend Sir Scoops"]])
+   [:p "Hi friend wthis is new info"]])
 
 (defn ^:export main []
-  #_(rdomc/render (rdomc/create-root (wjs/element-by-id "app")) [app])
-  (rdom/render [app] (wjs/element-by-id "app")))
+  (rdomc/render (rdomc/create-root (wjs/element-by-id "app")) [app])
+  #_(rdom/render [app] (wjs/element-by-id "app")))

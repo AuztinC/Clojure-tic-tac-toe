@@ -42,22 +42,22 @@ return x;
 return cljs.core.set.call(null,x);
 }
 });
-var ensure_set_8074 = taoensso.truss.impl.ensure_set;
+var ensure_set_8073 = taoensso.truss.impl.ensure_set;
 taoensso.truss.impl.ks_EQ_ = (function taoensso$truss$impl$ks_EQ_(ks,m){
-return cljs.core._EQ_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8074.call(null,ks));
+return cljs.core._EQ_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8073.call(null,ks));
 });
 
 taoensso.truss.impl.ks_LT__EQ_ = (function taoensso$truss$impl$ks_LT__EQ_(ks,m){
-return clojure.set.subset_QMARK_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8074.call(null,ks));
+return clojure.set.subset_QMARK_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8073.call(null,ks));
 });
 
 taoensso.truss.impl.ks_GT__EQ_ = (function taoensso$truss$impl$ks_GT__EQ_(ks,m){
-return clojure.set.superset_QMARK_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8074.call(null,ks));
+return clojure.set.superset_QMARK_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8073.call(null,ks));
 });
 
 taoensso.truss.impl.ks_nnil_QMARK_ = (function taoensso$truss$impl$ks_nnil_QMARK_(ks,m){
-return taoensso.truss.impl.revery_QMARK_.call(null,(function (p1__8069_SHARP_){
-return (!((cljs.core.get.call(null,m,p1__8069_SHARP_) == null)));
+return taoensso.truss.impl.revery_QMARK_.call(null,(function (p1__8068_SHARP_){
+return (!((cljs.core.get.call(null,m,p1__8068_SHARP_) == null)));
 }),ks);
 });
 taoensso.truss.impl.default_error_fn = (function taoensso$truss$impl$default_error_fn(data_){
@@ -154,11 +154,11 @@ var arg__$1 = (function (){var temp__5825__auto____$1 = _QMARK_data_fn;
 if(cljs.core.truth_(temp__5825__auto____$1)){
 var data_fn = temp__5825__auto____$1;
 try{return data_fn.call(null);
-}catch (e8084){if((e8084 instanceof Error)){
-var e = e8084;
+}catch (e8090){if((e8090 instanceof Error)){
+var e = e8090;
 return new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword("truss","error","truss/error",-1137909873),e], null);
 } else {
-throw e8084;
+throw e8090;
 
 }
 }} else {

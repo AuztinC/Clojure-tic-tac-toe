@@ -1,5 +1,15 @@
 (ns tic-tac-toe.game-options-spec
-  (:require [speclj.core :refer :all]
+  (:require [speclj.core :refer [describe
+                                 with-stubs
+                                 should
+                                 before
+                                 context
+                                 should-contain
+                                 stub
+                                 it
+                                 should-have-invoked
+                                 redefs-around
+                                 should=]]
             [speclj.stub :as stub]
             [tic-tac-toe.game-options :as sut]
             [tic-tac-toe.game :as init]

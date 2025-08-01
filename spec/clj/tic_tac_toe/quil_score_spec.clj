@@ -1,5 +1,17 @@
 (ns tic-tac-toe.quil-score_spec
-  (:require [speclj.core :refer :all]
+  (:require [speclj.core :refer [describe
+                                 with-stubs
+                                 should
+                                 before
+                                 context
+                                 tags
+                                 stub
+                                 it
+                                 should-have-invoked
+                                 redefs-around
+                                 should=
+                                 should-not
+                                 should-not-have-invoked]]
             [speclj.stub :as stub]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]

@@ -80,25 +80,25 @@ c3kit.wire.flash.flash_root = (function c3kit$wire$flash$flash_root(){
 var temp__5825__auto__ = cljs.core.seq.call(null,cljs.core.deref.call(null,c3kit.wire.flash.state));
 if(temp__5825__auto__){
 var flashes = temp__5825__auto__;
-return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"div.flash-root","div.flash-root",-1425229719),(function (){var iter__5503__auto__ = (function c3kit$wire$flash$flash_root_$_iter__16246(s__16247){
+return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"div.flash-root","div.flash-root",-1425229719),(function (){var iter__5503__auto__ = (function c3kit$wire$flash$flash_root_$_iter__16249(s__16250){
 return (new cljs.core.LazySeq(null,(function (){
-var s__16247__$1 = s__16247;
+var s__16250__$1 = s__16250;
 while(true){
-var temp__5825__auto____$1 = cljs.core.seq.call(null,s__16247__$1);
+var temp__5825__auto____$1 = cljs.core.seq.call(null,s__16250__$1);
 if(temp__5825__auto____$1){
-var s__16247__$2 = temp__5825__auto____$1;
-if(cljs.core.chunked_seq_QMARK_.call(null,s__16247__$2)){
-var c__5501__auto__ = cljs.core.chunk_first.call(null,s__16247__$2);
+var s__16250__$2 = temp__5825__auto____$1;
+if(cljs.core.chunked_seq_QMARK_.call(null,s__16250__$2)){
+var c__5501__auto__ = cljs.core.chunk_first.call(null,s__16250__$2);
 var size__5502__auto__ = cljs.core.count.call(null,c__5501__auto__);
-var b__16249 = cljs.core.chunk_buffer.call(null,size__5502__auto__);
-if((function (){var i__16248 = (0);
+var b__16252 = cljs.core.chunk_buffer.call(null,size__5502__auto__);
+if((function (){var i__16251 = (0);
 while(true){
-if((i__16248 < size__5502__auto__)){
-var f = cljs.core._nth.call(null,c__5501__auto__,i__16248);
-cljs.core.chunk_append.call(null,b__16249,cljs.core.with_meta(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [c3kit.wire.flash.flash_message,f], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"key","key",-1516042587),c3kit.wire.flashc.id.call(null,f)], null)));
+if((i__16251 < size__5502__auto__)){
+var f = cljs.core._nth.call(null,c__5501__auto__,i__16251);
+cljs.core.chunk_append.call(null,b__16252,cljs.core.with_meta(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [c3kit.wire.flash.flash_message,f], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"key","key",-1516042587),c3kit.wire.flashc.id.call(null,f)], null)));
 
-var G__16266 = (i__16248 + (1));
-i__16248 = G__16266;
+var G__16262 = (i__16251 + (1));
+i__16251 = G__16262;
 continue;
 } else {
 return true;
@@ -106,13 +106,13 @@ return true;
 break;
 }
 })()){
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__16249),c3kit$wire$flash$flash_root_$_iter__16246.call(null,cljs.core.chunk_rest.call(null,s__16247__$2)));
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__16252),c3kit$wire$flash$flash_root_$_iter__16249.call(null,cljs.core.chunk_rest.call(null,s__16250__$2)));
 } else {
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__16249),null);
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__16252),null);
 }
 } else {
-var f = cljs.core.first.call(null,s__16247__$2);
-return cljs.core.cons.call(null,cljs.core.with_meta(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [c3kit.wire.flash.flash_message,f], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"key","key",-1516042587),c3kit.wire.flashc.id.call(null,f)], null)),c3kit$wire$flash$flash_root_$_iter__16246.call(null,cljs.core.rest.call(null,s__16247__$2)));
+var f = cljs.core.first.call(null,s__16250__$2);
+return cljs.core.cons.call(null,cljs.core.with_meta(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [c3kit.wire.flash.flash_message,f], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"key","key",-1516042587),c3kit.wire.flashc.id.call(null,f)], null)),c3kit$wire$flash$flash_root_$_iter__16249.call(null,cljs.core.rest.call(null,s__16250__$2)));
 }
 } else {
 return null;

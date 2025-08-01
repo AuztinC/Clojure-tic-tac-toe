@@ -1,5 +1,15 @@
 (ns tic-tac-toe.human-turn-spec
-  (:require [speclj.core :refer :all]
+  (:require [speclj.core :refer [describe
+                                 with-stubs
+                                 should
+                                 before
+                                 context
+                                 should-contain
+                                 stub
+                                 it
+                                 should-have-invoked
+                                 redefs-around
+                                 should=]]
             [tic-tac-toe.human-turn :as sut]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]

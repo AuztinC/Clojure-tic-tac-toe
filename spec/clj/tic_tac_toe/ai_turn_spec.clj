@@ -1,5 +1,15 @@
 (ns tic-tac-toe.ai-turn-spec
-  (:require [speclj.core :refer :all]
+  (:require [speclj.core :refer [describe
+                                 with-stubs
+                                 should
+                                 should-not-have-invoked
+                                 context
+                                 tags
+                                 stub
+                                 it
+                                 should-have-invoked
+                                 redefs-around
+                                 should=]]
             [tic-tac-toe.ai-turn :as sut]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]))

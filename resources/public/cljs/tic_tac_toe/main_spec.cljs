@@ -9,6 +9,6 @@
   (wire/with-root-dom)
   (before (wire/render [sut/app]))
 
-  (it "does stuff"
+  (it "game container"
     (should-select "#bob")
     (should= "file:///" (wire/href "#bob a"))))

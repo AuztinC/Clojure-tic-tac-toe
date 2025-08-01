@@ -10,7 +10,7 @@ goog.require('goog.date.UtcDateTime');
  */
 cljs_time.coerce.ICoerce = function(){};
 
-var cljs_time$coerce$ICoerce$to_date_time$dyn_14582 = (function (obj){
+var cljs_time$coerce$ICoerce$to_date_time$dyn_14581 = (function (obj){
 var x__5373__auto__ = (((obj == null))?null:obj);
 var m__5374__auto__ = (cljs_time.coerce.to_date_time[goog.typeOf(x__5373__auto__)]);
 if((!((m__5374__auto__ == null)))){
@@ -31,7 +31,7 @@ cljs_time.coerce.to_date_time = (function cljs_time$coerce$to_date_time(obj){
 if((((!((obj == null)))) && ((!((obj.cljs_time$coerce$ICoerce$to_date_time$arity$1 == null)))))){
 return obj.cljs_time$coerce$ICoerce$to_date_time$arity$1(obj);
 } else {
-return cljs_time$coerce$ICoerce$to_date_time$dyn_14582.call(null,obj);
+return cljs_time$coerce$ICoerce$to_date_time$dyn_14581.call(null,obj);
 }
 });
 
@@ -40,11 +40,11 @@ return cljs_time$coerce$ICoerce$to_date_time$dyn_14582.call(null,obj);
  *   number of milliseconds after the Unix epoch.
  */
 cljs_time.coerce.from_long = (function cljs_time$coerce$from_long(millis){
-var G__14581 = millis;
-if((G__14581 == null)){
+var G__14582 = millis;
+if((G__14582 == null)){
 return null;
 } else {
-return goog.date.UtcDateTime.fromTimestamp.call(null,G__14581);
+return goog.date.UtcDateTime.fromTimestamp.call(null,G__14582);
 }
 });
 /**
@@ -112,8 +112,8 @@ throw e14588;
 if(cljs.core.truth_(d)){
 return cljs.core.cons.call(null,d,cljs_time$coerce$from_string_$_iter__14583.call(null,cljs.core.rest.call(null,s__14584__$2)));
 } else {
-var G__14593 = cljs.core.rest.call(null,s__14584__$2);
-s__14584__$1 = G__14593;
+var G__14594 = cljs.core.rest.call(null,s__14584__$2);
+s__14584__$1 = G__14594;
 continue;
 }
 }
@@ -171,13 +171,13 @@ return and__5023__auto__;
  * Convert `obj` to a JavaScript Date instance.
  */
 cljs_time.coerce.to_date = (function cljs_time$coerce$to_date(obj){
-var G__14594 = obj;
-var G__14594__$1 = (((G__14594 == null))?null:cljs_time.coerce.to_date_time.call(null,G__14594));
-var G__14594__$2 = (((G__14594__$1 == null))?null:G__14594__$1.getTime());
-if((G__14594__$2 == null)){
+var G__14593 = obj;
+var G__14593__$1 = (((G__14593 == null))?null:cljs_time.coerce.to_date_time.call(null,G__14593));
+var G__14593__$2 = (((G__14593__$1 == null))?null:G__14593__$1.getTime());
+if((G__14593__$2 == null)){
 return null;
 } else {
-return (new Date(G__14594__$2));
+return (new Date(G__14593__$2));
 }
 });
 /**

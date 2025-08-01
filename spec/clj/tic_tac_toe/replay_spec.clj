@@ -1,5 +1,8 @@
 (ns tic-tac-toe.replay-spec
-  (:require [speclj.core :refer :all]
+  (:require [speclj.core :refer [describe
+                                 context
+                                 it
+                                 should-contain]]
             [tic-tac-toe.replay :as sut]))
 
 
