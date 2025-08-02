@@ -27,7 +27,7 @@
             (wire/render [main/app])))
 
 
-  (focus-context "updated state atom with screen on click"
+  (context "updated state atom with screen on click"
     (context "select-game-mode"
       (it "clicking Human vs AI sets screen to :select-board"
         (should= "Human vs AI" (wire/text "#human-vs-ai"))
@@ -59,6 +59,7 @@
                 (reset! setup/state {:screen :select-board})
                 (wire/render [main/app])))
       (it "3x3"
+        (should-select "#board-3x3")
         (should= "3x3" (wire/text "#board-3x3"))
         (wire/click! "#board-3x3")
         (should= :select-difficulty (:screen @setup/state))
@@ -66,6 +67,7 @@
         (should= (board/get-board :3x3) (:board @setup/state)))
 
       (it "4x4"
+        (should-select "#board-4x4")
         (should= "4x4" (wire/text "#board-4x4"))
         (wire/click! "#board-4x4")
         (should= :select-difficulty (:screen @setup/state))
@@ -73,6 +75,7 @@
         (should= (board/get-board :4x4) (:board @setup/state)))
 
       (it "3x3x3"
+        (should-select "#board-3x3x3")
         (should= "3x3x3" (wire/text "#board-3x3x3"))
         (wire/click! "#board-3x3x3")
         (should= :select-difficulty (:screen @setup/state))
@@ -80,7 +83,31 @@
         (should= (board/get-board :3x3x3) (:board @setup/state))))
     )
 
-  (context "difficulty"
-    (it "selects one difficulty for ai human"
-      ()))
+  (context "calls select-difficulty with correct key"
+    (before (do
+              (reset! setup/state {:screen :select-difficulty})
+              (wire/render [main/app])))
+
+    (it "easy"
+      (with-redefs [setup/select-difficulty! (stub :select-difficulty!)]
+        (should-select ".easy")
+        (should= "Easy" (wire/text ".easy"))
+        (wire/click! ".easy")
+        (should-have-invoked :select-difficulty! {:with [:easy]})))
+
+    (it "medium"
+      (with-redefs [setup/select-difficulty! (stub :select-difficulty!)]
+        (should-select ".medium")
+        (should= "Medium" (wire/text ".medium"))
+        (wire/click! ".medium")
+        (should-have-invoked :select-difficulty! {:with [:medium]})))
+
+    (it "hard"
+      (with-redefs [setup/select-difficulty! (stub :select-difficulty!)]
+        (should-select ".hard")
+        (should= "Hard" (wire/text ".hard"))
+        (wire/click! ".hard")
+        (should-have-invoked :select-difficulty! {:with [:hard]}))))
+
+
   )

@@ -1,24 +1,19 @@
 (ns tic-tac-toe.setup
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [tic-tac-toe.board :as board]))
 
 (defonce state (r/atom {:screen :select-game-mode}))
 
 (defn select-difficulty! [choice]
-  (let [diff (case choice
-               "1" :easy
-               "2" :medium
-               "3" :hard)
-        ai-count (count (filterv #(= :ai %) (:players state)))
-        updated-difficulties (conj (vec (:difficulties state)) diff)]
+  (let [current-state @state
+        ai-count (count (filterv #(= :ai %) (:players current-state)))
+        updated-difficulties (conj (vec (:difficulties current-state)) choice)]
     (if (< (count updated-difficulties) ai-count)
-      (assoc state :difficulties updated-difficulties
+      (swap! state assoc :difficulties updated-difficulties
         :screen :select-difficulty)
-      (do
-        (-> state
-          (assoc
-            :active true
-            :difficulties updated-difficulties
-            :screen :game
-            :board (board/get-board (:board-size state))
-            :turn "p1"
-            :markers ["X" "O"]))))))
+      (swap! state assoc
+        :active true
+        :difficulties updated-difficulties
+        :screen :game
+        :turn "p1"
+        :markers ["X" "O"]))))

@@ -48,8 +48,14 @@
   [:div
    {:id "main-container"}
    [:h1 "Select difficulty"]
-   [:button {:type "submit" :name "choice" :value "1"} "Easy"]
-   [:button {:type "submit" :name "choice" :value "2"} "Medium"]
-   [:button {:type "submit" :name "choice" :value "3"} "Hard"]])
+   [:button {:id       "diff"
+             :class    "easy"
+             :on-click #(setup/select-difficulty! :easy)} "Easy"]
+   [:button {:id       "diff"
+             :class    "medium"
+             :on-click #(setup/select-difficulty! :medium)} "Medium"]
+   [:button {:id       "diff"
+             :class    "hard"
+             :on-click #(setup/select-difficulty! :hard)} "Hard"]])
 
 
