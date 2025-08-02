@@ -1,5 +1,6 @@
 (ns tic-tac-toe.html
-  (:require [tic-tac-toe.game-setup :as setup]))
+  (:require [tic-tac-toe.board :as board]
+            [tic-tac-toe.setup :as setup]))
 
 (def select-game-mode
   [:div
@@ -27,11 +28,20 @@
    {:id "main-container"}
    [:h1 "Select a board"]
    [:button {:id       "board-3x3"
-             :on-click #(swap! setup/state assoc :screen :select-difficulty)} "3x3"]
-   [:button {:id       "4x4"
-             :on-click #(swap! setup/state assoc :screen :select-difficulty)} "4x4"]
-   [:button {:id       "3x3x3"
-             :on-click #(swap! setup/state assoc :screen :select-difficulty)} "3x3x3"]
+             :on-click #(swap! setup/state assoc
+                          :screen :select-difficulty
+                          :board-size :3x3
+                          :board (board/get-board :3x3))} "3x3"]
+   [:button {:id       "board-4x4"
+             :on-click #(swap! setup/state assoc
+                          :screen :select-difficulty
+                          :board-size :4x4
+                          :board (board/get-board :4x4))} "4x4"]
+   [:button {:id       "board-3x3x3"
+             :on-click #(swap! setup/state assoc
+                          :screen :select-difficulty
+                          :board-size :3x3x3
+                          :board (board/get-board :3x3x3))} "3x3x3"]
    ])
 
 (def select-difficulty

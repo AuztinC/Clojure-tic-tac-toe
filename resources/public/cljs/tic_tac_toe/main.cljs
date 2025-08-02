@@ -2,7 +2,7 @@
   (:require [reagent.dom.client :as rdomc]
             [c3kit.wire.js :as wjs]
             [tic-tac-toe.html :as html]
-            [tic-tac-toe.game-setup :as setup]))
+            [tic-tac-toe.setup :as setup]))
 
 (defn ->inspect [x]
   (prn "inspect -> " x))

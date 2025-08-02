@@ -4,15 +4,15 @@ goog.require('cljs.core');
 goog.require('reagent.dom.client');
 goog.require('c3kit.wire.js');
 goog.require('tic_tac_toe.html');
-goog.require('tic_tac_toe.game_setup');
+goog.require('tic_tac_toe.setup');
 tic_tac_toe.main.__GT_inspect = (function tic_tac_toe$main$__GT_inspect(x){
 return cljs.core.prn.call(null,"inspect -> ",x);
 });
 tic_tac_toe.main.app = (function tic_tac_toe$main$app(){
-var screen__$1 = new cljs.core.Keyword(null,"screen","screen",1990059748).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,tic_tac_toe.game_setup.state));
-var G__14738 = screen__$1;
-var G__14738__$1 = (((G__14738 instanceof cljs.core.Keyword))?G__14738.fqn:null);
-switch (G__14738__$1) {
+var screen__$1 = new cljs.core.Keyword(null,"screen","screen",1990059748).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,tic_tac_toe.setup.state));
+var G__14232 = screen__$1;
+var G__14232__$1 = (((G__14232 instanceof cljs.core.Keyword))?G__14232.fqn:null);
+switch (G__14232__$1) {
 case "select-game-mode":
 return tic_tac_toe.html.select_game_mode;
 
@@ -26,7 +26,7 @@ return tic_tac_toe.html.select_difficulty;
 
 break;
 default:
-throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__14738__$1)].join('')));
+throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__14232__$1)].join('')));
 
 }
 });

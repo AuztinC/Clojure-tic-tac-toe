@@ -13,8 +13,9 @@
                    [c3kit.wire.spec-helperc :refer [should-select]])
   (:require [speclj.core]
             [c3kit.wire.spec-helper :as wire]
+            [tic-tac-toe.board :as board]
             [tic-tac-toe.html :as sut]
-            [tic-tac-toe.game-setup :as setup]
+            [tic-tac-toe.setup :as setup]
             [tic-tac-toe.main :as main]))
 
 
@@ -54,12 +55,32 @@
           (should= [:ai :ai] (:players out)))))
 
     (context "select-board"
-        (before (do
-                  (reset! setup/state {:screen :select-board})
-                  (wire/render [main/app])))
-        (it "3x3"
-          (should= "3x3" (wire/text "#board-3x3"))
-          (wire/click! "#board-3x3")
-          (should= :select-difficulty (:screen @setup/state))))
+      (before (do
+                (reset! setup/state {:screen :select-board})
+                (wire/render [main/app])))
+      (it "3x3"
+        (should= "3x3" (wire/text "#board-3x3"))
+        (wire/click! "#board-3x3")
+        (should= :select-difficulty (:screen @setup/state))
+        (should= :3x3 (:board-size @setup/state))
+        (should= (board/get-board :3x3) (:board @setup/state)))
+
+      (it "4x4"
+        (should= "4x4" (wire/text "#board-4x4"))
+        (wire/click! "#board-4x4")
+        (should= :select-difficulty (:screen @setup/state))
+        (should= :4x4 (:board-size @setup/state))
+        (should= (board/get-board :4x4) (:board @setup/state)))
+
+      (it "3x3x3"
+        (should= "3x3x3" (wire/text "#board-3x3x3"))
+        (wire/click! "#board-3x3x3")
+        (should= :select-difficulty (:screen @setup/state))
+        (should= :3x3x3 (:board-size @setup/state))
+        (should= (board/get-board :3x3x3) (:board @setup/state))))
     )
+
+  (context "difficulty"
+    (it "selects one difficulty for ai human"
+      ()))
   )
