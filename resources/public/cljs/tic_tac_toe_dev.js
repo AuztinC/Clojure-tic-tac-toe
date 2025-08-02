@@ -228,9 +228,12 @@ goog.addDependency("../c3kit/wire/websocketc.js", ['c3kit.wire.websocketc'], ['c
 goog.addDependency("../c3kit/wire/websocket.js", ['c3kit.wire.websocket'], ['reagent.core', 'cljs.core', 'c3kit.apron.corec', 'c3kit.wire.js', 'c3kit.wire.api', 'c3kit.wire.websocketc', 'c3kit.apron.log']);
 goog.addDependency("../reagent/dom.js", ['reagent.dom'], ['reagent.impl.util', 'reagent.impl.protocols', 'reagent.ratom', 'cljs.core', 'reagent.impl.template', 'reagent.impl.batching', 'react_dom']);
 goog.addDependency("../c3kit/wire/spec_helper.js", ['c3kit.wire.spec_helper'], ['cljsjs.react.dom.test_utils', 'reagent.core', 'cljs.core', 'c3kit.apron.corec', 'c3kit.wire.ajax', 'c3kit.wire.js', 'cljs.pprint', 'c3kit.wire.websocket', 'speclj.core', 'speclj.stub', 'clojure.string', 'c3kit.apron.log', 'reagent.dom']);
+goog.addDependency("../tic_tac_toe/game_setup.js", ['tic_tac_toe.game_setup'], ['reagent.core', 'cljs.core']);
+goog.addDependency("../tic_tac_toe/html.js", ['tic_tac_toe.html'], ['tic_tac_toe.game_setup', 'cljs.core']);
 goog.addDependency("../reagent/dom/client.js", ['reagent.dom.client'], ['reagent.impl.util', 'reagent.impl.protocols', 'react_dom.client', 'cljs.core', 'goog.object', 'reagent.impl.template', 'reagent.impl.batching', 'react']);
-goog.addDependency("../tic_tac_toe/main.js", ['tic_tac_toe.main'], ['reagent.dom', 'reagent.dom.client', 'c3kit.wire.js', 'cljs.core']);
-goog.addDependency("../tic_tac_toe/main_spec.js", ['tic_tac_toe.main_spec'], ['speclj.core', 'c3kit.wire.spec_helper', 'tic_tac_toe.main', 'cljs.core']);
+goog.addDependency("../tic_tac_toe/main.js", ['tic_tac_toe.main'], ['reagent.dom.client', 'c3kit.wire.js', 'tic_tac_toe.html', 'tic_tac_toe.game_setup', 'cljs.core']);
+goog.addDependency("../tic_tac_toe/html_spec.js", ['tic_tac_toe.html_spec'], ['speclj.core', 'c3kit.wire.spec_helper', 'tic_tac_toe.html', 'tic_tac_toe.game_setup', 'tic_tac_toe.main', 'cljs.core']);
 goog.addDependency("debug/errorhandler.js", ['goog.debug.ErrorHandler', 'goog.debug.ErrorHandler.ProtectedFunctionError'], ['goog.Disposable', 'goog.asserts', 'goog.debug.EntryPointMonitor', 'goog.debug.Error']);
+goog.addDependency("../tic_tac_toe/main_spec.js", ['tic_tac_toe.main_spec'], ['speclj.core', 'c3kit.wire.spec_helper', 'tic_tac_toe.main', 'cljs.core']);
 goog.addDependency("events/eventwrapper.js", ['goog.events.EventWrapper'], []);
 goog.addDependency("events/eventlike.js", ['goog.events.EventLike'], []);

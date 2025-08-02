@@ -1,14 +1,18 @@
 (ns tic-tac-toe.main
-  (:require [reagent.dom :as rdom]
-            [reagent.dom.client :as rdomc]
-            [c3kit.wire.js :as wjs]))
+  (:require [reagent.dom.client :as rdomc]
+            [c3kit.wire.js :as wjs]
+            [tic-tac-toe.html :as html]
+            [tic-tac-toe.game-setup :as setup]))
+
+(defn ->inspect [x]
+  (prn "inspect -> " x))
 
 (defn app []
-  [:div
-   {:id "bob"}
-   [:a {:href "/"} ]
-   [:p "Hi friend wthis is new info"]])
+  (let [screen (:screen @setup/state)]
+    (case screen
+      :select-game-mode html/select-game-mode
+      :select-board html/select-board
+      :select-difficulty html/select-difficulty)))
 
 (defn ^:export main []
-  (rdomc/render (rdomc/create-root (wjs/element-by-id "app")) [app])
-  #_(rdom/render [app] (wjs/element-by-id "app")))
+  (rdomc/render (rdomc/create-root (wjs/element-by-id "app")) [app]))
