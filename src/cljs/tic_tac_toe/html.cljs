@@ -1,5 +1,7 @@
 (ns tic-tac-toe.html
-  (:require [tic-tac-toe.board :as board]
+  (:require [clojure.string :as str]
+            [tic-tac-toe.board :as board]
+            [tic-tac-toe.game :as game]
             [tic-tac-toe.setup :as setup]))
 
 (def select-game-mode
@@ -57,5 +59,22 @@
    [:button {:id       "diff"
              :class    "hard"
              :on-click #(setup/select-difficulty! :hard)} "Hard"]])
+
+(defn render-cell [idx]
+  [:div {:id "cell"
+         ;:on-click #(game/next-position @setup/state idx)
+         } idx])
+
+(defn render-board [{:keys [board-size] :as _state}]
+  (let [board (board/get-board board-size)
+        indexed (map-indexed (fn [idx _cell]
+                               (render-cell idx))
+                  board)
+        size (case board-size
+               :3x3 3
+               :4x4 4
+               :3x3x3 9)
+        part-board (partition size indexed)]
+    part-board))
 
 

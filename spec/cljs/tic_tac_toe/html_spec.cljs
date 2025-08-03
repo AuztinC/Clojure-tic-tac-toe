@@ -9,14 +9,28 @@
                                         should-have-invoked
                                         context
                                         should-contain
-                                        focus-context]]
+                                        focus-context
+                                        should-have-count
+                                        focus-it]]
                    [c3kit.wire.spec-helperc :refer [should-select]])
   (:require [speclj.core]
             [c3kit.wire.spec-helper :as wire]
             [tic-tac-toe.board :as board]
+            [tic-tac-toe.game :as game]
             [tic-tac-toe.html :as sut]
+            [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.setup :as setup]
             [tic-tac-toe.main :as main]))
+
+(defn cell-count [size]
+  (let [state {:board-size size}
+        out (sut/render-board state)
+        row-count (count (first out))
+        column-count (count out)
+        cell-count (* row-count column-count)]
+    {:row-count    row-count
+     :column-count column-count
+     :cell-count   cell-count}))
 
 
 (describe "main"
@@ -109,5 +123,29 @@
         (wire/click! ".hard")
         (should-have-invoked :select-difficulty! {:with [:hard]}))))
 
+  (context "drawing board"
+    (it "render-cell returns div with value"
+      (let [out (sut/render-cell "index")]
+        (should-contain :div out)
+        (should-contain "index" out)))
+
+    (it "gives nine cells for 3x3"
+      (let [out (cell-count :3x3)]
+        (should= 3 (:row-count out))
+        (should= 3 (:column-count out))
+        (should= 9 (:cell-count out))))
+
+    (it "gives 16 cells for 4x4"
+      (let [out (cell-count :4x4)]
+        (should= 4 (:row-count out))
+        (should= 4 (:column-count out))
+        (should= 16 (:cell-count out))))
+
+    (it "gives 27 cells for 3x3x3"
+      (let [out (cell-count :3x3x3)]
+        (should= 9 (:row-count out))
+        (should= 3 (:column-count out))
+        (should= 27 (:cell-count out))))
+    )
 
   )

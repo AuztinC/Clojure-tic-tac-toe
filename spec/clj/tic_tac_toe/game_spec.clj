@@ -9,11 +9,13 @@
                                  it
                                  should-have-invoked
                                  redefs-around
-                                 should=]]
+                                 should=
+                                 focus-it]]
             [tic-tac-toe.game :as sut]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]
-            [tic-tac-toe.board :as board]))
+            [tic-tac-toe.board :as board]
+            [tic-tac-toe.ai-turn :as ai]))
 (def ai-vs-ai-state {:ui           :cli
                      :active-game  true
                      :id           123
@@ -105,7 +107,8 @@
   (context "Next-state stores a new move, updates turn and board"
     ;; TODO ARC - update tests for next-state
     (redefs-around [db/update-current-game! (stub :update-current-game!)
-                    sut/next-position (stub :next-position {:return 0})])
+                    ai/ai-turn (stub :ai-turn {:return 0})
+                    read-line (stub :read-line {:return "0"})])
     (it "AI turn"
       (let [new-state (sut/next-state ai-vs-ai-state)]
         (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))

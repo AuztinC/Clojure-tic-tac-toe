@@ -3,20 +3,21 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.game :as game]))
 
+(defn- empty-space? [board move]
+  (= [""] (get board move)))
+
 (defn apply-human-move
   [{:keys [board turn markers] :as state} idx]
   (let [marker (if (= turn "p1") (first markers) (second markers))]
-    (if (and (some? idx) (= "" (first (nth board idx))))
+    (if (and (some? idx) (empty-space? board idx))
       (let [updated-board (assoc board idx [marker])
             updated-state (assoc state
                             :board updated-board
                             :turn (game/next-player turn))]
+
         (db/update-current-game! updated-state idx)
         updated-state)
       state)))
-
-(defn- empty-space? [board move]
-  (= [""] (get board move)))
 
 (declare human-turn)
 (defn bad-move [board marker]
@@ -36,3 +37,6 @@
 (defmethod game/next-position [:human :cli] [{:keys [board] :as _state} [marker _] _]
   (let [move (human-turn board marker)]
     move))
+
+(defmethod game/next-position [:human :web-cljs] [{:keys [choice] :as state} [marker _] _]
+  (apply-human-move state choice))
