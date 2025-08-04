@@ -54,6 +54,22 @@
 
 
   (context "updated state atom with screen on click"
+
+    (context "reset btn"
+      (before (do
+                (reset! setup/state {:screen  :select-board
+                                     :ui      :web-cljs
+                                     :turn    "p1"
+                                     :players [:human :ai]
+                                     :markers ["X" "O"]})
+                (wire/render [main/app])))
+      (it "displays btn when :players exist"
+        (should-select "#reset-btn"))
+
+      (it "resets state when click"
+        (wire/click! "#reset-btn")
+        (should= setup/starting-state @setup/state)))
+
     (context "select-game-mode"
       (it "clicking Human vs AI sets screen to :select-board"
         (should= "Human vs AI" (wire/text "#human-vs-ai"))

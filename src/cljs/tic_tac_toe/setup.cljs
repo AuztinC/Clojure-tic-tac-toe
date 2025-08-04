@@ -5,12 +5,15 @@
             [tic-tac-toe.game :as game]
             [tic-tac-toe.ai-turn :as ai]))
 
-(defonce state (r/atom {:store   nil
-                        :active  true
-                        :screen  :select-game-mode
-                        :ui      :web-cljs
-                        :turn    "p1"
-                        :markers ["X" "O"]}))
+(def starting-state
+  {:store   nil
+   :active  true
+   :screen  :select-game-mode
+   :ui      :web-cljs
+   :turn    "p1"
+   :markers ["X" "O"]})
+
+(defonce state (r/atom starting-state))
 
 (defn select-difficulty! [choice]
   (let [current-state @state

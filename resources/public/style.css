@@ -10,7 +10,7 @@ h2, h1 {
   text-align: center;
 }
 
-body, .main-container {
+body, #main-container {
     display: flex;
     flex-direction: column;
     justify-content: center;

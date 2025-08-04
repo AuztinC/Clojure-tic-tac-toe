@@ -18,8 +18,6 @@
   (wire/with-root-dom)
   (before (wire/render [sut/app]))
 
-  (redefs-around [sut/->inspect (stub :inspect)])
-
   (it "game container"
     (should-select "#main-container")
     #_(should= "Welcome to Tic-Tac-Toe!" (wire/text "#title")))
