@@ -184,5 +184,11 @@
        (let [expected (sut/ai-turn (board/get-board :3x3) "X" :hard)]
         (should= expected (game/next-position {:board (board/get-board :3x3) :ui :gui :players [:human :ai]} ["X" :ai] :hard))
         (should-not-have-invoked :sleep))))
+
+    (it "web-cljs"
+      (with-redefs [sut/sleep (stub :sleep)]
+        (let [expected (sut/ai-turn (board/get-board :3x3) "X" :hard)]
+          (should= expected (game/next-position {:board (board/get-board :3x3) :ui :web-cljs :players [:human :ai]} ["X" :ai] :hard))
+          (should-not-have-invoked :sleep))))
     )
   )

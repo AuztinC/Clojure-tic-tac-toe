@@ -23,10 +23,12 @@
             [tic-tac-toe.main :as main]))
 
 (defn cell-count [size]
-  (let [state {:board-size size}
+  (let [state {:board-size size
+               :board      (board/get-board size)}
         out (sut/render-board state)
-        row-count (count (first out))
-        column-count (count out)
+        [_tag _attrs & rows] out
+        row-count (count rows)
+        column-count (count (drop 2 (first rows)))
         cell-count (* row-count column-count)]
     {:row-count    row-count
      :column-count column-count
@@ -36,8 +38,14 @@
 (describe "main"
   (with-stubs)
   (wire/with-root-dom)
+
+  (redefs-around [setup/auto-advance (stub :auto-advance)])
+
   (before (do
-            (reset! setup/state {:screen :select-game-mode})
+            (reset! setup/state {:screen :select-game-mode
+                                 :ui :web-cljs
+                                 :turn "p1"
+                                 :markers ["X" "O"]})
             (wire/render [main/app])))
 
 
@@ -70,7 +78,10 @@
 
     (context "select-board"
       (before (do
-                (reset! setup/state {:screen :select-board})
+                (reset! setup/state {:screen :select-board
+                                     :ui :web-cljs
+                                     :turn "p1"
+                                     :markers ["X" "O"]})
                 (wire/render [main/app])))
       (it "3x3"
         (should-select "#board-3x3")
@@ -99,7 +110,10 @@
 
   (context "calls select-difficulty with correct key"
     (before (do
-              (reset! setup/state {:screen :select-difficulty})
+              (reset! setup/state {:screen :select-difficulty
+                                   :ui :web-cljs
+                                   :turn "p1"
+                                   :markers ["X" "O"]})
               (wire/render [main/app])))
 
     (it "easy"
@@ -124,10 +138,25 @@
         (should-have-invoked :select-difficulty! {:with [:hard]}))))
 
   (context "drawing board"
-    (it "render-cell returns div with value"
+    (before (do
+              (reset! setup/state {:screen :game
+                                   :ui :web-cljs
+                                   :turn "p1"
+                                   :markers ["X" "O"]
+                                   :players [:human :ai]
+                                   :board-size :3x3
+                                   :board (board/get-board :3x3)})
+              (wire/render [main/app])))
+
+    (it "render-cell returns td with value"
       (let [out (sut/render-cell "index")]
-        (should-contain :div out)
+        (should-contain :td out)
         (should-contain "index" out)))
+
+    (it "render-board returns table with value"
+      (let [out (sut/render-board {:board-size :3x3
+                                   :ui         :web-cljs})]
+        (should-contain :tbody out)))
 
     (it "gives nine cells for 3x3"
       (let [out (cell-count :3x3)]
@@ -143,9 +172,20 @@
 
     (it "gives 27 cells for 3x3x3"
       (let [out (cell-count :3x3x3)]
-        (should= 9 (:row-count out))
-        (should= 3 (:column-count out))
+        (should= 3 (:row-count out))
+        (should= 9 (:column-count out))
         (should= 27 (:cell-count out))))
+
+    (it "click cell"
+      (with-redefs [ht/apply-human-move
+                    (stub :apply-human-move
+                      {:return {:screen     :game
+                                :board-size :3x3
+                                :board      []}})]
+        (should-select "#cell")
+        (should= "0" (wire/text "#cell"))
+        (wire/click! "#cell")
+        (should-have-invoked :apply-human-move)))
     )
 
   )

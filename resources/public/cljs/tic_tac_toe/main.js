@@ -1,18 +1,20 @@
 // Compiled by ClojureScript 1.12.42 {:optimizations :none}
 goog.provide('tic_tac_toe.main');
 goog.require('cljs.core');
+goog.require('reagent.core');
 goog.require('reagent.dom.client');
 goog.require('c3kit.wire.js');
 goog.require('tic_tac_toe.html');
 goog.require('tic_tac_toe.setup');
+goog.require('reagent.ratom');
 tic_tac_toe.main.__GT_inspect = (function tic_tac_toe$main$__GT_inspect(x){
 return cljs.core.prn.call(null,"inspect -> ",x);
 });
 tic_tac_toe.main.app = (function tic_tac_toe$main$app(){
 var screen__$1 = new cljs.core.Keyword(null,"screen","screen",1990059748).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,tic_tac_toe.setup.state));
-var G__17139 = screen__$1;
-var G__17139__$1 = (((G__17139 instanceof cljs.core.Keyword))?G__17139.fqn:null);
-switch (G__17139__$1) {
+var G__16421 = screen__$1;
+var G__16421__$1 = (((G__16421 instanceof cljs.core.Keyword))?G__16421.fqn:null);
+switch (G__16421__$1) {
 case "select-game-mode":
 return tic_tac_toe.html.select_game_mode;
 
@@ -25,8 +27,18 @@ case "select-difficulty":
 return tic_tac_toe.html.select_difficulty;
 
 break;
+case "game":
+var co__7704__auto___16429 = reagent.ratom.make_reaction.call(null,(function (){
+return tic_tac_toe.setup.auto_advance.call(null,cljs.core.deref.call(null,tic_tac_toe.setup.state));
+}),new cljs.core.Keyword(null,"auto-run","auto-run",1958400437),true);
+cljs.core.deref.call(null,co__7704__auto___16429);
+
+
+return tic_tac_toe.html.game.call(null);
+
+break;
 default:
-throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__17139__$1)].join('')));
+throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__16421__$1)].join('')));
 
 }
 });

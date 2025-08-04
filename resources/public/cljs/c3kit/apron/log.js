@@ -9,8 +9,8 @@ c3kit.apron.log.captured_logs = cljs.core.atom.call(null,cljs.core.PersistentVec
  * Arity overrides for timbre/-log!
  */
 c3kit.apron.log.capture_log_BANG_ = (function c3kit$apron$log$capture_log_BANG_(var_args){
-var G__14604 = arguments.length;
-switch (G__14604) {
+var G__13875 = arguments.length;
+switch (G__13875) {
 case 9:
 return c3kit.apron.log.capture_log_BANG_.cljs$core$IFn$_invoke$arity$9((arguments[(0)]),(arguments[(1)]),(arguments[(2)]),(arguments[(3)]),(arguments[(4)]),(arguments[(5)]),(arguments[(6)]),(arguments[(7)]),(arguments[(8)]));
 
@@ -124,25 +124,25 @@ c3kit.apron.log.all_BANG_ = (function c3kit$apron$log$all_BANG_(){
 return c3kit.apron.log.set_level_BANG_.call(null,new cljs.core.Keyword(null,"trace","trace",-1082747415));
 });
 c3kit.apron.log.parse_captured_logs = (function c3kit$apron$log$parse_captured_logs(){
-return cljs.core.map.call(null,(function (p1__14614_SHARP_){
-return cljs.core.PersistentHashMap.fromArrays([new cljs.core.Keyword(null,"level","level",1290497552),new cljs.core.Keyword(null,"message","message",-406056002)],[cljs.core.nth.call(null,p1__14614_SHARP_,(1)),cljs.core.apply.call(null,cljs.core.str,cljs.core.deref.call(null,cljs.core.nth.call(null,p1__14614_SHARP_,(8))))]);
+return cljs.core.map.call(null,(function (p1__13893_SHARP_){
+return cljs.core.PersistentHashMap.fromArrays([new cljs.core.Keyword(null,"level","level",1290497552),new cljs.core.Keyword(null,"message","message",-406056002)],[cljs.core.nth.call(null,p1__13893_SHARP_,(1)),cljs.core.apply.call(null,cljs.core.str,cljs.core.deref.call(null,cljs.core.nth.call(null,p1__13893_SHARP_,(8))))]);
 }),cljs.core.deref.call(null,c3kit.apron.log.captured_logs));
 });
 c3kit.apron.log.captured_logs_str = (function c3kit$apron$log$captured_logs_str(){
-return clojure.string.join.call(null,"\n",cljs.core.map.call(null,(function (p1__14616_SHARP_){
-return clojure.string.join.call(null," ",cljs.core.deref.call(null,cljs.core.nth.call(null,p1__14616_SHARP_,(8))));
+return clojure.string.join.call(null,"\n",cljs.core.map.call(null,(function (p1__13896_SHARP_){
+return clojure.string.join.call(null," ",cljs.core.deref.call(null,cljs.core.nth.call(null,p1__13896_SHARP_,(8))));
 }),cljs.core.deref.call(null,c3kit.apron.log.captured_logs)));
 });
 c3kit.apron.log.table_spec = (function c3kit$apron$log$table_spec(var_args){
 var args__5755__auto__ = [];
-var len__5749__auto___14620 = arguments.length;
-var i__5750__auto___14621 = (0);
+var len__5749__auto___13906 = arguments.length;
+var i__5750__auto___13907 = (0);
 while(true){
-if((i__5750__auto___14621 < len__5749__auto___14620)){
-args__5755__auto__.push((arguments[i__5750__auto___14621]));
+if((i__5750__auto___13907 < len__5749__auto___13906)){
+args__5755__auto__.push((arguments[i__5750__auto___13907]));
 
-var G__14622 = (i__5750__auto___14621 + (1));
-i__5750__auto___14621 = G__14622;
+var G__13910 = (i__5750__auto___13907 + (1));
+i__5750__auto___13907 = G__13910;
 continue;
 } else {
 }
@@ -155,8 +155,8 @@ return c3kit.apron.log.table_spec.cljs$core$IFn$_invoke$arity$variadic(argseq__5
 
 (c3kit.apron.log.table_spec.cljs$core$IFn$_invoke$arity$variadic = (function (cols){
 var width = (cljs.core.apply.call(null,cljs.core._PLUS_,cljs.core.map.call(null,cljs.core.second,cols)) + cljs.core.count.call(null,cols));
-var format_str = clojure.string.join.call(null," ",cljs.core.map.call(null,(function (p1__14618_SHARP_){
-return ["%-",cljs.core.str.cljs$core$IFn$_invoke$arity$1(cljs.core.second.call(null,p1__14618_SHARP_)),"s"].join('');
+var format_str = clojure.string.join.call(null," ",cljs.core.map.call(null,(function (p1__13897_SHARP_){
+return ["%-",cljs.core.str.cljs$core$IFn$_invoke$arity$1(cljs.core.second.call(null,p1__13897_SHARP_)),"s"].join('');
 }),cols));
 return new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null,"cols","cols",-1914801295),cols,new cljs.core.Keyword(null,"format","format",-1306924766),format_str,new cljs.core.Keyword(null,"width","width",-384071477),width,new cljs.core.Keyword(null,"title-fn","title-fn",-1701019188),(function (title){
 var pad = ((width - title.length()) / (2));
@@ -167,9 +167,9 @@ return [clojure.string.join.call(null,"",cljs.core.take.call(null,pad,cljs.core.
 (c3kit.apron.log.table_spec.cljs$lang$maxFixedArity = (0));
 
 /** @this {Function} */
-(c3kit.apron.log.table_spec.cljs$lang$applyTo = (function (seq14619){
+(c3kit.apron.log.table_spec.cljs$lang$applyTo = (function (seq13898){
 var self__5735__auto__ = this;
-return self__5735__auto__.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq14619));
+return self__5735__auto__.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq13898));
 }));
 
 /**

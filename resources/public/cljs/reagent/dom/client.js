@@ -28,30 +28,30 @@ return root.unmount();
 reagent.dom.client.reagent_root = (function reagent$dom$client$reagent_root(js_props){
 var el = reagent.dom.client.goog$module$goog$object.get.call(null,js_props,"comp");
 reagent.dom.client.global$module$react.useEffect((function (){
-var _STAR_always_update_STAR__orig_val__15813 = reagent.impl.util._STAR_always_update_STAR_;
-var _STAR_always_update_STAR__temp_val__15814 = false;
-(reagent.impl.util._STAR_always_update_STAR_ = _STAR_always_update_STAR__temp_val__15814);
+var _STAR_always_update_STAR__orig_val__16033 = reagent.impl.util._STAR_always_update_STAR_;
+var _STAR_always_update_STAR__temp_val__16034 = false;
+(reagent.impl.util._STAR_always_update_STAR_ = _STAR_always_update_STAR__temp_val__16034);
 
 try{reagent.impl.batching.flush_after_render.call(null);
 
 return undefined;
-}finally {(reagent.impl.util._STAR_always_update_STAR_ = _STAR_always_update_STAR__orig_val__15813);
+}finally {(reagent.impl.util._STAR_always_update_STAR_ = _STAR_always_update_STAR__orig_val__16033);
 }}));
 
-var _STAR_always_update_STAR__orig_val__15817 = reagent.impl.util._STAR_always_update_STAR_;
-var _STAR_always_update_STAR__temp_val__15818 = true;
-(reagent.impl.util._STAR_always_update_STAR_ = _STAR_always_update_STAR__temp_val__15818);
+var _STAR_always_update_STAR__orig_val__16037 = reagent.impl.util._STAR_always_update_STAR_;
+var _STAR_always_update_STAR__temp_val__16039 = true;
+(reagent.impl.util._STAR_always_update_STAR_ = _STAR_always_update_STAR__temp_val__16039);
 
 try{return el.call(null);
-}finally {(reagent.impl.util._STAR_always_update_STAR_ = _STAR_always_update_STAR__orig_val__15817);
+}finally {(reagent.impl.util._STAR_always_update_STAR_ = _STAR_always_update_STAR__orig_val__16037);
 }});
 /**
  * Render the given Reagent element (i.e. Hiccup data)
  *   into a given React root.
  */
 reagent.dom.client.render = (function reagent$dom$client$render(var_args){
-var G__15823 = arguments.length;
-switch (G__15823) {
+var G__16060 = arguments.length;
+switch (G__16060) {
 case 2:
 return reagent.dom.client.render.cljs$core$IFn$_invoke$arity$2((arguments[(0)]),(arguments[(1)]));
 
@@ -80,8 +80,8 @@ return root.render(reagent.dom.client.global$module$react.createElement(reagent.
 (reagent.dom.client.render.cljs$lang$maxFixedArity = 3);
 
 reagent.dom.client.hydrate_root = (function reagent$dom$client$hydrate_root(var_args){
-var G__15842 = arguments.length;
-switch (G__15842) {
+var G__16070 = arguments.length;
+switch (G__16070) {
 case 2:
 return reagent.dom.client.hydrate_root.cljs$core$IFn$_invoke$arity$2((arguments[(0)]),(arguments[(1)]));
 
@@ -100,12 +100,12 @@ throw (new Error(["Invalid arity: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(
 return reagent.dom.client.hydrate_root.call(null,container,el,null);
 }));
 
-(reagent.dom.client.hydrate_root.cljs$core$IFn$_invoke$arity$3 = (function (container,el,p__15852){
-var map__15857 = p__15852;
-var map__15857__$1 = cljs.core.__destructure_map.call(null,map__15857);
-var compiler = cljs.core.get.call(null,map__15857__$1,new cljs.core.Keyword(null,"compiler","compiler",-267926731),reagent.impl.template._STAR_current_default_compiler_STAR_);
-var on_recoverable_error = cljs.core.get.call(null,map__15857__$1,new cljs.core.Keyword(null,"on-recoverable-error","on-recoverable-error",1651056576));
-var identifier_prefix = cljs.core.get.call(null,map__15857__$1,new cljs.core.Keyword(null,"identifier-prefix","identifier-prefix",1929840008));
+(reagent.dom.client.hydrate_root.cljs$core$IFn$_invoke$arity$3 = (function (container,el,p__16074){
+var map__16076 = p__16074;
+var map__16076__$1 = cljs.core.__destructure_map.call(null,map__16076);
+var compiler = cljs.core.get.call(null,map__16076__$1,new cljs.core.Keyword(null,"compiler","compiler",-267926731),reagent.impl.template._STAR_current_default_compiler_STAR_);
+var on_recoverable_error = cljs.core.get.call(null,map__16076__$1,new cljs.core.Keyword(null,"on-recoverable-error","on-recoverable-error",1651056576));
+var identifier_prefix = cljs.core.get.call(null,map__16076__$1,new cljs.core.Keyword(null,"identifier-prefix","identifier-prefix",1929840008));
 var comp = (function (){
 return reagent.impl.protocols.as_element.call(null,compiler,el);
 });

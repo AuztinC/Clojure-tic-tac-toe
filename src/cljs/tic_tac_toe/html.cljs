@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
+            [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.setup :as setup]))
 
 (def select-game-mode
@@ -61,20 +62,35 @@
              :on-click #(setup/select-difficulty! :hard)} "Hard"]])
 
 (defn render-cell [idx]
-  [:div {:id "cell"
-         ;:on-click #(game/next-position @setup/state idx)
-         } idx])
+  [:td {:style    {:background-color "grey"
+                   :width            "60px"
+                   :height           "60px"
+                   :text-align       "center"
+                   :color            "white"
+                   :font-size        "2em"}
+        :id       "cell"
+        :on-click #(swap! setup/state ht/apply-human-move (js/parseInt idx))}
+   idx])
 
-(defn render-board [{:keys [board-size] :as _state}]
-  (let [board (board/get-board board-size)
-        indexed (map-indexed (fn [idx _cell]
-                               (render-cell idx))
-                  board)
+(defn render-board [{:keys [board-size board] :as _state}]
+  (let [indexed (map-indexed (fn [idx _cell]
+                               (render-cell
+                                 (if (= "" (first (nth board idx)))
+                                   idx
+                                   (first (nth board idx))))) board)
         size (case board-size
                :3x3 3
                :4x4 4
                :3x3x3 9)
         part-board (partition size indexed)]
-    part-board))
+    (into [:tbody {:class "board"}]
+      (map-indexed (fn [i row]
+                     (into [:tr {:class "row"}] row))
+        part-board))))
+
+(defn game []
+
+  [:table {:id "main-container"}
+   (render-board @setup/state)])
 
 

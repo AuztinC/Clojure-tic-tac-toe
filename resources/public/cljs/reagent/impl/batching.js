@@ -47,14 +47,14 @@ var n__5616__auto__ = a.length;
 var i = (0);
 while(true){
 if((i < n__5616__auto__)){
-var c_10374 = (a[i]);
-if(c_10374.cljsIsDirty === true){
-c_10374.forceUpdate();
+var c_7584 = (a[i]);
+if(c_7584.cljsIsDirty === true){
+c_7584.forceUpdate();
 } else {
 }
 
-var G__10375 = (i + (1));
-i = G__10375;
+var G__7585 = (i + (1));
+i = G__7585;
 continue;
 } else {
 return null;
@@ -75,8 +75,8 @@ while(true){
 if((i < n__5616__auto__)){
 (fs[i]).call(null);
 
-var G__10378 = (i + (1));
-i = G__10378;
+var G__7591 = (i + (1));
+i = G__7591;
 continue;
 } else {
 return null;

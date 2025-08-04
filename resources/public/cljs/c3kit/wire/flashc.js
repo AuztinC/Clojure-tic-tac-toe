@@ -3,8 +3,8 @@ goog.provide('c3kit.wire.flashc');
 goog.require('cljs.core');
 goog.require('c3kit.apron.corec');
 goog.require('c3kit.apron.schema');
-c3kit.wire.flashc.flash_schema = new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"level","level",1290497552),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"type","type",1174270348),new cljs.core.Keyword(null,"keyword","keyword",811389747)], null),new cljs.core.Keyword(null,"text","text",-1790561697),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"type","type",1174270348),new cljs.core.Keyword(null,"ignore","ignore",-1631542033)], null),new cljs.core.Keyword(null,"persist","persist",815289548),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"type","type",1174270348),new cljs.core.Keyword(null,"boolean","boolean",-1919418404)], null),new cljs.core.Keyword(null,"id","id",-1388402092),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"type","type",1174270348),new cljs.core.Keyword(null,"string","string",-1989541586),new cljs.core.Keyword(null,"coerce","coerce",1917884504),(function (p1__15272_SHARP_){
-var or__5025__auto__ = p1__15272_SHARP_;
+c3kit.wire.flashc.flash_schema = new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"level","level",1290497552),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"type","type",1174270348),new cljs.core.Keyword(null,"keyword","keyword",811389747)], null),new cljs.core.Keyword(null,"text","text",-1790561697),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"type","type",1174270348),new cljs.core.Keyword(null,"ignore","ignore",-1631542033)], null),new cljs.core.Keyword(null,"persist","persist",815289548),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"type","type",1174270348),new cljs.core.Keyword(null,"boolean","boolean",-1919418404)], null),new cljs.core.Keyword(null,"id","id",-1388402092),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"type","type",1174270348),new cljs.core.Keyword(null,"string","string",-1989541586),new cljs.core.Keyword(null,"coerce","coerce",1917884504),(function (p1__14947_SHARP_){
+var or__5025__auto__ = p1__14947_SHARP_;
 if(cljs.core.truth_(or__5025__auto__)){
 return or__5025__auto__;
 } else {
@@ -15,8 +15,8 @@ c3kit.wire.flashc.conform_BANG_ = (function c3kit$wire$flashc$conform_BANG_(flas
 return c3kit.apron.schema.conform_BANG_.call(null,c3kit.wire.flashc.flash_schema,flash);
 });
 c3kit.wire.flashc.create = (function c3kit$wire$flashc$create(var_args){
-var G__15281 = arguments.length;
-switch (G__15281) {
+var G__14951 = arguments.length;
+switch (G__14951) {
 case 2:
 return c3kit.wire.flashc.create.cljs$core$IFn$_invoke$arity$2((arguments[(0)]),(arguments[(1)]));
 
