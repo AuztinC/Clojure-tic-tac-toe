@@ -1,7 +1,5 @@
 (ns tic-tac-toe.html
-  (:require [clojure.string :as str]
-            [tic-tac-toe.board :as board]
-            [tic-tac-toe.game :as game]
+  (:require [tic-tac-toe.board :as board]
             [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.setup :as setup]))
 
@@ -25,61 +23,72 @@
                           :players [:ai :ai]
                           :screen :select-board)} "AI vs AI"]])
 
-(def select-board
-  [:div
-   {:id "main-container"}
-   [:h1 "Select a board"]
-   [:button {:id       "board-3x3"
-             :on-click #(swap! setup/state assoc
-                          :screen :select-difficulty
-                          :board-size :3x3
-                          :board (board/get-board :3x3))} "3x3"]
-   [:button {:id       "board-4x4"
-             :on-click #(swap! setup/state assoc
-                          :screen :select-difficulty
-                          :board-size :4x4
-                          :board (board/get-board :4x4))} "4x4"]
-   [:button {:id       "board-3x3x3"
-             :on-click #(swap! setup/state assoc
-                          :screen :select-difficulty
-                          :board-size :3x3x3
-                          :board (board/get-board :3x3x3))} "3x3x3"]
-   ])
+(defn select-board []
+  (let [next-screen (if (= [:human :human] (:players @setup/state))
+                      :game
+                      :select-difficulty)]
+    [:div
+     {:id "main-container"}
+     [:h1 "Select a board"]
+     [:button {:id       "board-3x3"
+               :on-click #(swap! setup/state assoc
+                            :screen next-screen
+                            :board-size :3x3
+                            :board (board/get-board :3x3))} "3x3"]
+     [:button {:id       "board-4x4"
+               :on-click #(swap! setup/state assoc
+                            :screen next-screen
+                            :board-size :4x4
+                            :board (board/get-board :4x4))} "4x4"]
+     [:button {:id       "board-3x3x3"
+               :on-click #(swap! setup/state assoc
+                            :screen next-screen
+                            :board-size :3x3x3
+                            :board (board/get-board :3x3x3))} "3x3x3"]]))
 
-(def select-difficulty
-  [:div
-   {:id "main-container"}
-   [:h1 "Select difficulty"]
-   [:button {:id       "diff"
-             :class    "easy"
-             :on-click #(setup/select-difficulty! :easy)} "Easy"]
-   [:button {:id       "diff"
-             :class    "medium"
-             :on-click #(setup/select-difficulty! :medium)} "Medium"]
-   [:button {:id       "diff"
-             :class    "hard"
-             :on-click #(setup/select-difficulty! :hard)} "Hard"]])
+(defn select-difficulty []
+  (let [diff-count (count (:difficulties @setup/state))
+        text (setup/difficulty-text diff-count)]
+    [:div
+     {:id "main-container"}
+     [:h1 text]
+     [:button {:id       "easy"
+               :class    "diff"
+               :on-click #(setup/select-difficulty! :easy)} "Easy"]
+     [:button {:id       "medium"
+               :class    "diff"
+               :on-click #(setup/select-difficulty! :medium)} "Medium"]
+     [:button {:id       "hard"
+               :class    "diff"
+               :on-click #(setup/select-difficulty! :hard)} "Hard"]]))
 
 (defn- ai-ai? []
-  (= [:ai :ai] (:players @setup/state)))
+  (or
+    (= :game-over (:screen @setup/state))
+    (= [:ai :ai] (:players @setup/state))))
 
 (defn- handle-click [idx]
   (if (ai-ai?)
     nil
     (swap! setup/state ht/apply-human-move (js/parseInt idx))))
 
-(defn render-cell [idx]
-  [:td {:style    {
-                   :background-color "grey"
+(defn- cell-cursor [value]
+  (if (or (string? value) (ai-ai?))
+    "default"
+    "pointer"))
+
+(defn render-cell [value]
+  [:td {:style    {:background-color "grey"
                    :width            "60px"
                    :height           "60px"
                    :text-align       "center"
                    :color            "white"
                    :font-size        "2em"
-                   :cursor           (if (ai-ai?) "default" "pointer")}
-        :id       (str "cell-" idx)
-        :on-click #(handle-click idx)}
-   idx])
+                   :cursor           (cell-cursor value)}
+        :id       (str "cell-" value)
+        :class    "cell"
+        :on-click #(handle-click value)}
+   value])
 
 (defn render-board [{:keys [board-size board] :as _state}]
   (let [indexed (map-indexed (fn [idx _cell]
@@ -101,6 +110,11 @@
   [:table {:id "main-container"}
    (render-board @setup/state)])
 
-;; TODO ARC - game over
-
+(defn game-over []
+  (let [winner (board/check-winner (:board @setup/state))]
+    [:div {:id "main-container"}
+     [:table (render-board @setup/state)]
+     [:h1 "Game Over!"]
+     [:h2 {:id "winner"} (setup/winner-text winner)]]
+    ))
 

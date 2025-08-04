@@ -1,5 +1,6 @@
 (ns tic-tac-toe.human-turn
-  (:require [tic-tac-toe.printer :as printer]
+  (:require [tic-tac-toe.board :as board]
+            [tic-tac-toe.printer :as printer]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.game :as game]))
 
@@ -11,10 +12,15 @@
   (let [marker (if (= turn "p1") (first markers) (second markers))]
     (if (and (some? idx) (empty-space? board idx))
       (let [updated-board (assoc board idx [marker])
-            updated-state (assoc state
-                            :board updated-board
-                            :turn (game/next-player turn))]
-
+            winner? (board/check-winner updated-board)
+            updated-state (if winner?
+                            (assoc state
+                              :board updated-board
+                              :turn (game/next-player turn)
+                              :screen :game-over)
+                            (assoc state
+                              :board updated-board
+                              :turn (game/next-player turn)))]
         (db/update-current-game! updated-state idx)
         updated-state)
       state)))

@@ -14,9 +14,10 @@
   (let [screen (:screen @setup/state)]
     (case screen
       :select-game-mode html/select-game-mode
-      :select-board html/select-board
-      :select-difficulty html/select-difficulty
-      :game (html/game))))
+      :select-board (html/select-board)
+      :select-difficulty (html/select-difficulty)
+      :game (html/game)
+      :game-over (html/game-over))))
 
 (defonce started?
   (do

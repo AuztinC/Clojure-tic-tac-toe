@@ -1,5 +1,6 @@
 (ns tic-tac-toe.setup
   (:require [c3kit.wire.js :as wjs]
+            [clojure.string :as str]
             [reagent.core :as r]
             [tic-tac-toe.game :as game]
             [tic-tac-toe.ai-turn :as ai]))
@@ -33,10 +34,23 @@
       (when (= :ai next-player)
         (if (= [:ai :ai] (:players new))
           (do
-            (js/removeEventListener "on-click" (wjs/element-by-id "app"))
             (sleep
             #(reset! state (game/next-state new))
             500))
           (reset! state (game/next-state new)))))))
+
+(defn difficulty-text [diff-count]
+  (cond
+    (= [:ai :ai] (:players @state))
+    (if (= 0 diff-count)
+      "Select 1st AI difficulty"
+      "Select 2nd AI difficulty")
+    :else "Select AI difficulty"))
+
+(defn winner-text [winner]
+  (if (= "tie" winner)
+    (str (str/replace-first winner #"t"
+           (.toUpperCase (.charAt winner 0))) " Game!")
+    (str "Winner is " winner "!")))
 
 

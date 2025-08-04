@@ -46,9 +46,9 @@
   (redefs-around [setup/auto-advance (stub :auto-advance)])
 
   (before (do
-            (reset! setup/state {:screen :select-game-mode
-                                 :ui :web-cljs
-                                 :turn "p1"
+            (reset! setup/state {:screen  :select-game-mode
+                                 :ui      :web-cljs
+                                 :turn    "p1"
                                  :markers ["X" "O"]})
             (wire/render [main/app])))
 
@@ -82,9 +82,9 @@
 
     (context "select-board"
       (before (do
-                (reset! setup/state {:screen :select-board
-                                     :ui :web-cljs
-                                     :turn "p1"
+                (reset! setup/state {:screen  :select-board
+                                     :ui      :web-cljs
+                                     :turn    "p1"
                                      :markers ["X" "O"]})
                 (wire/render [main/app])))
       (it "3x3"
@@ -109,48 +109,58 @@
         (wire/click! "#board-3x3x3")
         (should= :select-difficulty (:screen @setup/state))
         (should= :3x3x3 (:board-size @setup/state))
-        (should= (board/get-board :3x3x3) (:board @setup/state))))
+        (should= (board/get-board :3x3x3) (:board @setup/state)))
+
+      (it "skips difficulty if HvH"
+        (reset! setup/state {:screen  :select-board
+                             :ui      :web-cljs
+                             :players [:human :human]
+                             :turn    "p1"
+                             :markers ["X" "O"]})
+        (wire/render [main/app])
+        (should-select "#board-3x3")
+        (wire/click! "#board-3x3")
+        (should= :game (:screen @setup/state))))
     )
 
   (context "calls select-difficulty with correct key"
     (before (do
-              (reset! setup/state {:screen :select-difficulty
-                                   :ui :web-cljs
-                                   :turn "p1"
+              (reset! setup/state {:screen  :select-difficulty
+                                   :ui      :web-cljs
+                                   :turn    "p1"
                                    :markers ["X" "O"]})
               (wire/render [main/app])))
 
     (it "easy"
       (with-redefs [setup/select-difficulty! (stub :select-difficulty!)]
-        (should-select ".easy")
-        (should= "Easy" (wire/text ".easy"))
-        (wire/click! ".easy")
+        (should-select "#easy")
+        (should= "Easy" (wire/text "#easy"))
+        (wire/click! "#easy")
         (should-have-invoked :select-difficulty! {:with [:easy]})))
 
     (it "medium"
       (with-redefs [setup/select-difficulty! (stub :select-difficulty!)]
-        (should-select ".medium")
-        (should= "Medium" (wire/text ".medium"))
-
-        (wire/click! ".medium")
+        (should-select "#medium")
+        (should= "Medium" (wire/text "#medium"))
+        (wire/click! "#medium")
         (should-have-invoked :select-difficulty! {:with [:medium]})))
 
     (it "hard"
       (with-redefs [setup/select-difficulty! (stub :select-difficulty!)]
-        (should-select ".hard")
-        (should= "Hard" (wire/text ".hard"))
-        (wire/click! ".hard")
+        (should-select "#hard")
+        (should= "Hard" (wire/text "#hard"))
+        (wire/click! "#hard")
         (should-have-invoked :select-difficulty! {:with [:hard]}))))
 
   (context "drawing board"
     (before (do
-              (reset! setup/state {:screen :game
-                                   :ui :web-cljs
-                                   :turn "p1"
-                                   :markers ["X" "O"]
-                                   :players [:human :ai]
+              (reset! setup/state {:screen     :game
+                                   :ui         :web-cljs
+                                   :turn       "p1"
+                                   :markers    ["X" "O"]
+                                   :players    [:human :ai]
                                    :board-size :3x3
-                                   :board (board/get-board :3x3)})
+                                   :board      (board/get-board :3x3)})
               (wire/render [main/app])))
 
     (it "render-cell returns td with value"
@@ -184,13 +194,13 @@
     (it "click cell, css"
       (with-redefs [ht/apply-human-move (stub :apply-human-move
                                           {:invoke (fn [state _idx] state)})]
-        (reset! setup/state {:screen :game
-                             :ui :web-cljs
-                             :turn "p1"
-                             :markers ["X" "O"]
-                             :players [:human :ai]
+        (reset! setup/state {:screen     :game
+                             :ui         :web-cljs
+                             :turn       "p1"
+                             :markers    ["X" "O"]
+                             :players    [:human :ai]
                              :board-size :3x3
-                             :board (board/get-board :3x3)})
+                             :board      (board/get-board :3x3)})
         (should-select "#cell-1")
         (should= "grey"
           (cssfn "#cell-1" "background-color"))
@@ -207,17 +217,44 @@
     (it "click cell, css"
       (with-redefs [ht/apply-human-move (stub :apply-human-move
                                           {:invoke (fn [state _idx] state)})]
-        (reset! setup/state {:screen :game
-                             :ui :web-cljs
-                             :turn "p1"
-                             :markers ["X" "O"]
-                             :players [:ai :ai]
+        (reset! setup/state {:screen     :game
+                             :ui         :web-cljs
+                             :turn       "p1"
+                             :markers    ["X" "O"]
+                             :players    [:ai :ai]
                              :board-size :3x3
-                             :board (board/get-board :3x3)})
+                             :board      (board/get-board :3x3)})
         (should-select "#cell-1")
         (should= "1" (wire/text "#cell-1"))
         (wire/click! "#cell-1")
         (should-not-have-invoked :apply-human-move)))
     )
+
+  (context "game over"
+    (before (do
+              (reset! setup/state {:screen     :game-over
+                                   :ui         :web-cljs
+                                   :turn       "p1"
+                                   :markers    ["X" "O"]
+                                   :players    [:ai :ai]
+                                   :board-size :3x3
+                                   :board      (repeat 9 ["X"])})
+              (wire/render [main/app])))
+
+    (it "displays winning bard"
+      (should-select "#main-container")
+      (should-select ".cell")
+      (should-contain "Game Over!" (wire/text "h1"))
+      (should-contain "Winner is X" (wire/text "#winner")))
+
+    (it "displays tie game"
+      (reset! setup/state (assoc @setup/state :board [["X"] ["O"] ["O"]
+                                                      ["O"] ["X"] ["X"]
+                                                      ["X"] ["O"] ["O"]]))
+      (wire/render [main/app])
+      (should-select "#main-container")
+      (should-select ".cell")
+      (should-contain "Game Over!" (wire/text "h1"))
+      (should-contain "Tie Game!" (wire/text "#winner"))))
 
   )
