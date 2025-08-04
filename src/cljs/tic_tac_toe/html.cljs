@@ -6,25 +6,24 @@
             [tic-tac-toe.setup :as setup]))
 
 (def select-game-mode
-  [:div
-   {:id "main-container"}
-   [:div [:h1 "Select a game mode"]
-    [:button {:id       "human-vs-ai"
-              :on-click #(swap! setup/state assoc
-                           :players [:human :ai]
-                           :screen :select-board)} "Human vs AI"]
-    [:button {:id       "ai-vs-human"
-              :on-click #(swap! setup/state assoc
-                           :players [:ai :human]
-                           :screen :select-board)} "AI vs Human"]
-    [:button {:id       "human-vs-human"
-              :on-click #(swap! setup/state assoc
-                           :players [:human :human]
-                           :screen :select-board)} "Human vs Human"]
-    [:button {:id       "ai-vs-ai"
-              :on-click #(swap! setup/state assoc
-                           :players [:ai :ai]
-                           :screen :select-board)} "AI vs AI"]]])
+  [:div {:id "main-container"}
+   [:h1 {:style {:text-align "center"}} "Select a game mode"]
+   [:button {:id       "human-vs-ai"
+             :on-click #(swap! setup/state assoc
+                          :players [:human :ai]
+                          :screen :select-board)} "Human vs AI"]
+   [:button {:id       "ai-vs-human"
+             :on-click #(swap! setup/state assoc
+                          :players [:ai :human]
+                          :screen :select-board)} "AI vs Human"]
+   [:button {:id       "human-vs-human"
+             :on-click #(swap! setup/state assoc
+                          :players [:human :human]
+                          :screen :select-board)} "Human vs Human"]
+   [:button {:id       "ai-vs-ai"
+             :on-click #(swap! setup/state assoc
+                          :players [:ai :ai]
+                          :screen :select-board)} "AI vs AI"]])
 
 (def select-board
   [:div
@@ -61,17 +60,24 @@
              :class    "hard"
              :on-click #(setup/select-difficulty! :hard)} "Hard"]])
 
+(defn- ai-ai? []
+  (= [:ai :ai] (:players @setup/state)))
+
+(defn- handle-click [idx]
+  (if (ai-ai?)
+    nil
+    (swap! setup/state ht/apply-human-move (js/parseInt idx))))
+
 (defn render-cell [idx]
   [:td {:style    {:background-color "grey"
                    :width            "60px"
                    :height           "60px"
                    :text-align       "center"
                    :color            "white"
-                   :font-size        "2em"}
-        :id       "cell"
-        :on-click #(swap! setup/state
-                     (fn [state] (ht/apply-human-move state (js/parseInt idx))))
-        }
+                   :font-size        "2em"
+                   :cursor           (if (ai-ai?) "default" "pointer")}
+        :id       (str "cell-" idx)
+        :on-click #(handle-click idx)}
    idx])
 
 (defn render-board [{:keys [board-size board] :as _state}]

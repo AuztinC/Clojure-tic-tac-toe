@@ -20,7 +20,7 @@
 
   (redefs-around [sut/->inspect (stub :inspect)])
 
-  #_(it "game container"
+  (it "game container"
     (should-select "#main-container")
     #_(should= "Welcome to Tic-Tac-Toe!" (wire/text "#title")))
   )

@@ -1,10 +1,11 @@
 (ns tic-tac-toe.setup
-  (:require [reagent.core :as r]
+  (:require [c3kit.wire.js :as wjs]
+            [reagent.core :as r]
             [tic-tac-toe.game :as game]
             [tic-tac-toe.ai-turn :as ai]))
 
-(defonce state (r/atom {:store nil
-                        :active true
+(defonce state (r/atom {:store   nil
+                        :active  true
                         :screen  :select-game-mode
                         :ui      :web-cljs
                         :turn    "p1"
@@ -30,8 +31,12 @@
                         "p1" (first (:players new))
                         "p2" (second (:players new)))]
       (when (= :ai next-player)
-        (sleep
-          #(reset! state (game/next-state new))
-          500)))))
+        (if (= [:ai :ai] (:players new))
+          (do
+            (js/removeEventListener "on-click" (wjs/element-by-id "app"))
+            (sleep
+            #(reset! state (game/next-state new))
+            500))
+          (reset! state (game/next-state new)))))))
 
 

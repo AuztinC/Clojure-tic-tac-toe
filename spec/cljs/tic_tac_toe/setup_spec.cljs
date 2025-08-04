@@ -73,7 +73,7 @@
                     sut/sleep (stub :sleep)]
         (let [state {:screen  :game
                      :ui      :web-cljs
-                     :players [:human :ai]
+                     :players [:ai :ai]
                      :turn    "p2"
                      :board   (board/get-board :3x3)}]
           (reset! sut/state state)

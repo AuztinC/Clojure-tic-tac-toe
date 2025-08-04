@@ -11,7 +11,8 @@
                                         should-contain
                                         focus-context
                                         should-have-count
-                                        focus-it]]
+                                        focus-it
+                                        should-not-have-invoked]]
                    [c3kit.wire.spec-helperc :refer [should-select]])
   (:require [speclj.core]
             [c3kit.wire.spec-helper :as wire]
@@ -21,6 +22,9 @@
             [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.setup :as setup]
             [tic-tac-toe.main :as main]))
+
+(defn cssfn [target key]
+  (.getPropertyValue (wire/style target) key))
 
 (defn cell-count [size]
   (let [state {:board-size size
@@ -127,6 +131,7 @@
       (with-redefs [setup/select-difficulty! (stub :select-difficulty!)]
         (should-select ".medium")
         (should= "Medium" (wire/text ".medium"))
+
         (wire/click! ".medium")
         (should-have-invoked :select-difficulty! {:with [:medium]})))
 
@@ -176,16 +181,43 @@
         (should= 9 (:column-count out))
         (should= 27 (:cell-count out))))
 
-    #_(it "click cell"
-      (with-redefs [ht/apply-human-move
-                    (stub :apply-human-move
-                      {:return {:screen     :game
-                                :board-size :3x3
-                                :board      []}})]
-        (should-select "#cell")
-        (should= "0" (wire/text "#cell"))
-        (wire/click! "#cell")
+    (it "click cell, css"
+      (with-redefs [ht/apply-human-move (stub :apply-human-move
+                                          {:invoke (fn [state _idx] state)})]
+        (reset! setup/state {:screen :game
+                             :ui :web-cljs
+                             :turn "p1"
+                             :markers ["X" "O"]
+                             :players [:human :ai]
+                             :board-size :3x3
+                             :board (board/get-board :3x3)})
+        (should-select "#cell-1")
+        (should= "grey"
+          (cssfn "#cell-1" "background-color"))
+        (should= "60px"
+          (cssfn "#cell-1" "width"))
+        (should= "60px"
+          (cssfn "#cell-1" "height"))
+        (should= "pointer"
+          (cssfn "#cell-1" "cursor"))
+        (should= "1" (wire/text "#cell-1"))
+        (wire/click! "#cell-1")
         (should-have-invoked :apply-human-move)))
+
+    (it "click cell, css"
+      (with-redefs [ht/apply-human-move (stub :apply-human-move
+                                          {:invoke (fn [state _idx] state)})]
+        (reset! setup/state {:screen :game
+                             :ui :web-cljs
+                             :turn "p1"
+                             :markers ["X" "O"]
+                             :players [:ai :ai]
+                             :board-size :3x3
+                             :board (board/get-board :3x3)})
+        (should-select "#cell-1")
+        (should= "1" (wire/text "#cell-1"))
+        (wire/click! "#cell-1")
+        (should-not-have-invoked :apply-human-move)))
     )
 
   )
