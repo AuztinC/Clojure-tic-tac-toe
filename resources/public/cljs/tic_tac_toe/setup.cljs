@@ -1,8 +1,6 @@
 (ns tic-tac-toe.setup
   (:require [reagent.core :as r]
-            [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
-            [reagent.ratom :as ratom]
             [tic-tac-toe.ai-turn :as ai]))
 
 (defonce state (r/atom {:store nil
@@ -23,14 +21,17 @@
         :difficulties updated-difficulties
         :screen :game))))
 
+(defn sleep [fn t]
+  (js/setTimeout fn t))
+
 (defn auto-advance [_key _atom _old new]
   (when (and (= :game (:screen new)))
     (let [next-player (case (:turn new)
                         "p1" (first (:players new))
                         "p2" (second (:players new)))]
       (when (= :ai next-player)
-        (js/setTimeout
-          #(swap! state game/next-state)
+        (sleep
+          #(reset! state (game/next-state new))
           500)))))
 
 

@@ -91,8 +91,9 @@
         part-board))))
 
 (defn game []
-
   [:table {:id "main-container"}
    (render-board @setup/state)])
+
+;; TODO ARC - game over
 
 

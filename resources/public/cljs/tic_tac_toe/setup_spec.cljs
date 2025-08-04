@@ -21,6 +21,11 @@
 (describe "game setup"
   (with-stubs)
   ;(redefs-around [sut/auto-advance (stub :auto-advance)])
+  ;
+  (before (reset! sut/state {:screen :select-game-mode
+                             :ui :web-cljs
+                             :turn "p1"
+                             :markers ["X" "O"]}))
 
   (context "select-difficulty correct count and switch to game"
     (it "single difficulty 1 time"
@@ -33,7 +38,7 @@
         (should= [:easy] (:difficulties out))
         (should= :game (:screen out))))
 
-    #_(it "two difficulty "
+    (it "two difficulty "
       (reset! sut/state {:screen  :select-game-mode
                          :ui      :web-cljs
                          :turn    "p1"
@@ -48,34 +53,34 @@
         (should= :game (:screen out2))
         )))
 
-  #_(context "auto advance"
-    (it "returns current state if not ai turn"
+  (context "auto advance"
+    (it "does not advance if it's not the AI's turn"
       (with-redefs [game/next-state (stub :next-state)]
-        (let [state {:screen  :game
-                     :ui      :web-cljs
-                     :players [:human :ai]
-                     :turn    "p1"
-                     :board   (board/get-board :3x3)
-                     :board-size :3x3}
-              out (sut/auto-advance state)]
+        (let [initial-state {:screen     :game
+                             :ui         :web-cljs
+                             :players    [:human :ai]
+                             :turn       "p1"
+                             :board      (board/get-board :3x3)
+                             :board-size :3x3}]
+          (reset! sut/state initial-state)
+          (sut/auto-advance :test-key sut/state initial-state initial-state)
+          (should= initial-state @sut/state)
           (should-not-have-invoked :next-state))))
 
+
     (it "returns new state if ai turn"
-      (with-redefs [game/next-state (stub :next-state
-                                      {:return {:screen  :game
-                                                :players [:human :ai]
-                                                :turn    "p1"}})]
+      (with-redefs [game/next-state (stub :next-state {:return {:turn "p1"}})
+                    sut/sleep (stub :sleep)]
         (let [state {:screen  :game
                      :ui      :web-cljs
                      :players [:human :ai]
                      :turn    "p2"
-                     :board   (board/get-board :3x3)}
-              new-state {:screen  :game
-                         :players [:human :ai]
-                         :turn    "p1"}
-              out (sut/auto-advance state)]
-          (should= new-state out)
-          (should-have-invoked :next-state {:with [state]})))))
+                     :board   (board/get-board :3x3)}]
+          (reset! sut/state state)
+          (sut/auto-advance :test-key sut/state state state)
+          (should-have-invoked :sleep)
+          #_(should-have-invoked :next-state))))
+    )
 
   )
 

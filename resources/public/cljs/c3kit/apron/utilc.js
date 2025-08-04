@@ -11,11 +11,11 @@ goog.require('cognitect.transit');
  * Convenience.  Convert the form to EDN
  */
 c3kit.apron.utilc.__GT_edn = (function c3kit$apron$utilc$__GT_edn(v){
-var G__15310 = v;
-if((G__15310 == null)){
+var G__15197 = v;
+if((G__15197 == null)){
 return null;
 } else {
-return cljs.core.pr_str.call(null,G__15310);
+return cljs.core.pr_str.call(null,G__15197);
 }
 });
 /**
@@ -40,8 +40,8 @@ return parseInt(hex,(16));
  * Give a list of entities with unique :id's, return a map with the ids as keys and the entities as values
  */
 c3kit.apron.utilc.index_by_id = (function c3kit$apron$utilc$index_by_id(entities){
-return cljs.core.reduce.call(null,(function (p1__15313_SHARP_,p2__15314_SHARP_){
-return cljs.core.assoc.call(null,p1__15313_SHARP_,new cljs.core.Keyword(null,"id","id",-1388402092).cljs$core$IFn$_invoke$arity$1(p2__15314_SHARP_),p2__15314_SHARP_);
+return cljs.core.reduce.call(null,(function (p1__15216_SHARP_,p2__15220_SHARP_){
+return cljs.core.assoc.call(null,p1__15216_SHARP_,new cljs.core.Keyword(null,"id","id",-1388402092).cljs$core$IFn$_invoke$arity$1(p2__15220_SHARP_),p2__15220_SHARP_);
 }),cljs.core.PersistentArrayMap.EMPTY,entities);
 });
 /**
@@ -70,7 +70,7 @@ throw cljs.core.ex_info.call(null,"Missing :kind",entity);
  */
 c3kit.apron.utilc.__GT_uuid_or_nil = (function c3kit$apron$utilc$__GT_uuid_or_nil(uuid_str){
 try{return c3kit.apron.schema.__GT_uuid.call(null,uuid_str);
-}catch (e15316){var _ = e15316;
+}catch (e15229){var _ = e15229;
 return null;
 }});
 c3kit.apron.utilc.transit_reader = cognitect.transit.reader.call(null,new cljs.core.Keyword(null,"json","json",1279968570),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"handlers","handlers",79528781),new cljs.core.PersistentArrayMap(null, 2, ["f",parseFloat,"n",parseInt], null)], null));
@@ -79,8 +79,8 @@ c3kit.apron.utilc.transit_writer = cognitect.transit.writer.call(null,new cljs.c
  * Convert data into transit string
  */
 c3kit.apron.utilc.__GT_transit = (function c3kit$apron$utilc$__GT_transit(var_args){
-var G__15319 = arguments.length;
-switch (G__15319) {
+var G__15231 = arguments.length;
+switch (G__15231) {
 case 3:
 return c3kit.apron.utilc.__GT_transit.cljs$core$IFn$_invoke$arity$3((arguments[(0)]),(arguments[(1)]),(arguments[(2)]));
 
@@ -109,8 +109,8 @@ return cognitect.transit.write.call(null,c3kit.apron.utilc.transit_writer,data);
  * Convert transit string into data
  */
 c3kit.apron.utilc._LT__transit = (function c3kit$apron$utilc$_LT__transit(var_args){
-var G__15323 = arguments.length;
-switch (G__15323) {
+var G__15241 = arguments.length;
+switch (G__15241) {
 case 3:
 return c3kit.apron.utilc._LT__transit.cljs$core$IFn$_invoke$arity$3((arguments[(0)]),(arguments[(1)]),(arguments[(2)]));
 
@@ -146,11 +146,11 @@ return JSON.stringify(cljs.core.clj__GT_js.call(null,v));
  * Convert JSON into clj data structure.
  */
 c3kit.apron.utilc._LT__json = (function c3kit$apron$utilc$_LT__json(v){
-if(cljs.core.truth_((function (){var G__15328 = v;
-if((G__15328 == null)){
+if(cljs.core.truth_((function (){var G__15245 = v;
+if((G__15245 == null)){
 return null;
 } else {
-return c3kit.apron.corec.not_blank_QMARK_.call(null,G__15328);
+return c3kit.apron.corec.not_blank_QMARK_.call(null,G__15245);
 }
 })())){
 return cljs.core.js__GT_clj.call(null,JSON.parse(v));
@@ -187,8 +187,8 @@ return clojure.string.join.call(null,"\r\n",cljs.core.map.call(null,c3kit.apron.
  * Sanatize string into valid filename
  */
 c3kit.apron.utilc.__GT_filename = (function c3kit$apron$utilc$__GT_filename(var_args){
-var G__15333 = arguments.length;
-switch (G__15333) {
+var G__15260 = arguments.length;
+switch (G__15260) {
 case 1:
 return c3kit.apron.utilc.__GT_filename.cljs$core$IFn$_invoke$arity$1((arguments[(0)]));
 

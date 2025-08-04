@@ -2,8 +2,8 @@
 goog.provide('c3kit.apron.cursor');
 goog.require('cljs.core');
 c3kit.apron.cursor.do_swap_BANG_ = (function c3kit$apron$cursor$do_swap_BANG_(var_args){
-var G__6974 = arguments.length;
-switch (G__6974) {
+var G__6972 = arguments.length;
+switch (G__6972) {
 case 3:
 return c3kit.apron.cursor.do_swap_BANG_.cljs$core$IFn$_invoke$arity$3((arguments[(0)]),(arguments[(1)]),(arguments[(2)]));
 

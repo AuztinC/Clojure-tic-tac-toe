@@ -36,18 +36,18 @@ return tic_tac_toe.human_turn.apply_human_move.call(null,state,parseInt(idx));
 }));
 })], null),idx], null);
 });
-tic_tac_toe.html.render_board = (function tic_tac_toe$html$render_board(p__19051){
-var map__19052 = p__19051;
-var map__19052__$1 = cljs.core.__destructure_map.call(null,map__19052);
-var _state = map__19052__$1;
-var board_size = cljs.core.get.call(null,map__19052__$1,new cljs.core.Keyword(null,"board-size","board-size",140730505));
-var board = cljs.core.get.call(null,map__19052__$1,new cljs.core.Keyword(null,"board","board",-1907017633));
+tic_tac_toe.html.render_board = (function tic_tac_toe$html$render_board(p__22200){
+var map__22201 = p__22200;
+var map__22201__$1 = cljs.core.__destructure_map.call(null,map__22201);
+var _state = map__22201__$1;
+var board_size = cljs.core.get.call(null,map__22201__$1,new cljs.core.Keyword(null,"board-size","board-size",140730505));
+var board = cljs.core.get.call(null,map__22201__$1,new cljs.core.Keyword(null,"board","board",-1907017633));
 var indexed = cljs.core.map_indexed.call(null,(function (idx,_cell){
 return tic_tac_toe.html.render_cell.call(null,((cljs.core._EQ_.call(null,"",cljs.core.first.call(null,cljs.core.nth.call(null,board,idx))))?idx:cljs.core.first.call(null,cljs.core.nth.call(null,board,idx))));
 }),board);
-var size = (function (){var G__19053 = board_size;
-var G__19053__$1 = (((G__19053 instanceof cljs.core.Keyword))?G__19053.fqn:null);
-switch (G__19053__$1) {
+var size = (function (){var G__22202 = board_size;
+var G__22202__$1 = (((G__22202 instanceof cljs.core.Keyword))?G__22202.fqn:null);
+switch (G__22202__$1) {
 case "3x3":
 return (3);
 
@@ -61,7 +61,7 @@ return (9);
 
 break;
 default:
-throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__19053__$1)].join('')));
+throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__22202__$1)].join('')));
 
 }
 })();

@@ -2,9 +2,7 @@
 goog.provide('tic_tac_toe.setup');
 goog.require('cljs.core');
 goog.require('reagent.core');
-goog.require('tic_tac_toe.board');
 goog.require('tic_tac_toe.game');
-goog.require('reagent.ratom');
 goog.require('tic_tac_toe.ai_turn');
 if((typeof tic_tac_toe !== 'undefined') && (typeof tic_tac_toe.setup !== 'undefined') && (typeof tic_tac_toe.setup.state !== 'undefined')){
 } else {
@@ -12,8 +10,8 @@ tic_tac_toe.setup.state = reagent.core.atom.call(null,new cljs.core.PersistentAr
 }
 tic_tac_toe.setup.select_difficulty_BANG_ = (function tic_tac_toe$setup$select_difficulty_BANG_(choice){
 var current_state = cljs.core.deref.call(null,tic_tac_toe.setup.state);
-var ai_count = cljs.core.count.call(null,cljs.core.filterv.call(null,(function (p1__19046_SHARP_){
-return cljs.core._EQ_.call(null,new cljs.core.Keyword(null,"ai","ai",760454697),p1__19046_SHARP_);
+var ai_count = cljs.core.count.call(null,cljs.core.filterv.call(null,(function (p1__22195_SHARP_){
+return cljs.core._EQ_.call(null,new cljs.core.Keyword(null,"ai","ai",760454697),p1__22195_SHARP_);
 }),new cljs.core.Keyword(null,"players","players",-1361554569).cljs$core$IFn$_invoke$arity$1(current_state)));
 var updated_difficulties = cljs.core.conj.call(null,cljs.core.vec.call(null,new cljs.core.Keyword(null,"difficulties","difficulties",179230342).cljs$core$IFn$_invoke$arity$1(current_state)),choice);
 if((cljs.core.count.call(null,updated_difficulties) < ai_count)){
@@ -22,10 +20,13 @@ return cljs.core.swap_BANG_.call(null,tic_tac_toe.setup.state,cljs.core.assoc,ne
 return cljs.core.swap_BANG_.call(null,tic_tac_toe.setup.state,cljs.core.assoc,new cljs.core.Keyword(null,"difficulties","difficulties",179230342),updated_difficulties,new cljs.core.Keyword(null,"screen","screen",1990059748),new cljs.core.Keyword(null,"game","game",-441523833));
 }
 });
+tic_tac_toe.setup.sleep = (function tic_tac_toe$setup$sleep(fn,t){
+return setTimeout(fn,t);
+});
 tic_tac_toe.setup.auto_advance = (function tic_tac_toe$setup$auto_advance(_key,_atom,_old,new$){
 if(cljs.core._EQ_.call(null,new cljs.core.Keyword(null,"game","game",-441523833),new cljs.core.Keyword(null,"screen","screen",1990059748).cljs$core$IFn$_invoke$arity$1(new$))){
-var next_player = (function (){var G__19047 = new cljs.core.Keyword(null,"turn","turn",75759344).cljs$core$IFn$_invoke$arity$1(new$);
-switch (G__19047) {
+var next_player = (function (){var G__22196 = new cljs.core.Keyword(null,"turn","turn",75759344).cljs$core$IFn$_invoke$arity$1(new$);
+switch (G__22196) {
 case "p1":
 return cljs.core.first.call(null,new cljs.core.Keyword(null,"players","players",-1361554569).cljs$core$IFn$_invoke$arity$1(new$));
 
@@ -35,13 +36,13 @@ return cljs.core.second.call(null,new cljs.core.Keyword(null,"players","players"
 
 break;
 default:
-throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__19047)].join('')));
+throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__22196)].join('')));
 
 }
 })();
 if(cljs.core._EQ_.call(null,new cljs.core.Keyword(null,"ai","ai",760454697),next_player)){
-return setTimeout((function (){
-return cljs.core.swap_BANG_.call(null,tic_tac_toe.setup.state,tic_tac_toe.game.next_state);
+return tic_tac_toe.setup.sleep.call(null,(function (){
+return cljs.core.reset_BANG_.call(null,tic_tac_toe.setup.state,tic_tac_toe.game.next_state.call(null,new$));
 }),(500));
 } else {
 return null;
