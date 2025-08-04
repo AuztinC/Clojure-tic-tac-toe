@@ -69,7 +69,8 @@
     (swap! setup/state ht/apply-human-move (js/parseInt idx))))
 
 (defn render-cell [idx]
-  [:td {:style    {:background-color "grey"
+  [:td {:style    {
+                   :background-color "grey"
                    :width            "60px"
                    :height           "60px"
                    :text-align       "center"
