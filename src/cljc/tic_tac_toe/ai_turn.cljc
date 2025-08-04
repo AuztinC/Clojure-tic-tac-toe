@@ -172,7 +172,7 @@
       (sleep))
     (ai-turn board marker diff)))
 
-(defmethod init/next-position [:ai :web-cljs] [{:keys [board players]} [marker _] diff]
+(defmethod tic-tac-toe.game/next-position [:ai :web-cljs] [{:keys [board players]} [marker _] diff]
   (do
     (if (= [:ai :ai] players)
       (sleep))

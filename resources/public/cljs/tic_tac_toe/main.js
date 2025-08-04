@@ -12,9 +12,9 @@ return cljs.core.prn.call(null,"inspect -> ",x);
 });
 tic_tac_toe.main.app = (function tic_tac_toe$main$app(){
 var screen__$1 = new cljs.core.Keyword(null,"screen","screen",1990059748).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,tic_tac_toe.setup.state));
-var G__16421 = screen__$1;
-var G__16421__$1 = (((G__16421 instanceof cljs.core.Keyword))?G__16421.fqn:null);
-switch (G__16421__$1) {
+var G__19519 = screen__$1;
+var G__19519__$1 = (((G__19519 instanceof cljs.core.Keyword))?G__19519.fqn:null);
+switch (G__19519__$1) {
 case "select-game-mode":
 return tic_tac_toe.html.select_game_mode;
 
@@ -28,20 +28,23 @@ return tic_tac_toe.html.select_difficulty;
 
 break;
 case "game":
-var co__7704__auto___16429 = reagent.ratom.make_reaction.call(null,(function (){
-return tic_tac_toe.setup.auto_advance.call(null,cljs.core.deref.call(null,tic_tac_toe.setup.state));
-}),new cljs.core.Keyword(null,"auto-run","auto-run",1958400437),true);
-cljs.core.deref.call(null,co__7704__auto___16429);
-
-
 return tic_tac_toe.html.game.call(null);
 
 break;
 default:
-throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__16421__$1)].join('')));
+throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__19519__$1)].join('')));
 
 }
 });
+if((typeof tic_tac_toe !== 'undefined') && (typeof tic_tac_toe.main !== 'undefined') && (typeof tic_tac_toe.main.started_QMARK_ !== 'undefined')){
+} else {
+tic_tac_toe.main.started_QMARK_ = (function (){
+cljs.core.add_watch.call(null,tic_tac_toe.setup.state,new cljs.core.Keyword(null,"auto-turn","auto-turn",-1016045827),tic_tac_toe.setup.auto_advance);
+
+return true;
+})()
+;
+}
 tic_tac_toe.main.main = (function tic_tac_toe$main$main(){
 return reagent.dom.client.render.call(null,reagent.dom.client.create_root.call(null,c3kit.wire.js.element_by_id.call(null,"app")),new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [tic_tac_toe.main.app], null));
 });

@@ -8,16 +8,16 @@ goog.require('clojure.walk');
 goog.require('goog.dom');
 goog.require('goog.dom.forms');
 c3kit.wire.util.errors__GT_strings = (function c3kit$wire$util$errors__GT_strings(errors){
-return cljs.core.map.call(null,(function (p__14063){
-var vec__14064 = p__14063;
-var field = cljs.core.nth.call(null,vec__14064,(0),null);
-var error = cljs.core.nth.call(null,vec__14064,(1),null);
+return cljs.core.map.call(null,(function (p__14040){
+var vec__14041 = p__14040;
+var field = cljs.core.nth.call(null,vec__14041,(0),null);
+var error = cljs.core.nth.call(null,vec__14041,(1),null);
 return [cljs.core.name.call(null,field)," ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(error)].join('');
 }),errors);
 });
 c3kit.wire.util._PLUS_class_if = (function c3kit$wire$util$_PLUS_class_if(var_args){
-var G__14075 = arguments.length;
-switch (G__14075) {
+var G__14068 = arguments.length;
+switch (G__14068) {
 case 2:
 return c3kit.wire.util._PLUS_class_if.cljs$core$IFn$_invoke$arity$2((arguments[(0)]),(arguments[(1)]));
 
@@ -62,14 +62,14 @@ return attributes__$1;
 
 c3kit.wire.util.__GT_css_class = (function c3kit$wire$util$__GT_css_class(var_args){
 var args__5755__auto__ = [];
-var len__5749__auto___14134 = arguments.length;
-var i__5750__auto___14139 = (0);
+var len__5749__auto___14166 = arguments.length;
+var i__5750__auto___14167 = (0);
 while(true){
-if((i__5750__auto___14139 < len__5749__auto___14134)){
-args__5755__auto__.push((arguments[i__5750__auto___14139]));
+if((i__5750__auto___14167 < len__5749__auto___14166)){
+args__5755__auto__.push((arguments[i__5750__auto___14167]));
 
-var G__14141 = (i__5750__auto___14139 + (1));
-i__5750__auto___14139 = G__14141;
+var G__14168 = (i__5750__auto___14167 + (1));
+i__5750__auto___14167 = G__14168;
 continue;
 } else {
 }
@@ -87,9 +87,9 @@ return clojure.string.join.call(null," ",cljs.core.remove.call(null,cljs.core.ni
 (c3kit.wire.util.__GT_css_class.cljs$lang$maxFixedArity = (0));
 
 /** @this {Function} */
-(c3kit.wire.util.__GT_css_class.cljs$lang$applyTo = (function (seq14088){
+(c3kit.wire.util.__GT_css_class.cljs$lang$applyTo = (function (seq14080){
 var self__5735__auto__ = this;
-return self__5735__auto__.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq14088));
+return self__5735__auto__.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq14080));
 }));
 
 c3kit.wire.util.id_counter = cljs.core.atom.call(null,(0));
@@ -100,10 +100,10 @@ cljs.core.swap_BANG_.call(null,c3kit.wire.util.id_counter,cljs.core.inc);
 return result;
 });
 c3kit.wire.util.with_react_keys = (function c3kit$wire$util$with_react_keys(col){
-return c3kit.apron.corec.map_all.call(null,(function (p__14099){
-var vec__14100 = p__14099;
-var n = cljs.core.nth.call(null,vec__14100,(0),null);
-var i = cljs.core.nth.call(null,vec__14100,(1),null);
+return c3kit.apron.corec.map_all.call(null,(function (p__14172){
+var vec__14174 = p__14172;
+var n = cljs.core.nth.call(null,vec__14174,(0),null);
+var i = cljs.core.nth.call(null,vec__14174,(1),null);
 if((((!((n == null))))?(((((n.cljs$lang$protocol_mask$partition0$ & (262144))) || ((cljs.core.PROTOCOL_SENTINEL === n.cljs$core$IWithMeta$))))?true:(((!n.cljs$lang$protocol_mask$partition0$))?cljs.core.native_satisfies_QMARK_.call(null,cljs.core.IWithMeta,n):false)):cljs.core.native_satisfies_QMARK_.call(null,cljs.core.IWithMeta,n))){
 var m = cljs.core.meta.call(null,n);
 if(cljs.core.truth_(new cljs.core.Keyword(null,"key","key",-1516042587).cljs$core$IFn$_invoke$arity$1(m))){
@@ -118,14 +118,14 @@ return cljs.core.with_meta.call(null,new cljs.core.PersistentVector(null, 2, 5, 
 });
 c3kit.wire.util.keyed_list = (function c3kit$wire$util$keyed_list(var_args){
 var args__5755__auto__ = [];
-var len__5749__auto___14164 = arguments.length;
-var i__5750__auto___14165 = (0);
+var len__5749__auto___14226 = arguments.length;
+var i__5750__auto___14227 = (0);
 while(true){
-if((i__5750__auto___14165 < len__5749__auto___14164)){
-args__5755__auto__.push((arguments[i__5750__auto___14165]));
+if((i__5750__auto___14227 < len__5749__auto___14226)){
+args__5755__auto__.push((arguments[i__5750__auto___14227]));
 
-var G__14173 = (i__5750__auto___14165 + (1));
-i__5750__auto___14165 = G__14173;
+var G__14228 = (i__5750__auto___14227 + (1));
+i__5750__auto___14227 = G__14228;
 continue;
 } else {
 }
@@ -143,9 +143,9 @@ return c3kit.wire.util.with_react_keys.call(null,args);
 (c3kit.wire.util.keyed_list.cljs$lang$maxFixedArity = (0));
 
 /** @this {Function} */
-(c3kit.wire.util.keyed_list.cljs$lang$applyTo = (function (seq14148){
+(c3kit.wire.util.keyed_list.cljs$lang$applyTo = (function (seq14188){
 var self__5735__auto__ = this;
-return self__5735__auto__.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq14148));
+return self__5735__auto__.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq14188));
 }));
 
 c3kit.wire.util.next_key = (function (){var k = cljs.core.atom.call(null,(0));
@@ -168,29 +168,29 @@ return node;
  */
 c3kit.wire.util.atom_observer = (function c3kit$wire$util$atom_observer(state){
 return (function() {
-var G__14180 = null;
-var G__14180__1 = (function (path){
+var G__14229 = null;
+var G__14229__1 = (function (path){
 return cljs.core.get_in.call(null,cljs.core.deref.call(null,state),path);
 });
-var G__14180__2 = (function (path,value){
+var G__14229__2 = (function (path,value){
 taoensso.timbre._log_BANG_.call(null,taoensso.timbre._STAR_config_STAR_,new cljs.core.Keyword(null,"debug","debug",-1608172596),"c3kit.wire.util",null,null,null,new cljs.core.Keyword(null,"p","p",151049309),new cljs.core.Keyword(null,"auto","auto",-566279492),(new cljs.core.Delay((function (){
 return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, ["updating atom:",path,value], null);
 }),null)),null,(36),null);
 
 return cljs.core.swap_BANG_.call(null,state,cljs.core.assoc_in,path,value);
 });
-G__14180 = function(path,value){
+G__14229 = function(path,value){
 switch(arguments.length){
 case 1:
-return G__14180__1.call(this,path);
+return G__14229__1.call(this,path);
 case 2:
-return G__14180__2.call(this,path,value);
+return G__14229__2.call(this,path,value);
 }
 throw(new Error('Invalid arity: ' + arguments.length));
 };
-G__14180.cljs$core$IFn$_invoke$arity$1 = G__14180__1;
-G__14180.cljs$core$IFn$_invoke$arity$2 = G__14180__2;
-return G__14180;
+G__14229.cljs$core$IFn$_invoke$arity$1 = G__14229__1;
+G__14229.cljs$core$IFn$_invoke$arity$2 = G__14229__2;
+return G__14229;
 })()
 });
 c3kit.wire.util.watch_atom = (function c3kit$wire$util$watch_atom(key,atom){

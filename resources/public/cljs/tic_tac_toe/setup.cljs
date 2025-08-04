@@ -2,11 +2,14 @@
   (:require [reagent.core :as r]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
-            [reagent.ratom :as ratom]))
+            [reagent.ratom :as ratom]
+            [tic-tac-toe.ai-turn :as ai]))
 
-(defonce state (r/atom {:screen :select-game-mode
-                        :ui :web-cljs
-                        :turn "p1"
+(defonce state (r/atom {:store nil
+                        :active true
+                        :screen  :select-game-mode
+                        :ui      :web-cljs
+                        :turn    "p1"
                         :markers ["X" "O"]}))
 
 (defn select-difficulty! [choice]
@@ -20,19 +23,14 @@
         :difficulties updated-difficulties
         :screen :game))))
 
-(defn auto-advance [next-state]
-  (prn "next state " next-state)
-  (let [next-player (case (:turn next-state)
-                      "p1" (first (:players next-state))
-                      "p2" (second (:players next-state)))]
-    (cond
-      (= :game (:screen next-state))
-      (if (= :ai next-player)
-        (reset! state (game/next-state next-state))
-        @state)
+(defn auto-advance [_key _atom _old new]
+  (when (and (= :game (:screen new)))
+    (let [next-player (case (:turn new)
+                        "p1" (first (:players new))
+                        "p2" (second (:players new)))]
+      (when (= :ai next-player)
+        (js/setTimeout
+          #(swap! state game/next-state)
+          500)))))
 
-      ;(= :replay (:screen next-state))
-      ;(replay/apply-next-replay-move next-state)
-
-      :else @state)))
 

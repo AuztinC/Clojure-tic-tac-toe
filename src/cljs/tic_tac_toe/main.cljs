@@ -16,9 +16,12 @@
       :select-game-mode html/select-game-mode
       :select-board html/select-board
       :select-difficulty html/select-difficulty
-      :game (do
-              (ratom/run! (setup/auto-advance @setup/state))
-              (html/game)))))
+      :game (html/game))))
+
+(defonce started?
+  (do
+    (add-watch setup/state :auto-turn setup/auto-advance)
+    true))
 
 (defn ^:export main []
   (rdomc/render (rdomc/create-root (wjs/element-by-id "app")) [app]))

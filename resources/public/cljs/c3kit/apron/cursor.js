@@ -2,8 +2,8 @@
 goog.provide('c3kit.apron.cursor');
 goog.require('cljs.core');
 c3kit.apron.cursor.do_swap_BANG_ = (function c3kit$apron$cursor$do_swap_BANG_(var_args){
-var G__6930 = arguments.length;
-switch (G__6930) {
+var G__6974 = arguments.length;
+switch (G__6974) {
 case 3:
 return c3kit.apron.cursor.do_swap_BANG_.cljs$core$IFn$_invoke$arity$3((arguments[(0)]),(arguments[(1)]),(arguments[(2)]));
 
@@ -47,9 +47,9 @@ return cljs.core.apply.call(null,f,v,x,y,more);
 (c3kit.apron.cursor.do_swap_BANG_.cljs$lang$maxFixedArity = 6);
 
 c3kit.apron.cursor.swap_vals_result = (function c3kit$apron$cursor$swap_vals_result(path,result){
-var vec__6948 = result;
-var o = cljs.core.nth.call(null,vec__6948,(0),null);
-var n = cljs.core.nth.call(null,vec__6948,(1),null);
+var vec__6975 = result;
+var o = cljs.core.nth.call(null,vec__6975,(0),null);
+var n = cljs.core.nth.call(null,vec__6975,(1),null);
 return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.get_in.call(null,o,path),cljs.core.get_in.call(null,n,path)], null);
 });
 c3kit.apron.cursor.do_reset_BANG_ = (function c3kit$apron$cursor$do_reset_BANG_(base,path,new_value){

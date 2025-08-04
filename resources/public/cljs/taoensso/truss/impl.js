@@ -42,22 +42,22 @@ return x;
 return cljs.core.set.call(null,x);
 }
 });
-var ensure_set_8469 = taoensso.truss.impl.ensure_set;
+var ensure_set_8519 = taoensso.truss.impl.ensure_set;
 taoensso.truss.impl.ks_EQ_ = (function taoensso$truss$impl$ks_EQ_(ks,m){
-return cljs.core._EQ_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8469.call(null,ks));
+return cljs.core._EQ_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8519.call(null,ks));
 });
 
 taoensso.truss.impl.ks_LT__EQ_ = (function taoensso$truss$impl$ks_LT__EQ_(ks,m){
-return clojure.set.subset_QMARK_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8469.call(null,ks));
+return clojure.set.subset_QMARK_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8519.call(null,ks));
 });
 
 taoensso.truss.impl.ks_GT__EQ_ = (function taoensso$truss$impl$ks_GT__EQ_(ks,m){
-return clojure.set.superset_QMARK_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8469.call(null,ks));
+return clojure.set.superset_QMARK_.call(null,cljs.core.set.call(null,cljs.core.keys.call(null,m)),ensure_set_8519.call(null,ks));
 });
 
 taoensso.truss.impl.ks_nnil_QMARK_ = (function taoensso$truss$impl$ks_nnil_QMARK_(ks,m){
-return taoensso.truss.impl.revery_QMARK_.call(null,(function (p1__8468_SHARP_){
-return (!((cljs.core.get.call(null,m,p1__8468_SHARP_) == null)));
+return taoensso.truss.impl.revery_QMARK_.call(null,(function (p1__8513_SHARP_){
+return (!((cljs.core.get.call(null,m,p1__8513_SHARP_) == null)));
 }),ks);
 });
 taoensso.truss.impl.default_error_fn = (function taoensso$truss$impl$default_error_fn(data_){
@@ -67,20 +67,20 @@ throw cljs.core.ex_info.call(null,cljs.core.deref.call(null,new cljs.core.Keywor
 taoensso.truss.impl._STAR_data_STAR_ = null;
 taoensso.truss.impl._STAR_error_fn_STAR_ = taoensso.truss.impl.default_error_fn;
 taoensso.truss.impl.safe_pred_forms = (function (){var names = cljs.core.mapv.call(null,cljs.core.name,new cljs.core.PersistentHashSet(null, new cljs.core.PersistentArrayMap(null, 25, [new cljs.core.Symbol(null,"fn?","fn?",1820990818,null),"null",new cljs.core.Symbol(null,"vector?","vector?",-61367869,null),"null",new cljs.core.Symbol(null,"boolean","boolean",-278886877,null),"null",new cljs.core.Symbol(null,"some?","some?",234752293,null),"null",new cljs.core.Symbol(null,"sequential?","sequential?",1102351463,null),"null",new cljs.core.Symbol(null,"float?","float?",673884616,null),"null",new cljs.core.Symbol(null,"set?","set?",1636014792,null),"null",new cljs.core.Symbol(null,"reversible?","reversible?",314107817,null),"null",new cljs.core.Symbol(null,"identity","identity",-1007039734,null),"null",new cljs.core.Symbol(null,"string?","string?",-1129175764,null),"null",new cljs.core.Symbol(null,"associative?","associative?",-141666771,null),"null",new cljs.core.Symbol(null,"keyword?","keyword?",1917797069,null),"null",new cljs.core.Symbol(null,"counted?","counted?",1703071664,null),"null",new cljs.core.Symbol(null,"sorted?","sorted?",892797714,null),"null",new cljs.core.Symbol(null,"nil?","nil?",1612038930,null),"null",new cljs.core.Symbol(null,"not","not",1044554643,null),"null",new cljs.core.Symbol(null,"true?","true?",-1600332395,null),"null",new cljs.core.Symbol(null,"integer?","integer?",1303791671,null),"null",new cljs.core.Symbol(null,"delay?","delay?",-1528239209,null),"null",new cljs.core.Symbol(null,"ifn?","ifn?",-2106461064,null),"null",new cljs.core.Symbol(null,"false?","false?",-1522377573,null),"null",new cljs.core.Symbol(null,"list?","list?",-1494629,null),"null",new cljs.core.Symbol(null,"number?","number?",-1747282210,null),"null",new cljs.core.Symbol(null,"symbol?","symbol?",1820680511,null),"null",new cljs.core.Symbol(null,"coll?","coll?",-1874821441,null),"null"], null), null));
-return cljs.core.into.call(null,cljs.core.into.call(null,cljs.core.PersistentHashSet.EMPTY,cljs.core.mapv.call(null,(function (p1__8470_SHARP_){
-return cljs.core.symbol.call(null,"clojure.core",p1__8470_SHARP_);
-}),names)),cljs.core.mapv.call(null,(function (p1__8471_SHARP_){
-return cljs.core.symbol.call(null,"cljs.core",p1__8471_SHARP_);
+return cljs.core.into.call(null,cljs.core.into.call(null,cljs.core.PersistentHashSet.EMPTY,cljs.core.mapv.call(null,(function (p1__8516_SHARP_){
+return cljs.core.symbol.call(null,"clojure.core",p1__8516_SHARP_);
+}),names)),cljs.core.mapv.call(null,(function (p1__8517_SHARP_){
+return cljs.core.symbol.call(null,"cljs.core",p1__8517_SHARP_);
 }),names));
 })();
 taoensso.truss.impl.safe_pred = (function taoensso$truss$impl$safe_pred(pred){
 return (function (x){
 try{return pred.call(null,x);
-}catch (e8472){if((e8472 instanceof Error)){
-var _ = e8472;
+}catch (e8518){if((e8518 instanceof Error)){
+var _ = e8518;
 return null;
 } else {
-throw e8472;
+throw e8518;
 
 }
 }});
@@ -154,11 +154,11 @@ var arg__$1 = (function (){var temp__5825__auto____$1 = _QMARK_data_fn;
 if(cljs.core.truth_(temp__5825__auto____$1)){
 var data_fn = temp__5825__auto____$1;
 try{return data_fn.call(null);
-}catch (e8475){if((e8475 instanceof Error)){
-var e = e8475;
+}catch (e8528){if((e8528 instanceof Error)){
+var e = e8528;
 return new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword("truss","error","truss/error",-1137909873),e], null);
 } else {
-throw e8475;
+throw e8528;
 
 }
 }} else {

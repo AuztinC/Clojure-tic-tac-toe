@@ -31,21 +31,23 @@ return tic_tac_toe.setup.select_difficulty_BANG_.call(null,new cljs.core.Keyword
 })], null),"Hard"], null)], null);
 tic_tac_toe.html.render_cell = (function tic_tac_toe$html$render_cell(idx){
 return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"td","td",1479933353),new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null,"style","style",-496642736),new cljs.core.PersistentArrayMap(null, 6, [new cljs.core.Keyword(null,"background-color","background-color",570434026),"grey",new cljs.core.Keyword(null,"width","width",-384071477),"60px",new cljs.core.Keyword(null,"height","height",1025178622),"60px",new cljs.core.Keyword(null,"text-align","text-align",1786091845),"center",new cljs.core.Keyword(null,"color","color",1011675173),"white",new cljs.core.Keyword(null,"font-size","font-size",-1847940346),"2em"], null),new cljs.core.Keyword(null,"id","id",-1388402092),"cell",new cljs.core.Keyword(null,"on-click","on-click",1632826543),(function (){
-return cljs.core.swap_BANG_.call(null,tic_tac_toe.setup.state,tic_tac_toe.human_turn.apply_human_move,parseInt(idx));
+return cljs.core.swap_BANG_.call(null,tic_tac_toe.setup.state,(function (state){
+return tic_tac_toe.human_turn.apply_human_move.call(null,state,parseInt(idx));
+}));
 })], null),idx], null);
 });
-tic_tac_toe.html.render_board = (function tic_tac_toe$html$render_board(p__16224){
-var map__16225 = p__16224;
-var map__16225__$1 = cljs.core.__destructure_map.call(null,map__16225);
-var _state = map__16225__$1;
-var board_size = cljs.core.get.call(null,map__16225__$1,new cljs.core.Keyword(null,"board-size","board-size",140730505));
-var board = cljs.core.get.call(null,map__16225__$1,new cljs.core.Keyword(null,"board","board",-1907017633));
+tic_tac_toe.html.render_board = (function tic_tac_toe$html$render_board(p__19051){
+var map__19052 = p__19051;
+var map__19052__$1 = cljs.core.__destructure_map.call(null,map__19052);
+var _state = map__19052__$1;
+var board_size = cljs.core.get.call(null,map__19052__$1,new cljs.core.Keyword(null,"board-size","board-size",140730505));
+var board = cljs.core.get.call(null,map__19052__$1,new cljs.core.Keyword(null,"board","board",-1907017633));
 var indexed = cljs.core.map_indexed.call(null,(function (idx,_cell){
 return tic_tac_toe.html.render_cell.call(null,((cljs.core._EQ_.call(null,"",cljs.core.first.call(null,cljs.core.nth.call(null,board,idx))))?idx:cljs.core.first.call(null,cljs.core.nth.call(null,board,idx))));
 }),board);
-var size = (function (){var G__16226 = board_size;
-var G__16226__$1 = (((G__16226 instanceof cljs.core.Keyword))?G__16226.fqn:null);
-switch (G__16226__$1) {
+var size = (function (){var G__19053 = board_size;
+var G__19053__$1 = (((G__19053 instanceof cljs.core.Keyword))?G__19053.fqn:null);
+switch (G__19053__$1) {
 case "3x3":
 return (3);
 
@@ -59,7 +61,7 @@ return (9);
 
 break;
 default:
-throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__16226__$1)].join('')));
+throw (new Error(["No matching clause: ",cljs.core.str.cljs$core$IFn$_invoke$arity$1(G__19053__$1)].join('')));
 
 }
 })();

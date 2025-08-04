@@ -69,7 +69,9 @@
                    :color            "white"
                    :font-size        "2em"}
         :id       "cell"
-        :on-click #(swap! setup/state ht/apply-human-move (js/parseInt idx))}
+        :on-click #(swap! setup/state
+                     (fn [state] (ht/apply-human-move state (js/parseInt idx))))
+        }
    idx])
 
 (defn render-board [{:keys [board-size board] :as _state}]

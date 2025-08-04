@@ -7,13 +7,13 @@ goog.require('tic_tac_toe.game');
 tic_tac_toe.human_turn.empty_space_QMARK_ = (function tic_tac_toe$human_turn$empty_space_QMARK_(board,move){
 return cljs.core._EQ_.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [""], null),cljs.core.get.call(null,board,move));
 });
-tic_tac_toe.human_turn.apply_human_move = (function tic_tac_toe$human_turn$apply_human_move(p__16155,idx){
-var map__16156 = p__16155;
-var map__16156__$1 = cljs.core.__destructure_map.call(null,map__16156);
-var state = map__16156__$1;
-var board = cljs.core.get.call(null,map__16156__$1,new cljs.core.Keyword(null,"board","board",-1907017633));
-var turn = cljs.core.get.call(null,map__16156__$1,new cljs.core.Keyword(null,"turn","turn",75759344));
-var markers = cljs.core.get.call(null,map__16156__$1,new cljs.core.Keyword(null,"markers","markers",-246919693));
+tic_tac_toe.human_turn.apply_human_move = (function tic_tac_toe$human_turn$apply_human_move(p__16039,idx){
+var map__16040 = p__16039;
+var map__16040__$1 = cljs.core.__destructure_map.call(null,map__16040);
+var state = map__16040__$1;
+var board = cljs.core.get.call(null,map__16040__$1,new cljs.core.Keyword(null,"board","board",-1907017633));
+var turn = cljs.core.get.call(null,map__16040__$1,new cljs.core.Keyword(null,"turn","turn",75759344));
+var markers = cljs.core.get.call(null,map__16040__$1,new cljs.core.Keyword(null,"markers","markers",-246919693));
 var marker = ((cljs.core._EQ_.call(null,turn,"p1"))?cljs.core.first.call(null,markers):cljs.core.second.call(null,markers));
 if((((!((idx == null)))) && (tic_tac_toe.human_turn.empty_space_QMARK_.call(null,board,idx)))){
 var updated_board = cljs.core.assoc.call(null,board,idx,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [marker], null));
@@ -43,25 +43,25 @@ return move;
 return tic_tac_toe.human_turn.bad_move.call(null,board,marker);
 }
 });
-cljs.core._add_method.call(null,tic_tac_toe.game.next_position,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"human","human",-772334390),new cljs.core.Keyword(null,"cli","cli",-207918086)], null),(function (p__16157,p__16158,_){
-var map__16159 = p__16157;
-var map__16159__$1 = cljs.core.__destructure_map.call(null,map__16159);
-var _state = map__16159__$1;
-var board = cljs.core.get.call(null,map__16159__$1,new cljs.core.Keyword(null,"board","board",-1907017633));
-var vec__16160 = p__16158;
-var marker = cljs.core.nth.call(null,vec__16160,(0),null);
-var ___$1 = cljs.core.nth.call(null,vec__16160,(1),null);
+cljs.core._add_method.call(null,tic_tac_toe.game.next_position,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"human","human",-772334390),new cljs.core.Keyword(null,"cli","cli",-207918086)], null),(function (p__16070,p__16071,_){
+var map__16072 = p__16070;
+var map__16072__$1 = cljs.core.__destructure_map.call(null,map__16072);
+var _state = map__16072__$1;
+var board = cljs.core.get.call(null,map__16072__$1,new cljs.core.Keyword(null,"board","board",-1907017633));
+var vec__16073 = p__16071;
+var marker = cljs.core.nth.call(null,vec__16073,(0),null);
+var ___$1 = cljs.core.nth.call(null,vec__16073,(1),null);
 var move = tic_tac_toe.human_turn.human_turn.call(null,board,marker);
 return move;
 }));
-cljs.core._add_method.call(null,tic_tac_toe.game.next_position,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"human","human",-772334390),new cljs.core.Keyword(null,"web-cljs","web-cljs",186043180)], null),(function (p__16163,p__16164,_){
-var map__16165 = p__16163;
-var map__16165__$1 = cljs.core.__destructure_map.call(null,map__16165);
-var state = map__16165__$1;
-var choice = cljs.core.get.call(null,map__16165__$1,new cljs.core.Keyword(null,"choice","choice",-1375170727));
-var vec__16166 = p__16164;
-var marker = cljs.core.nth.call(null,vec__16166,(0),null);
-var ___$1 = cljs.core.nth.call(null,vec__16166,(1),null);
+cljs.core._add_method.call(null,tic_tac_toe.game.next_position,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"human","human",-772334390),new cljs.core.Keyword(null,"web-cljs","web-cljs",186043180)], null),(function (p__16081,p__16082,_){
+var map__16083 = p__16081;
+var map__16083__$1 = cljs.core.__destructure_map.call(null,map__16083);
+var state = map__16083__$1;
+var choice = cljs.core.get.call(null,map__16083__$1,new cljs.core.Keyword(null,"choice","choice",-1375170727));
+var vec__16084 = p__16082;
+var marker = cljs.core.nth.call(null,vec__16084,(0),null);
+var ___$1 = cljs.core.nth.call(null,vec__16084,(1),null);
 return tic_tac_toe.human_turn.apply_human_move.call(null,state,choice);
 }));
 

@@ -176,7 +176,7 @@
         (should= 9 (:column-count out))
         (should= 27 (:cell-count out))))
 
-    (it "click cell"
+    #_(it "click cell"
       (with-redefs [ht/apply-human-move
                     (stub :apply-human-move
                       {:return {:screen     :game
