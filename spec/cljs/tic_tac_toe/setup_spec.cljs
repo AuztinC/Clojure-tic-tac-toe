@@ -16,7 +16,8 @@
   (:require [speclj.core]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
-            [tic-tac-toe.setup :as sut]))
+            [tic-tac-toe.setup :as sut]
+            [tic-tac-toe.setupc :as setupc]))
 
 (describe "game setup"
   (with-stubs)
@@ -34,7 +35,7 @@
                          :turn    "p1"
                          :markers ["X" "O"]
                          :players [:human :ai]})
-      (let [out (sut/select-difficulty! :easy)]
+      (let [out (setupc/select-difficulty! sut/state :easy)]
         (should= [:easy] (:difficulties out))
         (should= :game (:screen out))))
 
@@ -44,8 +45,8 @@
                          :turn    "p1"
                          :markers ["X" "O"]
                          :players [:ai :ai]})
-      (let [out1 (sut/select-difficulty! :easy)
-            out2 (sut/select-difficulty! :hard)]
+      (let [out1 (setupc/select-difficulty! sut/state :easy)
+            out2 (setupc/select-difficulty! sut/state :hard)]
         (should= [:easy] (:difficulties out1))
         (should= :select-difficulty (:screen out1))
 

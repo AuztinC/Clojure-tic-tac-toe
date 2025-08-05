@@ -3,7 +3,8 @@
             [clojure.string :as str]
             [reagent.core :as r]
             [tic-tac-toe.game :as game]
-            [tic-tac-toe.ai-turn :as ai]))
+            [tic-tac-toe.ai-turn :as ai]
+            [tic-tac-toe.setupc :as setupc]))
 
 (def starting-state
   {:store   nil
@@ -15,10 +16,20 @@
 
 (defonce state (r/atom starting-state))
 
-(defn select-difficulty! [choice]
+#_(defn select-difficulty! [state choice]
   (let [current-state @state
-        ai-count (count (filterv #(= :ai %) (:players current-state)))
-        updated-difficulties (conj (vec (:difficulties current-state)) choice)]
+        ai-count (count (filterv #(= :ai %) (:players state)))
+        updated-difficulties (conj (vec (:difficulties state)) choice)]
+    (if (< (count updated-difficulties) ai-count)
+      (swap! state assoc :difficulties updated-difficulties
+        :screen :select-difficulty)
+      (swap! state assoc
+        :difficulties updated-difficulties
+        :screen :game))))
+
+(defmethod setupc/select-difficulty! :web-cljs [state choice]
+  (let [ai-count (count (filterv #(= :ai %) (:players @state)))
+        updated-difficulties (conj (vec (:difficulties @state)) choice)]
     (if (< (count updated-difficulties) ai-count)
       (swap! state assoc :difficulties updated-difficulties
         :screen :select-difficulty)

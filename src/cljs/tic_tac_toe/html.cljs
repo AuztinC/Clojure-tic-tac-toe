@@ -1,7 +1,8 @@
 (ns tic-tac-toe.html
   (:require [tic-tac-toe.board :as board]
             [tic-tac-toe.human-turn :as ht]
-            [tic-tac-toe.setup :as setup]))
+            [tic-tac-toe.setup :as setup]
+            [tic-tac-toe.setupc :as setupc]))
 
 (defn- reset-btn? []
   (if (:players @setup/state)
@@ -63,13 +64,13 @@
      [:h1 text]
      [:div [:button {:id       "easy"
                      :class    "diff"
-                     :on-click #(setup/select-difficulty! :easy)} "Easy"]
+                     :on-click #(setupc/select-difficulty! setup/state :easy)} "Easy"]
       [:button {:id       "medium"
                 :class    "diff"
-                :on-click #(setup/select-difficulty! :medium)} "Medium"]
+                :on-click #(setupc/select-difficulty! setup/state :medium)} "Medium"]
       [:button {:id       "hard"
                 :class    "diff"
-                :on-click #(setup/select-difficulty! :hard)} "Hard"]]
+                :on-click #(setupc/select-difficulty! setup/state :hard)} "Hard"]]
      [:br]
      (reset-btn?)]))
 

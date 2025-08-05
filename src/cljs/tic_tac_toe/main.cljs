@@ -15,11 +15,9 @@
       :game (html/game)
       :game-over (html/game-over))))
 
-(defonce started?
+#_(defonce started?
   (add-watch setup/state :auto-turn setup/auto-advance))
 
 (defn ^:export main []
+  (add-watch setup/state :auto-turn setup/auto-advance)
   (rdom/render [app] (wjs/element-by-id "app") ))
-
-;(reagent.dom/render [app] (wjs/element-by-id "app") )
-; (rdomc/render (rdomc/create-root (wjs/element-by-id "app")) [app])
