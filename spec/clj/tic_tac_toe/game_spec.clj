@@ -115,10 +115,11 @@
         (should= "p2" (:turn new-state))
         (should-have-invoked :update-current-game! {:with [new-state 0]})))
     (it "Human turn"
-      (let [new-state (sut/next-state human-vs-ai-state)]
-        (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
-        (should= "p2" (:turn new-state))
-        (should-have-invoked :update-current-game! {:with [new-state 0]}))
+      (with-out-str
+        (let [new-state (sut/next-state human-vs-ai-state)]
+          (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
+          (should= "p2" (:turn new-state))
+          (should-have-invoked :update-current-game! {:with [new-state 0]})))
       )
 
     )

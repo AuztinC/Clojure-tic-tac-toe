@@ -1,5 +1,5 @@
 (ns tic-tac-toe.setup
-  (:require [c3kit.wire.js :as wjs]
+  (:require
             [clojure.string :as str]
             [reagent.core :as r]
             [tic-tac-toe.game :as game]
@@ -30,17 +30,16 @@
   (js/setTimeout fn t))
 
 (defn auto-advance [_key _atom _old new]
-  (when (and (= :game (:screen new)))
-    (let [next-player (case (:turn new)
-                        "p1" (first (:players new))
-                        "p2" (second (:players new)))]
+  (when (= :game (:screen new))
+    (let [next-player (game/next-player-key new)]
       (when (= :ai next-player)
         (if (= [:ai :ai] (:players new))
           (do
             (sleep
-            #(reset! state (game/next-state new))
-            500))
-          (reset! state (game/next-state new)))))))
+              #(reset! state (game/next-state new))
+              500))
+          (reset! state (game/next-state new)))
+        ))))
 
 (defn difficulty-text [diff-count]
   (cond

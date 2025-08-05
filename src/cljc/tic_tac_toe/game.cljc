@@ -10,6 +10,11 @@
 (defn next-player [turn]
   (if (= "p1" turn) "p2" "p1"))
 
+(defn next-player-key [{:keys [turn players] :as _state}]
+  (case turn
+    "p1" (first players)
+    "p2" (second players)))
+
 (defn ->players
   [{:keys [turn players]}]
   (let [[p1-type p2-type] players]

@@ -61,7 +61,7 @@
     <orderEntry type="library" name="Deps: org.apache.xmlgraphics/batik-css:1.14" level="project" />
     <orderEntry type="library" name="Deps: org.bouncycastle/bcutil-jdk18on:1.75" level="project" />
     <orderEntry type="library" name="Deps: org.bouncycastle/bcprov-jdk14:1.38" level="project" />
-    <orderEntry type="library" name="Deps: cljsjs/react-dom:18.3.1-1" level="project" />
+    <orderEntry type="library" name="Deps: cljsjs/react-dom:17.0.2-0" level="project" />
     <orderEntry type="library" name="Deps: noencore:0.3.7" level="project" />
     <orderEntry type="library" name="Deps: org.apache.xmlgraphics/xmlgraphics-commons:2.6" level="project" />
     <orderEntry type="library" name="Deps: com.fasterxml.jackson.dataformat/jackson-dataformat-cbor:2.12.4" level="project" />
@@ -92,7 +92,7 @@
     <orderEntry type="library" name="Deps: org.ow2.asm/asm:9.2" level="project" />
     <orderEntry type="library" name="Deps: trptcolin/versioneer:0.1.1" level="project" />
     <orderEntry type="library" name="Deps: org.eclipse.jetty.websocket/websocket-jetty-server:11.0.20" level="project" />
-    <orderEntry type="library" name="Deps: cljsjs/react:18.3.1-1" level="project" />
+    <orderEntry type="library" name="Deps: cljsjs/react:17.0.2-0" level="project" />
     <orderEntry type="library" name="Deps: com.cleancoders.c3kit/scaffold:2.0.3" level="project" />
     <orderEntry type="library" name="Deps: xalan:2.7.2" level="project" />
     <orderEntry type="library" name="Deps: org.eclipse.jetty/jetty-security:11.0.20" level="project" />

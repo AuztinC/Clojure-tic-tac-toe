@@ -132,7 +132,8 @@
                              :ui      :web-cljs
                              :players [:human :human]
                              :turn    "p1"
-                             :markers ["X" "O"]})
+                             :markers ["X" "O"]
+                             :board (board/get-board :3x3)})
         (wire/render [main/app])
         (should-select "#board-3x3")
         (wire/click! "#board-3x3")
@@ -178,6 +179,8 @@
                                    :board-size :3x3
                                    :board      (board/get-board :3x3)})
               (wire/render [main/app])))
+
+    (redefs-around [board/check-winner (stub :check-winner {:return false})])
 
     (it "render-cell returns td with value"
       (let [out (sut/render-cell "index")]
