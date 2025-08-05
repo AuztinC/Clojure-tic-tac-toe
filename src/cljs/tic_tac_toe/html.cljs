@@ -5,7 +5,7 @@
 
 (defn reset-btn? []
   (if (:players @setup/state)
-    [:button {:id "reset-btn"
+    [:button {:id       "reset-btn"
               :on-click #(reset! setup/state setup/starting-state)}
      "Reset Game?"]))
 
@@ -88,12 +88,19 @@
     "default"
     "pointer"))
 
+(defn- cell-text-color [value]
+  (case value
+    "X" "orange"
+    "O" "rgb(85, 189, 237)"
+
+    "white"))
+
 (defn render-cell [value]
   [:td {:style    {:background-color "grey"
                    :width            "60px"
                    :height           "60px"
                    :text-align       "center"
-                   :color            "white"
+                   :color            (cell-text-color value)
                    :font-size        "2em"
                    :cursor           (cell-cursor value)}
         :id       (str "cell-" value)
