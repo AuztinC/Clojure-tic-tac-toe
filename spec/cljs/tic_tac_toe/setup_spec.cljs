@@ -98,8 +98,7 @@
           (sut/game-over? true {:dummy :input
                                 :store   :ratom})
           (let [state @sut/state]
-            (should= {:board "updated" :something "else" :screen :game-over
-                      :store :ratom} state))))
+            (should=  {:dummy :input, :store :ratom, :screen :game-over} state))))
 
       (it "resets state normally when winner? is false"
         (with-redefs [game/next-state (stub :next-state {:return {:board "next" :something "else"
@@ -107,8 +106,7 @@
           (sut/game-over? false {:dummy :input
                                  :store   :ratom})
           (let [state @sut/state]
-            (should= {:board "next" :something "else"
-                      :store :ratom} state))))
+            (should= {:dummy :input, :store :ratom} state))))
 
       )
 

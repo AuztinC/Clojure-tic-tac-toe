@@ -34,9 +34,9 @@
 (defn game-over? [winner? new]
   (if winner?
     (do
-      (reset! state (game/next-state new))
-      (reset! state (assoc (game/next-state new) :screen :game-over)))
-    (reset! state (game/next-state new))))
+      (reset! state new)
+       (js/setTimeout (reset! state (assoc new :screen :game-over)) 10))
+    (reset! state new)))
 
 (defn auto-advance [_key _atom _old new]
   (when (= :game (:screen new))
@@ -48,7 +48,7 @@
             (sleep
               #(reset! state (game/next-state new))
               500)
-            (game-over? winner? new)))))))
+            (game-over? winner? after-move-state)))))))
 
 (defn difficulty-text [diff-count]
   (cond
