@@ -140,20 +140,35 @@
       (assoc state :board (board/get-board :3x3x3) :board-size :3x3x3 :screen next-screen)
       :else state)))
 
+#_(defmethod setupc/select-difficulty! :gui [state choice]
+  (let [ai-count (count (filterv #(= :ai %) (:players state)))
+        updated-difficulties (conj (vec (:difficulties state)) choice)]
+    (if (< (count updated-difficulties) ai-count)
+      (assoc state :difficulties updated-difficulties)
+      (do
+        (db/clear-active {:store (:store state)})
+        (-> state
+          (assoc :id (db/set-new-game-id {:store (:store state)})
+            :difficulties updated-difficulties
+            :screen :game))))))
+
+(defn select-difficulty! [state choice]
+  (let [ai-count (count (filterv #(= :ai %) (:players state)))
+        updated-difficulties (conj (vec (:difficulties state)) choice)]
+    (if (< (count updated-difficulties) ai-count)
+      (assoc state :difficulties updated-difficulties)
+      (do
+        (db/clear-active {:store (:store state)})
+        (-> state
+          (assoc :id (db/set-new-game-id {:store (:store state)})
+            :difficulties updated-difficulties
+            :screen :game))))))
+
 (defmethod mouse-pressed! :select-difficulty [state event]
   (let [{:keys [x y]} event
         difficulty (->difficulty x y)]
     (if difficulty
-      (let [ai-count (count (filterv #(= :ai %) (:players state)))
-            updated-difficulties (conj (vec (:difficulties state)) difficulty)]
-        (if (< (count updated-difficulties) ai-count)
-          (assoc state :difficulties updated-difficulties)
-          (do
-            (db/clear-active {:store (:store state)})
-            (-> state
-              (assoc :id (db/set-new-game-id {:store (:store state)})
-                :difficulties updated-difficulties
-                :screen :game)))))
+      (select-difficulty! state difficulty)
       state)))
 
 (defmethod mouse-pressed! :replay-confirm [state event]

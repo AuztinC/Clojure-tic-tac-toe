@@ -1,7 +1,7 @@
 (ns tic-tac-toe.game-options-spec
   (:require [speclj.core :refer [describe
                                  with-stubs
-                                 should
+                                 focus-context
                                  before
                                  context
                                  should-contain
@@ -60,6 +60,7 @@
     )
 
   (context "selecting difficulty"
+
     (it "prints difficulty"
       (should-contain "Choose AI difficulties\n  1: Easy\n  2: Medium\n  3: Hard\n"
         (with-out-str (with-in-str "1\n" (sut/select-difficulty {:difficulty-count 1 :store :mem})))))

@@ -4,13 +4,10 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.game :as game]))
 
-(defn- empty-space? [board move]
-  (= [""] (get board move)))
-
 (defn apply-human-move
   [{:keys [board turn markers] :as state} idx]
   (let [marker (if (= turn "p1") (first markers) (second markers))]
-    (if (and (some? idx) (empty-space? board idx))
+    (if (and (some? idx) (game/empty-space? board idx))
       (let [updated-board (assoc board idx [marker])
             winner? (board/check-winner updated-board)
             updated-state (if winner?
@@ -36,7 +33,7 @@
   (printer/print-player-prompt marker)
   (let [input (read-line)
         move (if (re-matches #"\d+" input) (Integer/parseInt input))]
-    (if (empty-space? board move)
+    (if (game/empty-space? board move)
       move
       (bad-move board marker))))
 

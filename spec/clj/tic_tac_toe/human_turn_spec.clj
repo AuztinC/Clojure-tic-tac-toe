@@ -2,7 +2,7 @@
   (:require [speclj.core :refer [describe
                                  with-stubs
                                  context
-                                 before
+                                 should-not=
                                  focus-context
                                  should-contain
                                  stub
@@ -13,6 +13,7 @@
             [tic-tac-toe.human-turn :as sut]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
+            [tic-tac-toe.persistence :as db]
             [tic-tac-toe.printer :as printer]))
 
 (describe "human-turn"
@@ -67,4 +68,45 @@
                   ["X" :human] [:hard])]
        (should= "p2" (:turn out))
         (should= [["X"][""][""][""][""][""][""][""][""]] (:board out)))))
+
+  (context "apply human move"
+
+    (it "applies a valid move, no winner"
+      (with-redefs [board/check-winner (stub :check-winner {:return false})
+                    db/update-current-game! (stub :update!)
+                    game/next-player (stub :next {:return "p2"})
+                    game/empty-space? (stub :empty? {:return true})]
+        (let [initial-state {:board {0 ["X"] 1 nil}
+                             :turn "p1"
+                             :markers ["X" "O"]
+                             :screen :game}
+              idx 1
+              new-state (sut/apply-human-move initial-state idx)]
+          (should= "p2" (:turn new-state))
+          (should= ["X"] (get-in new-state [:board 0]))
+          (should= ["X"] (get-in new-state [:board 1])) ; move applied
+          (should-not= :game-over (:screen new-state)))))
+
+    (it "applies a valid move and detects a winner"
+      (with-redefs [board/check-winner (stub :check-winner {:return true})
+                    db/update-current-game! (stub :update!)
+                    game/next-player (stub :next {:return "p2"})
+                    game/empty-space? (stub :empty? {:return true})]
+        (let [initial-state {:board {0 ["X"] 1 nil}
+                             :turn "p1"
+                             :markers ["X" "O"]
+                             :screen :game}
+              idx 1
+              new-state (sut/apply-human-move initial-state idx)]
+          (should= "p2" (:turn new-state))
+          (should= :game-over (:screen new-state)))))
+
+    (it "ignores the move if index is nil"
+      (let [initial-state {:board {} :turn "p1" :markers ["X" "O"]}]
+        (should= initial-state (sut/apply-human-move initial-state nil))))
+
+    (it "ignores the move if space is not empty"
+      (with-redefs [game/empty-space? (stub :empty? {:return false})]
+        (let [initial-state {:board {0 ["X"]} :turn "p1" :markers ["X" "O"]}]
+          (should= initial-state (sut/apply-human-move initial-state 0))))))
   )

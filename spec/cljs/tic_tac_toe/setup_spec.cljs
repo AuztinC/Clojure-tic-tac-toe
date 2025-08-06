@@ -23,24 +23,25 @@
   (with-stubs)
   ;(redefs-around [sut/auto-advance (stub :auto-advance)])
   ;
-  (before (reset! sut/state {:screen :select-game-mode
-                             :ui :web-cljs
-                             :turn "p1"
+  (before (reset! sut/state {:screen  :select-game-mode
+                             :ui      :web-cljs
+                             :turn    "p1"
                              :markers ["X" "O"]}))
 
   (context "select-difficulty correct count and switch to game"
     (it "single difficulty 1 time"
-      (reset! sut/state {:screen  :select-game-mode
+      (reset! sut/state {:screen  :select-difficulty
                          :ui      :web-cljs
                          :turn    "p1"
                          :markers ["X" "O"]
                          :players [:human :ai]})
-      (let [out (setupc/select-difficulty! sut/state :easy)]
+      (let [state @sut/state
+            out (setupc/select-difficulty! sut/state :easy)]
         (should= [:easy] (:difficulties out))
         (should= :game (:screen out))))
 
     (it "two difficulty "
-      (reset! sut/state {:screen  :select-game-mode
+      (reset! sut/state {:screen  :select-difficulty
                          :ui      :web-cljs
                          :turn    "p1"
                          :markers ["X" "O"]
@@ -81,6 +82,24 @@
           (sut/auto-advance :test-key sut/state state state)
           ;(should-have-invoked :sleep)
           #_(should-have-invoked :next-state))))
+
+    (context "game-over?"
+      (before
+        (reset! sut/state {:screen :game}))
+      (it "resets state with game-over screen when winner? is true"
+        (with-redefs [game/next-state (stub :next-state {:return {:board "updated" :something "else"}})]
+          (sut/game-over? true {:dummy :input})
+          (let [state @sut/state]
+           (should= {:board "updated" :something "else" :screen :game-over} state))))
+
+      (it "resets state normally when winner? is false"
+        (with-redefs [game/next-state (stub :next-state {:return {:board "next" :something "else"}})]
+          (sut/game-over? false {:dummy :input})
+          (let [state @sut/state]
+           (should= {:board "next" :something "else"} state))))
+
+      )
+
     )
 
   )

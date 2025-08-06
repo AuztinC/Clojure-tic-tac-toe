@@ -159,7 +159,8 @@
       (with-redefs [db/clear-active (stub :clear-active)
                     db/set-new-game-id (stub :set-new-game-id)]
         (let [event {:x 55 :y 225}
-              state {:screen  :select-difficulty
+              state {:ui :gui
+                     :screen  :select-difficulty
                      :players [:human :ai]}
               result (sut/mouse-pressed! state event)]
           (should= :hard (first (:difficulties result))))))
@@ -168,7 +169,8 @@
       (with-redefs [db/clear-active (stub :clear-active)
                     db/set-new-game-id (stub :set-new-game-id)]
         (let [event {:x 55 :y 225}
-              state {:screen     :select-difficulty
+              state {:ui :gui
+                     :screen     :select-difficulty
                      :board-size :3x3
                      :players    [:ai :ai]}
               result1 (sut/mouse-pressed! state event)

@@ -7,6 +7,9 @@
   [player-type ui])
 (defmulti next-position position-dispatch)
 
+(defn empty-space? [board move]
+  (= [""] (get board move)))
+
 (defn next-player [turn]
   (if (= "p1" turn) "p2" "p1"))
 
