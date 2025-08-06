@@ -7,7 +7,9 @@
 (defn- reset-btn? []
   (if (:players @setup/state)
     [:button {:id       "reset-btn"
-              :on-click #(reset! setup/state setup/starting-state)}
+              :on-click #(reset! setup/state setup/starting-state)
+              :disabled (and (= :game (:screen @setup/state))
+                          (= [:ai :ai] (:players @setup/state)))}
      "Reset Game?"]))
 
 (def select-game-mode
@@ -120,7 +122,7 @@
                :4x4 4
                :3x3x3 9)
         part-board (partition size indexed)]
-    (into [:tbody {:class "board"}]
+    (into [:tbody {:id (str "game-board-" (name board-size))}]
       (map-indexed (fn [i row]
                      (into [:tr {:class "row"}] row))
         part-board))))

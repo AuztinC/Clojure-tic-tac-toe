@@ -17,3 +17,7 @@ body, #main-container {
     align-items: center;
 }
 
+#game-board-3x3x3:nth-child(3n) {
+    border: solid black 3px;
+}
+

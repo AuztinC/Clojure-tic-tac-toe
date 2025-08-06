@@ -17,7 +17,6 @@
   (:require [speclj.core]
             [c3kit.wire.spec-helper :as wire]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.game :as game]
             [tic-tac-toe.html :as sut]
             [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.setup :as setup]
@@ -191,7 +190,8 @@
     (it "render-board returns table with value"
       (let [out (sut/render-board {:board-size :3x3
                                    :ui         :web-cljs})]
-        (should-contain :tbody out)))
+        (should-contain :tbody out)
+        (should-select "#game-board-3x3")))
 
     (it "gives nine cells for 3x3"
       (let [out (cell-count :3x3)]

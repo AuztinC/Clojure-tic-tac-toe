@@ -323,7 +323,7 @@
         (should= sut/update-state update)
         (should= sut/mouse-pressed! mouse-pressed)))
 
-    (it "initial state"
+  (it "initial state"
       (reset! db/mem-db {})
       (sut/start-gui :mem)
       (let [{:keys [setup]} (apply hash-map (stub/last-invocation-of :sketch))

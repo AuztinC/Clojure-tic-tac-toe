@@ -25,6 +25,7 @@
   ;
   (before (reset! sut/state {:screen  :select-game-mode
                              :ui      :web-cljs
+                             :store :ratom
                              :turn    "p1"
                              :markers ["X" "O"]}))
 
@@ -32,6 +33,7 @@
     (it "single difficulty 1 time"
       (reset! sut/state {:screen  :select-difficulty
                          :ui      :web-cljs
+                         :store   :ratom
                          :turn    "p1"
                          :markers ["X" "O"]
                          :players [:human :ai]})
@@ -43,6 +45,7 @@
     (it "two difficulty "
       (reset! sut/state {:screen  :select-difficulty
                          :ui      :web-cljs
+                         :store   :ratom
                          :turn    "p1"
                          :markers ["X" "O"]
                          :players [:ai :ai]})
@@ -59,6 +62,7 @@
     (it "does not advance if it's not the AI's turn"
       (with-redefs [game/next-state (stub :next-state)]
         (let [initial-state {:screen     :game
+                             :store   :ratom
                              :ui         :web-cljs
                              :players    [:human :ai]
                              :turn       "p1"
@@ -74,6 +78,7 @@
       (with-redefs [game/next-state (stub :next-state {:return {:turn "p1"}})
                     sut/sleep (stub :sleep)]
         (let [state {:screen  :game
+                     :store   :ratom
                      :ui      :web-cljs
                      :players [:ai :ai]
                      :turn    "p2"
@@ -85,18 +90,25 @@
 
     (context "game-over?"
       (before
-        (reset! sut/state {:screen :game}))
+        (reset! sut/state {:screen :game
+                           :store   :ratom}))
       (it "resets state with game-over screen when winner? is true"
-        (with-redefs [game/next-state (stub :next-state {:return {:board "updated" :something "else"}})]
-          (sut/game-over? true {:dummy :input})
+        (with-redefs [game/next-state (stub :next-state {:return {:board "updated" :something "else"
+                                                                  :store   :ratom}})]
+          (sut/game-over? true {:dummy :input
+                                :store   :ratom})
           (let [state @sut/state]
-           (should= {:board "updated" :something "else" :screen :game-over} state))))
+            (should= {:board "updated" :something "else" :screen :game-over
+                      :store :ratom} state))))
 
       (it "resets state normally when winner? is false"
-        (with-redefs [game/next-state (stub :next-state {:return {:board "next" :something "else"}})]
-          (sut/game-over? false {:dummy :input})
+        (with-redefs [game/next-state (stub :next-state {:return {:board "next" :something "else"
+                                                                  :store :ratom}})]
+          (sut/game-over? false {:dummy :input
+                                 :store   :ratom})
           (let [state @sut/state]
-           (should= {:board "next" :something "else"} state))))
+            (should= {:board "next" :something "else"
+                      :store :ratom} state))))
 
       )
 

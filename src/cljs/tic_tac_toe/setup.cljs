@@ -5,6 +5,7 @@
     [tic-tac-toe.board :as board]
     [tic-tac-toe.game :as game]
     [tic-tac-toe.ai-turn]
+    [tic-tac-toe.persistence :as db]
     [tic-tac-toe.setupc :as setupc]))
 
 (def starting-state
@@ -45,7 +46,7 @@
               winner? (board/check-winner (:board after-move-state))]
           (if (= [:ai :ai] (:players new))
             (sleep
-              #(game-over? winner? new)
+              #(reset! state (game/next-state new))
               500)
             (game-over? winner? new)))))))
 
