@@ -11,7 +11,7 @@
                                  should-not
                                  should=]]
             [tic-tac-toe.board :as sut]
-            [tic-tac-toe.printer :as printer]))
+            [tic-tac-toe.cli-text :as printer]))
 
 (describe "board"
 

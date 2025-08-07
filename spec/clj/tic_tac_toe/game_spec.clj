@@ -13,7 +13,7 @@
                                  focus-it]]
             [tic-tac-toe.game :as sut]
             [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.printer :as printer]
+            [tic-tac-toe.cli-text :as printer]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.ai-turn :as ai]))
 (def ai-vs-ai-state {:ui           :cli

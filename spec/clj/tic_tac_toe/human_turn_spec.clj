@@ -14,7 +14,7 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
             [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.printer :as printer]))
+            [tic-tac-toe.cli-text :as printer]))
 
 (describe "human-turn"
   (with-stubs)

@@ -11,15 +11,13 @@
                  :verbose        true
                  :watch-fn       c3kit.scaffold.cljs/on-dev-compiled
                  :parallel-build true}
- :production     {
-                  :cache-analysis false
+ :production     {:cache-analysis false
                   :infer-externs  true
                   :optimizations  :advanced
                   :output-dir     "resources/public/cljs"
                   :output-to      "resources/public/cljs/tic_tac_toe.js"
                   :pretty-print   false
-                  :sources        ["src/cljs" "src/cljc" "src/clj"]
+                  :sources        ["src/cljs" "src/cljc"]
                   :specs          false
-                  :verbose        false
-                  }
+                  :verbose        false}
  }

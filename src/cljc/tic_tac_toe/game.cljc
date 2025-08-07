@@ -1,5 +1,5 @@
 (ns tic-tac-toe.game
-  (:require [tic-tac-toe.printer :as printer]
+  (:require [tic-tac-toe.cli-text :as printer]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
 

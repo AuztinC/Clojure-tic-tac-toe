@@ -14,7 +14,7 @@
             [tic-tac-toe.game-options :as sut]
             [tic-tac-toe.game :as init]
             [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.printer :as printer]
+            [tic-tac-toe.cli-text :as printer]
             [tic-tac-toe.replay :as replay]))
 
 (describe "game-options"

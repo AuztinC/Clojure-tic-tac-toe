@@ -1,4 +1,4 @@
-(ns tic-tac-toe.printer)
+(ns tic-tac-toe.cli-text)
 
 (defn ->index-board [board]
   (if (= 3 (count board))

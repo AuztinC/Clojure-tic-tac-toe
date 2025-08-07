@@ -1,6 +1,6 @@
 (ns tic-tac-toe.human-turn
   (:require [tic-tac-toe.board :as board]
-            [tic-tac-toe.printer :as printer]
+            [tic-tac-toe.cli-text :as printer]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.game :as game]))
 

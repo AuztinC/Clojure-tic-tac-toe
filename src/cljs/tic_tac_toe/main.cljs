@@ -3,7 +3,7 @@
             [c3kit.wire.js :as wjs]
             [reagent.dom :as rdom]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.html :as html]
+            [tic-tac-toe.draw :as html]
             [tic-tac-toe.setup :as setup]))
 
 (defn app []

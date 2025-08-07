@@ -1,4 +1,4 @@
-(ns tic-tac-toe.html
+(ns tic-tac-toe.draw
   (:require [tic-tac-toe.board :as board]
             [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.setup :as setup]
