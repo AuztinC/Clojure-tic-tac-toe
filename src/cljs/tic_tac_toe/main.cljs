@@ -1,10 +1,10 @@
 (ns tic-tac-toe.main
   (:require
-            [c3kit.wire.js :as wjs]
-            [reagent.dom :as rdom]
-            [tic-tac-toe.board :as board]
-            [tic-tac-toe.draw :as html]
-            [tic-tac-toe.setup :as setup]))
+    [c3kit.wire.js :as wjs]
+    [reagent.dom :as rdom]
+    [tic-tac-toe.board :as board]
+    [tic-tac-toe.draw :as html]
+    [tic-tac-toe.config :as setup]))
 
 (defn app []
   (let [screen (:screen @setup/state)]

@@ -41,5 +41,4 @@
   (let [move (human-turn board marker)]
     move))
 
-(defmethod game/next-position [:human :web-cljs] [{:keys [choice] :as state} [marker _] _]
-  (apply-human-move state choice))
+

@@ -18,8 +18,9 @@
             [c3kit.wire.spec-helper :as wire]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.draw :as sut]
+            [tic-tac-toe.game :as game]
             [tic-tac-toe.human-turn :as ht]
-            [tic-tac-toe.setup :as setup]
+            [tic-tac-toe.config :as setup]
             [tic-tac-toe.main :as main]
             [tic-tac-toe.setupc :as setupc]))
 
@@ -212,7 +213,7 @@
         (should= 27 (:cell-count out))))
 
     (it "click cell, css"
-      (with-redefs [ht/apply-human-move (stub :apply-human-move
+      (with-redefs [game/next-position (stub :next-position
                                           {:invoke (fn [state _idx] state)})]
         (reset! setup/state {:screen     :game
                              :ui         :web-cljs
@@ -232,10 +233,10 @@
           (cssfn "#cell-1" "cursor"))
         (should= "1" (wire/text "#cell-1"))
         (wire/click! "#cell-1")
-        (should-have-invoked :apply-human-move)))
+        (should-have-invoked :next-position)))
 
     (it "click cell, css"
-      (with-redefs [ht/apply-human-move (stub :apply-human-move
+      (with-redefs [game/next-position (stub :next-position
                                           {:invoke (fn [state _idx] state)})]
         (reset! setup/state {:screen     :game
                              :ui         :web-cljs
@@ -247,7 +248,7 @@
         (should-select "#cell-1")
         (should= "1" (wire/text "#cell-1"))
         (wire/click! "#cell-1")
-        (should-not-have-invoked :apply-human-move)))
+        (should-not-have-invoked :next-position)))
     )
 
   (context "game over"

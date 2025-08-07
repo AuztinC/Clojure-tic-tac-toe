@@ -1,10 +1,11 @@
 (ns tic-tac-toe.draw
   (:require [tic-tac-toe.board :as board]
+            [tic-tac-toe.game :as game]
             [tic-tac-toe.human-turn :as ht]
-            [tic-tac-toe.setup :as setup]
+            [tic-tac-toe.config :as setup]
             [tic-tac-toe.setupc :as setupc]))
 
-(defn- reset-btn? []
+(defn- reset-btn []
   (if (:players @setup/state)
     [:button {:id       "reset-btn"
               :on-click #(reset! setup/state setup/starting-state)
@@ -56,7 +57,7 @@
                              :board (board/get-board :3x3x3))} "3x3x3"]]
      [:br]
      [:br]
-     (reset-btn?)]))
+     (reset-btn)]))
 
 (defn select-difficulty []
   (let [diff-count (count (:difficulties @setup/state))
@@ -74,17 +75,25 @@
                 :class    "diff"
                 :on-click #(setupc/select-difficulty! setup/state :hard)} "Hard"]]
      [:br]
-     (reset-btn?)]))
+     (reset-btn)]))
 
 (defn- ignore-user-input? []
   (or
     (= :game-over (:screen @setup/state))
     (= [:ai :ai] (:players @setup/state))))
 
+(defn- current-player-type [{:keys [players turn]}]
+  (if (= turn "p1") (first players) (second players)))
+
+(defn- current-marker [{:keys [markers turn]}]
+  (if (= turn "p1") (first markers) (second markers)))
+
 (defn- handle-click [idx]
-  (if (ignore-user-input?)
-    nil
-    (swap! setup/state ht/apply-human-move (js/parseInt idx))))
+  (when-not (ignore-user-input?)
+    (let [state (assoc @setup/state :choice (js/parseInt idx))]
+      (game/next-position state
+        [(current-marker state) (current-player-type state)]
+        nil))))
 
 (defn- cell-cursor [value]
   (if (or (string? value) (ignore-user-input?))
@@ -132,7 +141,7 @@
    [:table
     (render-board @setup/state)]
    [:br]
-   (reset-btn?)])
+   (reset-btn)])
 
 (defn game-over []
   (let [winner (board/check-winner (:board @setup/state))]
@@ -141,6 +150,6 @@
      [:h1 "Game Over!"]
      [:h2 {:id "winner"} (setup/winner-text winner)]
      [:br]
-     (reset-btn?)]
+     (reset-btn)]
     ))
 

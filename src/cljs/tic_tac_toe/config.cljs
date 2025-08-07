@@ -1,4 +1,4 @@
-(ns tic-tac-toe.setup
+(ns tic-tac-toe.config
   (:require
     [clojure.string :as str]
     [reagent.core :as r]

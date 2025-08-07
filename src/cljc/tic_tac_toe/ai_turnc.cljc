@@ -1,6 +1,5 @@
-(ns tic-tac-toe.ai-turn
-  (:require [tic-tac-toe.board :as board]
-            [tic-tac-toe.game :as init]))
+(ns tic-tac-toe.ai-turnc
+  (:require [tic-tac-toe.board :as board]))
 
 (defn score-minimax-result [result depth marker]
   (cond
@@ -153,24 +152,3 @@
       (= :hard difficulty) (hard board marker open-positions)
       (= :medium difficulty) (medium board marker open-positions)
       (= :easy difficulty) (easy open-positions))))
-
-(defn sleep []
-  (Thread/sleep 500))
-
-(defmethod init/next-position [:ai :cli] [{:keys [board]} [marker _] diff]
-  (ai-turn board marker diff))
-
-(defmethod init/next-position [:ai :gui] [{:keys [board players]} [marker _] diff]
-  (do
-    (if (= [:ai :ai] players)
-      (sleep))
-    (ai-turn board marker diff)))
-
-(defmethod init/next-position [:ai :web] [{:keys [board players]} [marker _] diff]
-  (do
-    (if (= [:ai :ai] players)
-      (sleep))
-    (ai-turn board marker diff)))
-
-(defmethod tic-tac-toe.game/next-position [:ai :web-cljs] [{:keys [board players]} [marker _] diff]
-  (ai-turn board marker diff))

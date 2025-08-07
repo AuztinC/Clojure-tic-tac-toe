@@ -58,16 +58,7 @@
                                           :players [:human :ai]}
                        ["X" :human] [:hard])))))
 
-    (it "invokes apply-next-move gui"
-      (let [out (game/next-position {:board   (board/get-board :3x3)
-                                     :ui      :web-cljs
-                                     :players [:human :ai]
-                                     :choice  0
-                                     :markers ["X" "O"]
-                                     :turn "p1"}
-                  ["X" :human] [:hard])]
-       (should= "p2" (:turn out))
-        (should= [["X"][""][""][""][""][""][""][""][""]] (:board out)))))
+    )
 
   (context "apply human move"
 

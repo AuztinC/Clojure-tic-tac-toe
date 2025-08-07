@@ -9,9 +9,6 @@
   (-> (slurp edn-file)
     (edn/read-string)))
 
-(defn ->inspect [x]
-  (prn "->inspect: " x) x)
-
 (defmethod db/set-new-game-id :file [_store]
   (-> (edn-state)
     (into (sorted-map))

@@ -15,7 +15,7 @@
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.cli-text :as printer]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.ai-turn :as ai]))
+            [tic-tac-toe.ai-turnc :as aic]))
 (def ai-vs-ai-state {:ui           :cli
                      :active-game  true
                      :id           123
@@ -107,7 +107,7 @@
   (context "Next-state stores a new move, updates turn and board"
     ;; TODO ARC - update tests for next-state
     (redefs-around [db/update-current-game! (stub :update-current-game!)
-                    ai/ai-turn (stub :ai-turn {:return 0})
+                    aic/ai-turn (stub :ai-turn {:return 0})
                     read-line (stub :read-line {:return "0"})])
     (it "AI turn"
       (let [new-state (sut/next-state ai-vs-ai-state)]
