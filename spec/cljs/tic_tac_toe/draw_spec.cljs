@@ -1,4 +1,4 @@
-(ns tic-tac-toe.html-spec
+(ns tic-tac-toe.draw-spec
   (:require-macros [speclj.core :refer [should=
                                         it
                                         describe
@@ -19,10 +19,8 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.draw :as sut]
             [tic-tac-toe.game :as game]
-            [tic-tac-toe.human-turn :as ht]
-            [tic-tac-toe.config :as setup]
-            [tic-tac-toe.main :as main]
-            [tic-tac-toe.setupc :as setupc]))
+            [tic-tac-toe.config :as config]
+            [tic-tac-toe.main :as main]))
 
 (defn cssfn [target key]
   (.getPropertyValue (wire/style target) key))
@@ -44,10 +42,10 @@
   (with-stubs)
   (wire/with-root-dom)
 
-  (redefs-around [setup/auto-advance (stub :auto-advance)])
+  (redefs-around [config/auto-advance (stub :auto-advance)])
 
   (before (do
-            (reset! setup/state {:screen  :select-game-mode
+            (reset! config/state {:screen  :select-game-mode
                                  :ui      :web-cljs
                                  :turn    "p1"
                                  :markers ["X" "O"]})
@@ -58,7 +56,7 @@
 
     (context "reset btn"
       (before (do
-                (reset! setup/state {:screen  :select-board
+                (reset! config/state {:screen  :select-board
                                      :ui      :web-cljs
                                      :turn    "p1"
                                      :players [:human :ai]
@@ -69,37 +67,37 @@
 
       (it "resets state when click"
         (wire/click! "#reset-btn")
-        (should= setup/starting-state @setup/state)))
+        (should= config/starting-state @config/state)))
 
     (context "select-game-mode"
       (it "clicking Human vs AI sets screen to :select-board"
         (should= "Human vs AI" (wire/text "#human-vs-ai"))
         (wire/click! "#human-vs-ai")
-        (should= :select-board (:screen @setup/state))
-        (should= [:human :ai] (:players @setup/state)))
+        (should= :select-board (:screen @config/state))
+        (should= [:human :ai] (:players @config/state)))
 
       (it "clicking AI vs Human sets screen to :select-board"
         (should= "AI vs Human" (wire/text "#ai-vs-human"))
         (wire/click! "#ai-vs-human")
-        (should= :select-board (:screen @setup/state))
-        (should= [:ai :human] (:players @setup/state)))
+        (should= :select-board (:screen @config/state))
+        (should= [:ai :human] (:players @config/state)))
 
       (it "clicking Human vs Human sets screen to :select-board"
         (should= "Human vs Human" (wire/text "#human-vs-human"))
         (wire/click! "#human-vs-human")
-        (should= :select-board (:screen @setup/state))
-        (should= [:human :human] (:players @setup/state)))
+        (should= :select-board (:screen @config/state))
+        (should= [:human :human] (:players @config/state)))
 
       (it "clicking AI vs AI sets screen to :select-board"
         (should= "AI vs AI" (wire/text "#ai-vs-ai"))
         (wire/click! "#ai-vs-ai")
-        (let [out @setup/state]
+        (let [out @config/state]
           (should= :select-board (:screen out))
           (should= [:ai :ai] (:players out)))))
 
     (context "select-board"
       (before (do
-                (reset! setup/state {:screen  :select-board
+                (reset! config/state {:screen  :select-board
                                      :ui      :web-cljs
                                      :turn    "p1"
                                      :markers ["X" "O"]})
@@ -108,28 +106,28 @@
         (should-select "#board-3x3")
         (should= "3x3" (wire/text "#board-3x3"))
         (wire/click! "#board-3x3")
-        (should= :select-difficulty (:screen @setup/state))
-        (should= :3x3 (:board-size @setup/state))
-        (should= (board/get-board :3x3) (:board @setup/state)))
+        (should= :select-difficulty (:screen @config/state))
+        (should= :3x3 (:board-size @config/state))
+        (should= (board/get-board :3x3) (:board @config/state)))
 
       (it "4x4"
         (should-select "#board-4x4")
         (should= "4x4" (wire/text "#board-4x4"))
         (wire/click! "#board-4x4")
-        (should= :select-difficulty (:screen @setup/state))
-        (should= :4x4 (:board-size @setup/state))
-        (should= (board/get-board :4x4) (:board @setup/state)))
+        (should= :select-difficulty (:screen @config/state))
+        (should= :4x4 (:board-size @config/state))
+        (should= (board/get-board :4x4) (:board @config/state)))
 
       (it "3x3x3"
         (should-select "#board-3x3x3")
         (should= "3x3x3" (wire/text "#board-3x3x3"))
         (wire/click! "#board-3x3x3")
-        (should= :select-difficulty (:screen @setup/state))
-        (should= :3x3x3 (:board-size @setup/state))
-        (should= (board/get-board :3x3x3) (:board @setup/state)))
+        (should= :select-difficulty (:screen @config/state))
+        (should= :3x3x3 (:board-size @config/state))
+        (should= (board/get-board :3x3x3) (:board @config/state)))
 
       (it "skips difficulty if HvH"
-        (reset! setup/state {:screen  :select-board
+        (reset! config/state {:screen  :select-board
                              :ui      :web-cljs
                              :players [:human :human]
                              :turn    "p1"
@@ -138,41 +136,41 @@
         (wire/render [main/app])
         (should-select "#board-3x3")
         (wire/click! "#board-3x3")
-        (should= :game (:screen @setup/state))))
+        (should= :game (:screen @config/state))))
     )
 
   (context "calls select-difficulty with correct key"
     (before (do
-              (reset! setup/state {:screen  :select-difficulty
+              (reset! config/state {:screen  :select-difficulty
                                    :ui      :web-cljs
                                    :turn    "p1"
                                    :markers ["X" "O"]})
               (wire/render [main/app])))
 
     (it "easy"
-      (with-redefs [setupc/select-difficulty! (stub :select-difficulty!)]
+      (with-redefs [config/select-difficulty! (stub :select-difficulty!)]
         (should-select "#easy")
         (should= "Easy" (wire/text "#easy"))
         (wire/click! "#easy")
-        (should-have-invoked :select-difficulty! {:with [setup/state :easy]})))
+        (should-have-invoked :select-difficulty! {:with [config/state :easy]})))
 
     (it "medium"
-      (with-redefs [setupc/select-difficulty! (stub :select-difficulty!)]
+      (with-redefs [config/select-difficulty! (stub :select-difficulty!)]
         (should-select "#medium")
         (should= "Medium" (wire/text "#medium"))
         (wire/click! "#medium")
-        (should-have-invoked :select-difficulty! {:with [setup/state :medium]})))
+        (should-have-invoked :select-difficulty! {:with [config/state :medium]})))
 
     (it "hard"
-      (with-redefs [setupc/select-difficulty! (stub :select-difficulty!)]
+      (with-redefs [config/select-difficulty! (stub :select-difficulty!)]
         (should-select "#hard")
         (should= "Hard" (wire/text "#hard"))
         (wire/click! "#hard")
-        (should-have-invoked :select-difficulty! {:with [setup/state :hard]}))))
+        (should-have-invoked :select-difficulty! {:with [config/state :hard]}))))
 
   (context "drawing board"
     (before (do
-              (reset! setup/state {:screen     :game
+              (reset! config/state {:screen     :game
                                    :ui         :web-cljs
                                    :turn       "p1"
                                    :markers    ["X" "O"]
@@ -215,7 +213,7 @@
     (it "click cell, css"
       (with-redefs [game/next-position (stub :next-position
                                           {:invoke (fn [state _idx] state)})]
-        (reset! setup/state {:screen     :game
+        (reset! config/state {:screen     :game
                              :ui         :web-cljs
                              :turn       "p1"
                              :markers    ["X" "O"]
@@ -238,7 +236,7 @@
     (it "click cell, css"
       (with-redefs [game/next-position (stub :next-position
                                           {:invoke (fn [state _idx] state)})]
-        (reset! setup/state {:screen     :game
+        (reset! config/state {:screen     :game
                              :ui         :web-cljs
                              :turn       "p1"
                              :markers    ["X" "O"]
@@ -253,7 +251,7 @@
 
   (context "game over"
     (before (do
-              (reset! setup/state {:screen     :game-over
+              (reset! config/state {:screen     :game-over
                                    :ui         :web-cljs
                                    :turn       "p1"
                                    :markers    ["X" "O"]
@@ -269,7 +267,7 @@
       (should-contain "Winner is X" (wire/text "#winner")))
 
     (it "displays tie game"
-      (reset! setup/state (assoc @setup/state :board [["X"] ["O"] ["O"]
+      (reset! config/state (assoc @config/state :board [["X"] ["O"] ["O"]
                                                       ["O"] ["X"] ["X"]
                                                       ["X"] ["O"] ["O"]]))
       (wire/render [main/app])

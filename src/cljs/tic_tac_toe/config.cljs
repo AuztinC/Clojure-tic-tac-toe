@@ -5,7 +5,7 @@
     [tic-tac-toe.board :as board]
     [tic-tac-toe.game :as game]
     [tic-tac-toe.ai-turn]
-    [tic-tac-toe.setupc :as setupc]))
+    ))
 
 (def starting-state
   {:store   nil
@@ -17,7 +17,7 @@
 
 (defonce state (r/atom starting-state))
 
-(defmethod setupc/select-difficulty! :web-cljs [state choice]
+(defn select-difficulty! [state choice]
   (let [ai-count (count (filterv #(= :ai %) (:players @state)))
         updated-difficulties (conj (vec (:difficulties @state)) choice)]
     (if (< (count updated-difficulties) ai-count)

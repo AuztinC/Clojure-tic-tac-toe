@@ -17,7 +17,7 @@
            org.postgresql/postgresql    {:mvn/version "42.7.3"}
            org.clojure/java.jdbc        {:mvn/version "0.7.12"}
            cheshire/cheshire            {:mvn/version "5.10.2"}
-           quil/quil                    {:mvn/version "4.3.1563"}
+           ;quil/quil                    {:mvn/version "4.3.1563"}
            hiccup/hiccup                {:mvn/version "2.0.0-alpha2"}
            ;cljsjs/react                 {:mvn/version "18.3.1-1"}
            ;cljsjs/react-dom             {:mvn/version "18.3.1-1"}

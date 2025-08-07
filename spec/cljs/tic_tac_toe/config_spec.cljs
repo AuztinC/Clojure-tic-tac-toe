@@ -1,4 +1,4 @@
-(ns tic-tac-toe.setup-spec
+(ns tic-tac-toe.config-spec
   (:require-macros [speclj.core :refer [should=
                                         it
                                         describe
@@ -38,7 +38,7 @@
                          :turn    "p1"
                          :markers ["X" "O"]
                          :players [:human :ai]})
-      (let [out (setupc/select-difficulty! sut/state :easy)]
+      (let [out (sut/select-difficulty! sut/state :easy)]
         (should= [:easy] (:difficulties out))
         (should= :game (:screen out))))
 
@@ -49,8 +49,8 @@
                          :turn    "p1"
                          :markers ["X" "O"]
                          :players [:ai :ai]})
-      (let [out1 (setupc/select-difficulty! sut/state :easy)
-            out2 (setupc/select-difficulty! sut/state :hard)]
+      (let [out1 (sut/select-difficulty! sut/state :easy)
+            out2 (sut/select-difficulty! sut/state :hard)]
         (should= [:easy] (:difficulties out1))
         (should= :select-difficulty (:screen out1))
 
