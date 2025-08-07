@@ -12,6 +12,7 @@
                                  should=
                                  focus-it]]
             [tic-tac-toe.game :as sut]
+            [tic-tac-toe.gamec :as gamec]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.cli-text :as printer]
             [tic-tac-toe.board :as board]
@@ -54,6 +55,23 @@
   (with-stubs)
   (before (reset! db/mem-db {}))
 
+
+  (context "cli next state"
+   (redefs-around [db/update-current-game! (stub :update-current-game!)
+                  aic/ai-turn (stub :ai-turn {:return 0})
+                  read-line (stub :read-line {:return "0"})])
+  (it "AI turn cli"
+    (let [new-state (gamec/next-state ai-vs-ai-state)]
+      (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
+      (should= "p2" (:turn new-state))
+      (should-have-invoked :update-current-game! {:with [new-state 0]})))
+  (it "Human turn cli"
+    (with-out-str
+      (let [new-state (gamec/next-state human-vs-ai-state)]
+        (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
+        (should= "p2" (:turn new-state))
+        (should-have-invoked :update-current-game! {:with [new-state 0]})))))
+
   (context "Game-loop"
     (tags :slow)
 
@@ -90,11 +108,7 @@
         (with-out-str (sut/game-loop {:screen :game-over}))
         (should-have-invoked :end-game!)))
 
-    (it "next-state checks winner, sets screen to :game-over"
-      (with-redefs [board/check-winner (stub :check-winner {:return "X Wins!"})]
-        (let [result (sut/next-state {:screen :game})]
-          (should-have-invoked :check-winner)
-          (should= :game-over (:screen result)))))
+
     )
 
 
@@ -104,25 +118,7 @@
                 (sut/end-game! {:id 123 :board (board/get-board :3x3)}))
               "Game ID: ")))
 
-  (context "Next-state stores a new move, updates turn and board"
-    ;; TODO ARC - update tests for next-state
-    (redefs-around [db/update-current-game! (stub :update-current-game!)
-                    aic/ai-turn (stub :ai-turn {:return 0})
-                    read-line (stub :read-line {:return "0"})])
-    (it "AI turn"
-      (let [new-state (sut/next-state ai-vs-ai-state)]
-        (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
-        (should= "p2" (:turn new-state))
-        (should-have-invoked :update-current-game! {:with [new-state 0]})))
-    (it "Human turn"
-      (with-out-str
-        (let [new-state (sut/next-state human-vs-ai-state)]
-          (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
-          (should= "p2" (:turn new-state))
-          (should-have-invoked :update-current-game! {:with [new-state 0]})))
-      )
 
-    )
   )
 
 

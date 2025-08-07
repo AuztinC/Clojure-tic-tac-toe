@@ -18,7 +18,7 @@
             [c3kit.wire.spec-helper :as wire]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.draw :as sut]
-            [tic-tac-toe.game :as game]
+            [tic-tac-toe.gamec :as game]
             [tic-tac-toe.config :as config]
             [tic-tac-toe.main :as main]))
 
@@ -210,43 +210,36 @@
         (should= 9 (:column-count out))
         (should= 27 (:cell-count out))))
 
-    (it "click cell, css"
-      (with-redefs [game/next-position (stub :next-position
-                                          {:invoke (fn [state _idx] state)})]
-        (reset! config/state {:screen     :game
-                             :ui         :web-cljs
-                             :turn       "p1"
-                             :markers    ["X" "O"]
-                             :players    [:human :ai]
-                             :board-size :3x3
-                             :board      (board/get-board :3x3)})
-        (should-select "#cell-1")
-        (should= "grey"
-          (cssfn "#cell-1" "background-color"))
-        (should= "60px"
-          (cssfn "#cell-1" "width"))
-        (should= "60px"
-          (cssfn "#cell-1" "height"))
-        (should= "pointer"
-          (cssfn "#cell-1" "cursor"))
-        (should= "1" (wire/text "#cell-1"))
-        (wire/click! "#cell-1")
-        (should-have-invoked :next-position)))
+    (context "click cell"
+      (redefs-around [game/next-position (stub :next-position
+                                           {:invoke (fn [state & _] state)})])
+     (it "click cell, css (human vs ai)"
 
-    (it "click cell, css"
-      (with-redefs [game/next-position (stub :next-position
-                                          {:invoke (fn [state _idx] state)})]
-        (reset! config/state {:screen     :game
-                             :ui         :web-cljs
-                             :turn       "p1"
-                             :markers    ["X" "O"]
-                             :players    [:ai :ai]
-                             :board-size :3x3
-                             :board      (board/get-board :3x3)})
-        (should-select "#cell-1")
-        (should= "1" (wire/text "#cell-1"))
-        (wire/click! "#cell-1")
-        (should-not-have-invoked :next-position)))
+       (should-select "#cell-1")
+       (should= "grey"
+         (cssfn "#cell-1" "background-color"))
+       (should= "60px"
+         (cssfn "#cell-1" "width"))
+       (should= "60px"
+         (cssfn "#cell-1" "height"))
+       (should= "pointer"
+         (cssfn "#cell-1" "cursor"))
+       (should= "1" (wire/text "#cell-1"))
+       (wire/click! "#cell-1")
+       (should-have-invoked :next-position))
+
+    (it "click cell (ai vs ai)"
+      (reset! config/state {:screen     :game
+                            :ui         :web-cljs
+                            :turn       "p1"
+                            :markers    ["X" "O"]
+                            :players    [:ai :ai]
+                            :board-size :3x3
+                            :board      (board/get-board :3x3)})
+      (should-select "#cell-1")
+      (should= "1" (wire/text "#cell-1"))
+      (wire/click! "#cell-1")
+      (should-not-have-invoked :next-position)))
     )
 
   (context "game over"

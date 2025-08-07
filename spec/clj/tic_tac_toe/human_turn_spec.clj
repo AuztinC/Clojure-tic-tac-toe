@@ -10,6 +10,7 @@
                                  should-have-invoked
                                  redefs-around
                                  should=]]
+            [tic-tac-toe.gamec :as gamec]
             [tic-tac-toe.human-turn :as sut]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
@@ -53,7 +54,7 @@
     (with-out-str
       (with-in-str "1"
         (it "invokes next position cli"
-          (should= 1 (game/next-position {:board   (board/get-board :3x3)
+          (should= 1 (gamec/next-position {:board   (board/get-board :3x3)
                                           :ui      :cli
                                           :players [:human :ai]}
                        ["X" :human] [:hard])))))
@@ -65,8 +66,8 @@
     (it "applies a valid move, no winner"
       (with-redefs [board/check-winner (stub :check-winner {:return false})
                     db/update-current-game! (stub :update!)
-                    game/next-player (stub :next {:return "p2"})
-                    game/empty-space? (stub :empty? {:return true})]
+                    gamec/next-player (stub :next {:return "p2"})
+                    gamec/empty-space? (stub :empty? {:return true})]
         (let [initial-state {:board {0 ["X"] 1 nil}
                              :turn "p1"
                              :markers ["X" "O"]
@@ -81,8 +82,8 @@
     (it "applies a valid move and detects a winner"
       (with-redefs [board/check-winner (stub :check-winner {:return true})
                     db/update-current-game! (stub :update!)
-                    game/next-player (stub :next {:return "p2"})
-                    game/empty-space? (stub :empty? {:return true})]
+                    gamec/next-player (stub :next {:return "p2"})
+                    gamec/empty-space? (stub :empty? {:return true})]
         (let [initial-state {:board {0 ["X"] 1 nil}
                              :turn "p1"
                              :markers ["X" "O"]
@@ -97,7 +98,7 @@
         (should= initial-state (sut/apply-human-move initial-state nil))))
 
     (it "ignores the move if space is not empty"
-      (with-redefs [game/empty-space? (stub :empty? {:return false})]
+      (with-redefs [gamec/empty-space? (stub :empty? {:return false})]
         (let [initial-state {:board {0 ["X"]} :turn "p1" :markers ["X" "O"]}]
           (should= initial-state (sut/apply-human-move initial-state 0))))))
   )

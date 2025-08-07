@@ -15,9 +15,8 @@
                    [c3kit.wire.spec-helperc :refer [should-select]])
   (:require [speclj.core]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.game :as game]
+            [tic-tac-toe.gamec :as game]
             [tic-tac-toe.config :as sut]
-            [tic-tac-toe.setupc :as setupc]
             [tic-tac-toe.ai-turnc :as aic]))
 
 (describe "game setup"

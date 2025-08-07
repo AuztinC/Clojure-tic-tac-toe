@@ -11,8 +11,7 @@
                                  redefs-around
                                  should=]]
             [tic-tac-toe.ai-turnc :as sut]
-            [tic-tac-toe.board :as board]
-            [tic-tac-toe.game :as game]))
+            [tic-tac-toe.board :as board]))
 
 (describe "ai-turn"
   (with-stubs)

@@ -4,9 +4,9 @@
                                         describe]])
   (:require [speclj.core]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.game :as game]
             [tic-tac-toe.ai-turnc :as aic]
-            [tic-tac-toe.ai-turn]))
+            [tic-tac-toe.ai-turn]
+            [tic-tac-toe.gamec :as game]))
 
 (describe "ai-turn-cljs"
 

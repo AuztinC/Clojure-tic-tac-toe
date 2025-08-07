@@ -1,6 +1,6 @@
 (ns tic-tac-toe.draw
   (:require [tic-tac-toe.board :as board]
-            [tic-tac-toe.game :as game]
+            [tic-tac-toe.gamec :as gamec]
             [tic-tac-toe.human-turn :as ht]
             [tic-tac-toe.config :as config]))
 
@@ -90,7 +90,7 @@
 (defn- handle-click [idx]
   (when-not (ignore-user-input?)
     (let [state (assoc @config/state :choice (js/parseInt idx))]
-      (game/next-position state
+      (gamec/next-position state
         [(current-marker state) (current-player-type state)]
         nil))))
 

@@ -3,7 +3,7 @@
                                         it
                                         describe]])
   (:require [speclj.core]
-            [tic-tac-toe.game :as game]))
+            [tic-tac-toe.gamec :as game]))
 
 (describe "human turn cljs"
   (it "invokes apply-next-move gui"

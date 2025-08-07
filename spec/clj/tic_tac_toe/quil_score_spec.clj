@@ -15,6 +15,7 @@
             [speclj.stub :as stub]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
+            [tic-tac-toe.gamec :as gamec]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.quil-core :as sut]
             [quil.core :as q]
@@ -83,7 +84,7 @@
   (context "state changes"
 
     (it "update-state calls game loop if no winner"
-      (with-redefs [game/next-state (stub :next-state)]
+      (with-redefs [gamec/next-state (stub :next-state)]
         (sut/update-state ai-vs-ai-state)
         (should-have-invoked :next-state)))
 
@@ -337,13 +338,13 @@
 
   (context "ai turn"
     (it "get-selection returns next board and sleeps"
-      (with-redefs [game/next-position (stub :play-turn {:return 0})]
+      (with-redefs [gamec/next-position (stub :play-turn {:return 0})]
         (let [result (sut/update-state ai-vs-human-state)]
           (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board result))
           (should= "p2" (:turn result)))))
 
     (it "allows game loop to check winner with ai games"
-      (with-redefs [game/next-state (stub :next-state)
+      (with-redefs [gamec/next-state (stub :next-state)
                     board/check-winner (stub :check-winner)]
         (sut/update-state {:screen :game :players [:human :ai] :turn "p2"})
         (should-not-have-invoked :check-winner)

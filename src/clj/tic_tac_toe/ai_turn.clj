@@ -1,6 +1,6 @@
 (ns tic-tac-toe.ai-turn
   (:require [tic-tac-toe.ai-turnc :as aic]
-            [tic-tac-toe.game :as game]))
+            [tic-tac-toe.gamec :as game]))
 
 (defn sleep []
   (Thread/sleep 500))

@@ -3,7 +3,7 @@
     [clojure.string :as str]
     [reagent.core :as r]
     [tic-tac-toe.board :as board]
-    [tic-tac-toe.game :as game]
+    [tic-tac-toe.gamec :as gamec]
     [tic-tac-toe.ai-turn]
     ))
 
@@ -39,13 +39,13 @@
 
 (defn auto-advance [_key _atom _old new]
   (when (= :game (:screen new))
-    (let [next-player (game/next-player-key new)]
+    (let [next-player (gamec/next-player-key new)]
       (when (= :ai next-player)
-        (let [after-move-state (game/next-state new)
+        (let [after-move-state (gamec/next-state new)
               winner? (board/check-winner (:board after-move-state))]
           (if (= [:ai :ai] (:players new))
             (sleep
-              #(reset! state (game/next-state new))
+              #(reset! state (gamec/next-state new))
               500)
             (game-over? winner? after-move-state)))))))
 

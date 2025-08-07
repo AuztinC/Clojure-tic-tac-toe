@@ -1,7 +1,8 @@
 (ns tic-tac-toe.replay
   (:require [tic-tac-toe.board :as board]
             [tic-tac-toe.game :as game]
-            [tic-tac-toe.cli-text :as printer]))
+            [tic-tac-toe.cli-text :as printer]
+            [tic-tac-toe.gamec :as gamec]))
 
 (defn game-loop! []
   (fn [acc {:keys [player position]}]
@@ -29,7 +30,7 @@
           updated-state (-> state
                           (assoc :board new-board)
                           (assoc :moves remaining)
-                          (assoc :turn (game/next-player (:turn state))))]
+                          (assoc :turn (gamec/next-player (:turn state))))]
       (if winner
         (assoc updated-state :screen :game-over)
         updated-state))

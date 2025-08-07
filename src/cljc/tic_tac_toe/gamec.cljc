@@ -1,7 +1,7 @@
-(ns tic-tac-toe.game
-  (:require [tic-tac-toe.cli-text :as printer]
-            [tic-tac-toe.board :as board]
+(ns tic-tac-toe.gamec
+  (:require [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
+
 
 (defn position-dispatch [{:keys [ui] :as _state} [_ player-type] & _]
   [player-type ui])
@@ -32,12 +32,6 @@
       (and (= "p1" turn) (= :ai player-type)) (first difficulties)
       (and (= "p2" turn) (= :ai player-type)) (second difficulties))))
 
-(defn end-game! [{:keys [id board] :as state}]
-  (do
-    (printer/display-board board)
-    (printer/output-result (board/check-winner board))
-    (printer/game-id id)))
-
 (defn next-state [state]
   (if (board/check-winner (:board state))
     (assoc state :screen :game-over)
@@ -51,12 +45,3 @@
         (do
           (db/update-current-game! next-state move)
           next-state)))))
-
-(defn game-loop [state]
-  (loop [state state]
-    (if (= :game-over (:screen state))
-      (end-game! state)
-      (do
-        (printer/display-board (:board state))
-        (recur (next-state state))))))
-

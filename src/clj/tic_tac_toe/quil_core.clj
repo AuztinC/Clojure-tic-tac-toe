@@ -4,6 +4,7 @@
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.game :as game]
+            [tic-tac-toe.gamec :as gamec]
             [tic-tac-toe.quil-drawings :as draw]
             [tic-tac-toe.replay :as replay]
             [tic-tac-toe.human-turn :as ht]))
@@ -43,12 +44,12 @@
         row (int (/ y cell-size))
         index (+ (* row 3) col)
         selection? (and (>= index 0) (< index 9) (= (first (nth board index)) ""))
-        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (game/next-player turn))]
+        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))]
     (if selection?
       (do
         (db/update-current-game! updated-board index)
         (-> state
-          (assoc :board (assoc (:board state) index [marker]) :turn (game/next-player turn))
+          (assoc :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))
           (setup-2d-game)))
       state)))
 
@@ -63,12 +64,12 @@
         row (int (/ y cell-size))
         index (+ (* row 4) col)
         selection? (and (>= index 0) (< index 16) (= (first (nth board index)) ""))
-        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (game/next-player turn))]
+        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))]
     (if selection?
       (do
         (db/update-current-game! updated-board index)
         (-> state
-          (assoc :board (assoc (:board state) index [marker]) :turn (game/next-player turn))
+          (assoc :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))
           (setup-2d-game)))
       state)))
 
@@ -104,7 +105,7 @@
             selection? (and (>= index 0)
                          (< index 27)
                          (= (first (nth board index)) ""))
-            updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (game/next-player turn))]
+            updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))]
         (if selection?
           (let [updated (ht/apply-human-move state index)]
             (setup-2d-game updated))
@@ -344,7 +345,7 @@
           (assoc state :screen :game-over)
           state)
 
-        (= :ai player) (game/next-state state)
+        (= :ai player) (gamec/next-state state)
 
         :else state))
 
