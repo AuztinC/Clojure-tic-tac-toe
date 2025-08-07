@@ -5,7 +5,8 @@
 (defmethod gamec/next-position [:human :web-cljs] [{:keys [board turn choice] :as state} [marker _] _]
   (if (and (some? choice) (gamec/empty-space? board choice))
     (let [updated-board (assoc board choice [marker])]
+      (dissoc @config/state :choice)
       (swap! config/state assoc
         :board updated-board
         :turn (gamec/next-player turn)))
-    state))
+    (dissoc state :choice)))

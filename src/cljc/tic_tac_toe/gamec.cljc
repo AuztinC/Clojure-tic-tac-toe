@@ -2,7 +2,6 @@
   (:require [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]))
 
-
 (defn position-dispatch [{:keys [ui] :as _state} [_ player-type] & _]
   [player-type ui])
 (defmulti next-position position-dispatch)

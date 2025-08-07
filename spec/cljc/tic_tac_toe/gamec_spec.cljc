@@ -5,9 +5,12 @@
                                  stub
                                  it
                                  should-have-invoked
-                                 should=]]
+                                 should-not-throw
+                                 should=
+                                 redefs-around]]
             [tic-tac-toe.gamec :as sut]
-            [tic-tac-toe.board :as board]))
+            [tic-tac-toe.board :as board]
+            [tic-tac-toe.persistence :as db]))
 (def human-vs-ai-state {:ui           :cli
                         :active-game  true
                         :id           123
@@ -31,9 +34,18 @@
                      :turn         "p1"})
 (describe "game common"
   (with-stubs)
-  (context "Next-state stores a new move, updates turn and board"
-    ;; TODO ARC - update tests for next-state
+  (redefs-around [db/update-current-game! (stub :update-current-game!)
+                  sut/next-position (stub :next-position {:return 0})])
+  (context "Next-state"
 
+    (it "makes a move and updates turn and board"
+      (let [initial-state ai-vs-ai-state
+            result (sut/next-state initial-state)]
+        (should= "p2" (:turn result))
+        (should= [["X"][""][""][""][""][""][""][""][""]] (:board result))))
+
+    (it "handles human players"
+      (should-not-throw (sut/next-state human-vs-ai-state)))
 
     (it "next-state checks winner, sets screen to :game-over"
       (with-redefs [board/check-winner (stub :check-winner {:return "X Wins!"})]

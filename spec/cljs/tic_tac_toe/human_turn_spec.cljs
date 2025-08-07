@@ -1,12 +1,13 @@
 (ns tic-tac-toe.human-turn-spec
   (:require-macros [speclj.core :refer [should=
                                         it
-                                        describe]])
+                                        describe
+                                        should-not]])
   (:require [speclj.core]
             [tic-tac-toe.gamec :as game]))
 
 (describe "human turn cljs"
-  (it "invokes apply-next-move gui"
+  (it "updates board and turn"
     (let [out (game/next-position {:board   (vec (repeat 9 [""]))
                                    :ui      :web-cljs
                                    :players [:human :ai]
@@ -14,5 +15,21 @@
                                    :markers ["X" "O"]
                                    :turn    "p1"} ["X" :human])]
       (should= "p2" (:turn out))
-      (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board out)))))
+      (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board out))
+      (should-not (:choice out))))
+
+  (it "handles bad input; removes choice"
+    (let [out (game/next-position {:board   (vec (repeat 9 [""]))
+                                   :ui      :web-cljs
+                                   :players [:human :ai]
+                                   :choice  10
+                                   :markers ["X" "O"]
+                                   :turn    "p1"} ["X" :human])
+          expected-out {:board   (vec (repeat 9 [""]))
+                        :ui      :web-cljs
+                        :players [:human :ai]
+                        :markers ["X" "O"]
+                        :turn    "p1"}]
+      (should= expected-out out)
+      (should-not (:choice expected-out)))))
 

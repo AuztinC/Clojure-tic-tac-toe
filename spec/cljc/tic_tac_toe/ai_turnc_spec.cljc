@@ -2,7 +2,6 @@
   (:require [speclj.core :refer [describe
                                  with-stubs
                                  should
-                                 should-not-have-invoked
                                  context
                                  tags
                                  stub

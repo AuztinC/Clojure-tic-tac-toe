@@ -24,20 +24,6 @@
 (defn- retry-difficulty []
   (println "Not a difficulty, retry."))
 
-(defn step-difficulty [state input]
-  (let [out (conj (vec (:difficulties state)) input)]
-    (if (= (:difficulties-count) (count out))
-      (let [id (db/set-new-game-id {:store (:store state)})
-            board (board/get-board (:board-size state))]
-        (assoc (dissoc state :difficulty-count)
-          :difficulties out
-          :screen :game
-          :id id
-          :board board
-          :turn "p1"
-          :markers ["X"]))
-      (assoc state :difficulties out))))
-
 (defn select-difficulty [state]
   (printer/print-difficulty)
   (loop [out []]
