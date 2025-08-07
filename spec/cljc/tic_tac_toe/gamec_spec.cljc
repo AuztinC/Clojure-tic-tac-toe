@@ -5,12 +5,9 @@
                                  stub
                                  it
                                  should-have-invoked
-                                 redefs-around
                                  should=]]
             [tic-tac-toe.gamec :as sut]
-            [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.board :as board]
-            [tic-tac-toe.ai-turnc :as aic]))
+            [tic-tac-toe.board :as board]))
 (def human-vs-ai-state {:ui           :cli
                         :active-game  true
                         :id           123
