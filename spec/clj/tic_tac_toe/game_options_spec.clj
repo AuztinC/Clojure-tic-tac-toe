@@ -1,7 +1,7 @@
 (ns tic-tac-toe.game-options-spec
   (:require [speclj.core :refer [describe
                                  with-stubs
-                                 focus-context
+                                 should-not
                                  before
                                  context
                                  should-contain
@@ -77,7 +77,7 @@
     (it "selects two difficulty for ai vs ai"
       (with-out-str (should= [:easy :hard] (:difficulties (with-in-str "1\n3" (sut/select-difficulty {:difficulty-count 2 :store :mem}))))))
     (it "empty for human vs human"
-      (with-out-str (should= [] (:difficulties (with-in-str "1" (sut/select-difficulty {:difficulty-count 0 :store :mem}))))))
+      (with-out-str (should-not (:difficulties (with-in-str "1" (sut/select-difficulty {:difficulty-count 0 :store :mem}))))))
     )
 
   (context "select board size"

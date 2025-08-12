@@ -3,7 +3,7 @@
             [quil.middleware :as m]
             [tic-tac-toe.board :as board]
             [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.game :as game]
+            [tic-tac-toe.configc :as configc]
             [tic-tac-toe.gamec :as gamec]
             [tic-tac-toe.quil-drawings :as draw]
             [tic-tac-toe.replay :as replay]
@@ -141,6 +141,11 @@
       :else state)))
 
 (defn select-difficulty! [state choice]
+  (let [new-state (configc/select-difficulty state choice)]
+    (db/clear-active {:store (:store new-state)})
+    new-state))
+
+#_(defn select-difficulty! [state choice]
   (let [ai-count (count (filterv #(= :ai %) (:players state)))
         updated-difficulties (conj (vec (:difficulties state)) choice)]
     (if (< (count updated-difficulties) ai-count)

@@ -1,5 +1,6 @@
 (ns tic-tac-toe.game-options
-  (:require [tic-tac-toe.persistence :as db]
+  (:require [tic-tac-toe.configc :as configc]
+            [tic-tac-toe.persistence :as db]
             [tic-tac-toe.cli-text :as printer]
             [tic-tac-toe.game :as init]
             [tic-tac-toe.board :as board]
@@ -24,29 +25,33 @@
 (defn- retry-difficulty []
   (println "Not a difficulty, retry."))
 
+(def ->single-difficulty
+  {"1" :easy "2" :medium "3" :hard})
+
+(defn final-state! [state]
+  (let [id (db/set-new-game-id {:store (:store state)})
+        board (board/get-board (:board-size state))]
+    (assoc (dissoc state :difficulty-count)
+      :difficulties (:difficulties state)
+      :screen :game
+      :id id
+      :board board
+      :turn "p1"
+      :markers ["X" "O"])))
+
 (defn select-difficulty [state]
   (printer/print-difficulty)
-  (loop [out []]
-    (if (= (:difficulty-count state) (count out))
-      (let [id (db/set-new-game-id {:store (:store state)})
-            board (board/get-board (:board-size state))]
-        (assoc (dissoc state :difficulty-count)
-          :difficulties out
-          :screen :game
-          :id id
-          :board board
-          :turn "p1"
-          :markers ["X" "O"]))
+  (loop [state state]
+    (if (= (:difficulty-count state) (count (:difficulties state)))
+      (final-state! state)
       (do
-        (printer/print-difficulty-iteration (count out))
+        (printer/print-difficulty-iteration (count (:difficulties state)))
         (let [player-choice (read-line)]
-          (case player-choice
-            "1" (recur (conj out :easy))
-            "2" (recur (conj out :medium))
-            "3" (recur (conj out :hard))
+          (if-let [diff (get ->single-difficulty player-choice)]
+            (recur (configc/select-difficulty state diff))
             (do
               (retry-difficulty)
-              (recur out))))))))
+              (recur state))))))))
 
 (declare select-game)
 (defn- retry-select-game [store]

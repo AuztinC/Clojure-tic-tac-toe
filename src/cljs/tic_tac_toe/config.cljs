@@ -4,7 +4,8 @@
     [reagent.core :as r]
     [tic-tac-toe.board :as board]
     [tic-tac-toe.gamec :as gamec]
-    [tic-tac-toe.ai-turn]))
+    [tic-tac-toe.ai-turn]
+    [tic-tac-toe.configc :as configc]))
 
 (def starting-state
   {:store   nil
@@ -16,7 +17,10 @@
 
 (defonce state (r/atom starting-state))
 
-(defn select-difficulty! [state choice]
+(defn select-difficulty! [atom choice]
+  (swap! atom configc/select-difficulty choice))
+
+#_(defn select-difficulty! [state choice]
   (let [ai-count (count (filterv #(= :ai %) (:players @state)))
         updated-difficulties (conj (vec (:difficulties @state)) choice)]
     (if (< (count updated-difficulties) ai-count)
