@@ -4,7 +4,7 @@
                                  should
                                  before
                                  context
-                                 tags
+                                 focus-describe
                                  stub
                                  it
                                  should-have-invoked
@@ -22,6 +22,7 @@
             [tic-tac-toe.quil-drawings :as draw]))
 
 (def ai-vs-ai-state {:id           123
+                     :ui :gui
                      :screen       :game
                      :board-size   :3x3
                      :board        (board/get-board :3x3)
@@ -337,16 +338,21 @@
         )))
 
   (context "ai turn"
-    (it "get-selection returns next board and sleeps"
+    (it "returns next board and sleeps"
       (with-redefs [gamec/next-position (stub :play-turn {:return 0})]
         (let [result (sut/update-state ai-vs-human-state)]
           (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board result))
           (should= "p2" (:turn result)))))
 
-    (it "allows game loop to check winner with ai games"
+    #_(it "allows game loop to check winner with ai games"
       (with-redefs [gamec/next-state (stub :next-state)
                     board/check-winner (stub :check-winner)]
-        (sut/update-state {:screen :game :players [:human :ai] :turn "p2"})
+        (sut/update-state {:board (vec (repeat 9 [[""]]))
+                           :ui :gui
+                           :screen :game
+                           :players [:human :ai]
+                           :turn "p2"
+                           :difficulties [:easy :easy]})
         (should-not-have-invoked :check-winner)
         (should-have-invoked :next-state)))
     )

@@ -39,17 +39,16 @@
   (context "Next-state"
 
     (it "makes a move and updates turn and board"
-      (let [initial-state ai-vs-ai-state
-            result (sut/next-state initial-state)]
+      (let [result (sut/next-state ai-vs-ai-state 0)]
         (should= "p2" (:turn result))
         (should= [["X"][""][""][""][""][""][""][""][""]] (:board result))))
 
     (it "handles human players"
-      (should-not-throw (sut/next-state human-vs-ai-state)))
+      (should-not-throw (sut/next-state human-vs-ai-state 0)))
 
     (it "next-state checks winner, sets screen to :game-over"
       (with-redefs [board/check-winner (stub :check-winner {:return "X Wins!"})]
-        (let [result (sut/next-state {:screen :game})]
+        (let [result (sut/next-state {:screen :game} 0)]
           (should-have-invoked :check-winner)
           (should= :game-over (:screen result)))))
 

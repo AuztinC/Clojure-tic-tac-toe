@@ -4,8 +4,7 @@
     [reagent.core :as r]
     [tic-tac-toe.board :as board]
     [tic-tac-toe.gamec :as gamec]
-    [tic-tac-toe.ai-turn]
-    ))
+    [tic-tac-toe.ai-turn]))
 
 (def starting-state
   {:store   nil
@@ -41,11 +40,14 @@
   (when (= :game (:screen new))
     (let [next-player (gamec/next-player-key new)]
       (when (= :ai next-player)
-        (let [after-move-state (gamec/next-state new)
+        (let [move (gamec/next-position new
+                     [(gamec/current-marker new) (gamec/current-player-type new)]
+                     (:difficulties new))
+              after-move-state (gamec/next-state new move)
               winner? (board/check-winner (:board after-move-state))]
           (if (= [:ai :ai] (:players new))
             (sleep
-              #(reset! state (gamec/next-state new))
+              #(reset! state (gamec/next-state new move))
               500)
             (game-over? winner? after-move-state)))))))
 

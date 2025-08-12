@@ -24,23 +24,29 @@
       ["X" p1-type]
       ["O" p2-type])))
 
-(defn ->difficulties [turn player-type difficulties]
+(defn ->difficulties [{:keys [turn difficulties] :as _state} player-type]
   (if (= 1 (count difficulties))
     (if (= :ai player-type) (first difficulties))
     (cond
       (and (= "p1" turn) (= :ai player-type)) (first difficulties)
       (and (= "p2" turn) (= :ai player-type)) (second difficulties))))
 
-(defn next-state [state]
+(defn current-player-type [{:keys [players turn]}]
+  (if (= turn "p1") (first players) (second players)))
+
+(defn current-marker [{:keys [markers turn]}]
+  (if (= turn "p1") (first markers) (second markers)))
+
+(defn next-state [state move]
   (if (board/check-winner (:board state))
     (assoc state :screen :game-over)
     (let [{board        :board,
            difficulties :difficulties
            turn         :turn} state]
       (let [[marker player-type :as player] (->players state)
-            difficulty (->difficulties turn player-type difficulties)
-            move (next-position state player difficulty)
+            ;difficulty (->difficulties turn player-type difficulties)
+            ;move (next-position state player difficulty)
+            _ (prn (number? move))
             next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
-        (do
-          (db/update-current-game! next-state move)
-          next-state)))))
+        (db/update-current-game! next-state move)
+        next-state))))

@@ -93,7 +93,6 @@
         cell-size (/ (q/width) 9)
         layer-size (* 3 cell-size)
         layer (find-layer x y layer-size)]
-
     (if (some? layer)
       (let [ox (* layer layer-size)
             oy (* layer layer-size)
@@ -345,7 +344,11 @@
           (assoc state :screen :game-over)
           state)
 
-        (= :ai player) (gamec/next-state state)
+        (= :ai player) (let [difficulty (gamec/->difficulties state player)
+                             move (gamec/next-position state
+                                    [(gamec/current-marker state) (gamec/current-player-type state)]
+                                    difficulty)]
+                        (gamec/next-state state move))
 
         :else state))
 

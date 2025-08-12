@@ -81,17 +81,11 @@
     (= :game-over (:screen @config/state))
     (= [:ai :ai] (:players @config/state))))
 
-(defn- current-player-type [{:keys [players turn]}]
-  (if (= turn "p1") (first players) (second players)))
-
-(defn- current-marker [{:keys [markers turn]}]
-  (if (= turn "p1") (first markers) (second markers)))
-
 (defn- handle-click [idx]
   (when-not (ignore-user-input?)
     (let [state (assoc @config/state :choice (js/parseInt idx))]
       (gamec/next-position state
-        [(current-marker state) (current-player-type state)]
+        [(gamec/current-marker state) (gamec/current-player-type state)]
         nil))))
 
 (defn- cell-cursor [value]
