@@ -63,10 +63,9 @@
 (defn select-game [state]
   (printer/print-game-options)
   (let [choice (read-line)
-        players (get configc/select-game (Integer/parseInt choice))]
-    (if players
-      (assoc state :players players
-        :screen :select-board)
+        new-state (configc/select-game state (Integer/parseInt choice) )]
+    (if (:players new-state)
+      new-state
       (do
         (retry-select-game state)
         state))))

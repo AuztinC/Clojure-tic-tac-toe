@@ -22,9 +22,7 @@
   (swap! atom configc/select-difficulty choice))
 
 (defn select-game! [atom choice]
-  (swap! atom assoc
-    :players (get configc/select-game choice)
-    :screen :select-board))
+  (swap! atom configc/select-game choice))
 
 (defn select-board-size! [atom choice]
   (let [next-screen (if (= [:human :human] (:players @atom))
