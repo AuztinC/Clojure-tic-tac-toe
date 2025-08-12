@@ -59,7 +59,8 @@
   (redefs-around [q/fill (stub :fill)
                   q/rect (stub :rect)
                   q/text (stub :text)
-                  q/frame-rate (stub :frame-rate)])
+                  q/frame-rate (stub :frame-rate)
+                  db/update-current-game! (stub :update-current-game!)])
 
   (it "draw-button"
     (draw/draw-button "text" 10 10 10 10)
@@ -85,8 +86,7 @@
   (context "state changes"
 
     (it "update-state calls game loop if no winner"
-      (with-redefs [db/update-current-game! (stub :update-current-game!)
-                    gamec/next-state (stub :next-state)]
+      (with-redefs [gamec/next-state (stub :next-state)]
         (sut/update-state ai-vs-ai-state)
         (should-have-invoked :next-state)))
 
@@ -256,7 +256,6 @@
   (context "human input"
 
     (redefs-around [q/width (stub :q/width {:return 400})
-                    db/update-current-game! (stub :update-current-game!)
                     sut/setup-2d-game (stub :setup-2d-game)])
 
     (it "click returns new selection and updates db "
@@ -345,16 +344,17 @@
           (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board result))
           (should= "p2" (:turn result)))))
 
-    #_(it "allows game loop to check winner with ai games"
+    (it "allows game loop to check winner with ai games"
       (with-redefs [gamec/next-state (stub :next-state)
-                    board/check-winner (stub :check-winner)]
+                    board/check-winner (stub :check-winner)
+                    gamec/->difficulties (stub :difficulties {:return :easy})
+                    gamec/next-position (stub :next-position {:return 0})]
         (sut/update-state {:board (vec (repeat 9 [[""]]))
                            :ui :gui
                            :screen :game
                            :players [:human :ai]
                            :turn "p2"
-                           :difficulties [:easy :easy]})
-        (should-not-have-invoked :check-winner)
+                           :difficulties [:easy]})
         (should-have-invoked :next-state)))
     )
 

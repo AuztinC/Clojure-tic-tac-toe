@@ -9,8 +9,7 @@
                                  should=
                                  redefs-around]]
             [tic-tac-toe.gamec :as sut]
-            [tic-tac-toe.board :as board]
-            [tic-tac-toe.persistence :as db]))
+            [tic-tac-toe.board :as board]))
 (def human-vs-ai-state {:ui           :cli
                         :active-game  true
                         :id           123
@@ -34,8 +33,7 @@
                      :turn         "p1"})
 (describe "game common"
   (with-stubs)
-  (redefs-around [db/update-current-game! (stub :update-current-game!)
-                  sut/next-position (stub :next-position {:return 0})])
+  (redefs-around [sut/next-position (stub :next-position {:return 0})])
   (context "Next-state"
 
     (it "makes a move and updates turn and board"

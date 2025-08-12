@@ -212,7 +212,7 @@
 
     (context "click cell"
       (redefs-around [game/next-position (stub :next-position
-                                           {:invoke (fn [state & _] state)})])
+                                           {:return 1})])
      (it "click cell, css (human vs ai)"
 
        (should-select "#cell-1")

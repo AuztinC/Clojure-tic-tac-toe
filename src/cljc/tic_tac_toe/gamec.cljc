@@ -1,6 +1,5 @@
 (ns tic-tac-toe.gamec
-  (:require [tic-tac-toe.board :as board]
-            [tic-tac-toe.persistence :as db]))
+  (:require [tic-tac-toe.board :as board]))
 
 (defn position-dispatch [{:keys [ui] :as _state} [_ player-type] & _]
   [player-type ui])
@@ -42,7 +41,7 @@
     (assoc state :screen :game-over)
     (let [{board :board,
            turn  :turn} state
-          [marker] (->players state)
-          next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
-      #_(db/update-current-game! next-state move)
-      next-state)))
+          [marker] (->players state)]
+      (assoc state
+        :board (assoc board move [marker])
+        :turn (next-player turn)))))

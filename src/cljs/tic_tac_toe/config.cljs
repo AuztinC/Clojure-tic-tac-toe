@@ -29,27 +29,20 @@
 (defn sleep [fn t]
   (js/setTimeout fn t))
 
-(defn game-over? [winner? new]
-  (if winner?
-    (do
-      (reset! state new)
-       (js/setTimeout (reset! state (assoc new :screen :game-over)) 10))
-    (reset! state new)))
-
 (defn auto-advance [_key _atom _old new]
   (when (= :game (:screen new))
-    (let [next-player (gamec/next-player-key new)]
+    (if (board/check-winner (:board new))
+      (reset! state (assoc new :screen :game-over))
+     (let [next-player (gamec/next-player-key new)]
       (when (= :ai next-player)
         (let [move (gamec/next-position new
                      [(gamec/current-marker new) (gamec/current-player-type new)]
-                     (:difficulties new))
-              after-move-state (gamec/next-state new move)
-              winner? (board/check-winner (:board after-move-state))]
+                     (gamec/->difficulties new next-player))]
           (if (= [:ai :ai] (:players new))
             (sleep
               #(reset! state (gamec/next-state new move))
               500)
-            (game-over? winner? after-move-state)))))))
+            (reset! state (gamec/next-state new move)))))))))
 
 (defn difficulty-text [diff-count]
   (cond

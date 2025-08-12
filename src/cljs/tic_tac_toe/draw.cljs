@@ -83,8 +83,15 @@
 
 (defn- handle-click [idx]
   (when-not (ignore-user-input?)
-    (let [state (assoc @config/state :choice (js/parseInt idx))]
-      (gamec/next-position state
+    (let [state (assoc @config/state :choice (js/parseInt idx))
+          move (gamec/next-position state
+                 [(gamec/current-marker state) (gamec/current-player-type state)]
+                 nil)
+          marker (if (= "p1" (:turn state)) "X" "O")
+          updated-board (assoc (:board state) move [marker])]
+      (swap! config/state assoc
+        :board updated-board
+        :turn (gamec/next-player (:turn state)))  #_(gamec/next-position state
         [(gamec/current-marker state) (gamec/current-player-type state)]
         nil))))
 
