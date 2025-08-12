@@ -74,10 +74,6 @@
 
     (it "advances immediately when next player is AI but players are human vs AI"
       (with-redefs [board/check-winner         (constantly false)
-                    gamec/next-player-key      (constantly :ai)
-                    gamec/current-marker       (constantly "X")
-                    gamec/current-player-type  (constantly :ai)
-                    gamec/->difficulties       (constantly :easy)
                     gamec/next-position        (constantly 3)
                     gamec/next-state           (stub :next-state {:return {:screen :game :turn "p1"}})
                     sut/sleep                  (stub :sleep)]
@@ -92,10 +88,6 @@
 
     (it "performs move when ai v ai (sleep branch)"
       (with-redefs [board/check-winner         (stub :check-winner {:return false})
-                    gamec/next-player-key      (stub :next-player-key {:return :ai})
-                    gamec/current-marker       (stub :current-marker {:return "X"})
-                    gamec/current-player-type  (stub :current-player-type {:return :ai})
-                    gamec/->difficulties       (stub :->difficulties {:return :easy})
                     gamec/next-position        (stub :next-position {:return 4})
                     gamec/next-state           (stub :next-state {:return {:screen :game :turn "p1"}})
                     sut/sleep                   (fn [f ms] (f))]

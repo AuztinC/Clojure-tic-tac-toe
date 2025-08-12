@@ -1,7 +1,7 @@
 (ns tic-tac-toe.draw
   (:require [tic-tac-toe.board :as board]
             [tic-tac-toe.gamec :as gamec]
-            [tic-tac-toe.human-turn :as ht]
+
             [tic-tac-toe.config :as config]))
 
 (defn- reset-btn []
@@ -16,47 +16,27 @@
   [:div {:id "main-container"}
    [:h1 {:style {:text-align "center"}} "Select a game mode"]
    [:div [:button {:id       "human-vs-ai"
-                   :on-click #(swap! config/state assoc
-                                :players [:human :ai]
-                                :screen :select-board)} "Human vs AI"]
+                   :on-click #(config/select-game! config/state 1)} "Human vs AI"]
     [:button {:id       "ai-vs-human"
-              :on-click #(swap! config/state assoc
-                           :players [:ai :human]
-                           :screen :select-board)} "AI vs Human"]
+              :on-click #(config/select-game! config/state 2)} "AI vs Human"]
     [:button {:id       "human-vs-human"
-              :on-click #(swap! config/state assoc
-                           :players [:human :human]
-                           :screen :select-board)} "Human vs Human"]
+              :on-click #(config/select-game! config/state 3)} "Human vs Human"]
     [:button {:id       "ai-vs-ai"
-              :on-click #(swap! config/state assoc
-                           :players [:ai :ai]
-                           :screen :select-board)} "AI vs AI"]]])
+              :on-click #(config/select-game! config/state 4)} "AI vs AI"]]])
 
 (defn select-board []
-  (let [next-screen (if (= [:human :human] (:players @config/state))
-                      :game
-                      :select-difficulty)]
-    [:div
-     {:id "main-container"}
-     [:h1 "Select a board"]
-     [:div [:button {:id       "board-3x3"
-                     :on-click #(swap! config/state assoc
-                                  :screen next-screen
-                                  :board-size :3x3
-                                  :board (board/get-board :3x3))} "3x3"]
-      [:button {:id       "board-4x4"
-                :on-click #(swap! config/state assoc
-                             :screen next-screen
-                             :board-size :4x4
-                             :board (board/get-board :4x4))} "4x4"]
-      [:button {:id       "board-3x3x3"
-                :on-click #(swap! config/state assoc
-                             :screen next-screen
-                             :board-size :3x3x3
-                             :board (board/get-board :3x3x3))} "3x3x3"]]
-     [:br]
-     [:br]
-     (reset-btn)]))
+  [:div
+   {:id "main-container"}
+   [:h1 "Select a board"]
+   [:div [:button {:id       "board-3x3"
+                   :on-click #(config/select-board-size! config/state 1)} "3x3"]
+    [:button {:id       "board-4x4"
+              :on-click #(config/select-board-size! config/state 2)} "4x4"]
+    [:button {:id       "board-3x3x3"
+              :on-click #(config/select-board-size! config/state 3)} "3x3x3"]]
+   [:br]
+   [:br]
+   (reset-btn)])
 
 (defn select-difficulty []
   (let [diff-count (count (:difficulties @config/state))
@@ -76,27 +56,8 @@
      [:br]
      (reset-btn)]))
 
-(defn- ignore-user-input? []
-  (or
-    (= :game-over (:screen @config/state))
-    (= [:ai :ai] (:players @config/state))))
-
-(defn- handle-click [idx]
-  (when-not (ignore-user-input?)
-    (let [state (assoc @config/state :choice (js/parseInt idx))
-          move (gamec/next-position state
-                 [(gamec/current-marker state) (gamec/current-player-type state)]
-                 nil)
-          marker (if (= "p1" (:turn state)) "X" "O")
-          updated-board (assoc (:board state) move [marker])]
-      (swap! config/state assoc
-        :board updated-board
-        :turn (gamec/next-player (:turn state)))  #_(gamec/next-position state
-        [(gamec/current-marker state) (gamec/current-player-type state)]
-        nil))))
-
 (defn- cell-cursor [value]
-  (if (or (string? value) (ignore-user-input?))
+  (if (or (string? value) (config/ignore-user-input?))
     "default"
     "pointer"))
 
@@ -117,7 +78,7 @@
                    :cursor           (cell-cursor value)}
         :id       (str "cell-" value)
         :class    "cell"
-        :on-click #(handle-click value)}
+        :on-click #(config/handle-click value)}
    value])
 
 (defn render-board [{:keys [board-size board] :as _state}]
@@ -150,6 +111,5 @@
      [:h1 "Game Over!"]
      [:h2 {:id "winner"} (config/winner-text winner)]
      [:br]
-     (reset-btn)]
-    ))
+     (reset-btn)]))
 

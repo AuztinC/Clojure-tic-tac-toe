@@ -10,3 +10,14 @@
     (-> state
       (assoc :difficulties updated-difficulties)
       (assoc :screen screen))))
+
+(def select-game
+  {1 [:human :ai]
+   2 [:ai :human]
+   3 [:human :human]
+   4 [:ai :ai]})
+
+(def select-board-size
+  {1 :3x3
+   2 :4x4
+   3 :3x3x3})

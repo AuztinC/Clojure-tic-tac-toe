@@ -211,9 +211,8 @@
         (should= 27 (:cell-count out))))
 
     (context "click cell"
-      (redefs-around [game/next-position (stub :next-position
-                                           {:return 1})])
-     (it "click cell, css (human vs ai)"
+      (redefs-around [config/handle-click (stub :handle-click)])
+     (it "css (human vs ai)"
 
        (should-select "#cell-1")
        (should= "grey"
@@ -226,9 +225,9 @@
          (cssfn "#cell-1" "cursor"))
        (should= "1" (wire/text "#cell-1"))
        (wire/click! "#cell-1")
-       (should-have-invoked :next-position))
+       (should-have-invoked :handle-click {:with [1]}))
 
-    (it "click cell (ai vs ai)"
+    (it "(ai vs ai)"
       (reset! config/state {:screen     :game
                             :ui         :web-cljs
                             :turn       "p1"

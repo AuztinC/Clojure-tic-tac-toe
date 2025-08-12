@@ -10,12 +10,10 @@
                                  should-have-invoked
                                  redefs-around
                                  should=]]
-            [speclj.stub :as stub]
             [tic-tac-toe.game-options :as sut]
             [tic-tac-toe.game :as init]
             [tic-tac-toe.persistence :as db]
-            [tic-tac-toe.cli-text :as printer]
-            [tic-tac-toe.replay :as replay]))
+            [tic-tac-toe.cli-text :as printer]))
 
 (describe "game-options"
   (with-stubs)
@@ -67,17 +65,17 @@
 
     (it "difficulty retries for bad input"
       (with-redefs [sut/select-difficulty (stub :select-difficulty {:invoke sut/select-difficulty})]
-        (let [out1 (with-out-str (with-in-str "5\n1\n1" (sut/select-difficulty {:difficulty-count 1 :store :mem})))
-              out2 (with-out-str (with-in-str "5\n1\n6\n2" (sut/select-difficulty {:difficulty-count 2 :store :mem})))]
+        (let [out1 (with-out-str (with-in-str "5\n1\n1" (sut/select-difficulty {:players [:human :ai] :store :mem})))
+              out2 (with-out-str (with-in-str "5\n1\n6\n2" (sut/select-difficulty {:players [:human :ai] :store :mem})))]
           (should-contain "Not a difficulty, retry.\n" out1)
           (should-contain "Not a difficulty, retry.\n" out2))))
 
     (it "selects one difficulty for human vs ai"
-      (with-out-str (should= [:easy] (:difficulties (with-in-str "1" (sut/select-difficulty {:difficulty-count 1 :store :mem}))))))
+      (with-out-str (should= [:easy] (:difficulties (with-in-str "1" (sut/select-difficulty {:players [:human :ai] :store :mem}))))))
     (it "selects two difficulty for ai vs ai"
-      (with-out-str (should= [:easy :hard] (:difficulties (with-in-str "1\n3" (sut/select-difficulty {:difficulty-count 2 :store :mem}))))))
+      (with-out-str (should= [:easy :hard] (:difficulties (with-in-str "1\n3" (sut/select-difficulty {:players [:ai :ai] :store :mem}))))))
     (it "empty for human vs human"
-      (with-out-str (should-not (:difficulties (with-in-str "1" (sut/select-difficulty {:difficulty-count 0 :store :mem}))))))
+      (with-out-str (should-not (:difficulties (with-in-str "1" (sut/select-difficulty {:players [:human :human] :store :mem}))))))
     )
 
   (context "select board size"

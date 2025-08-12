@@ -5,6 +5,7 @@
     [tic-tac-toe.board :as board]
     [tic-tac-toe.gamec :as gamec]
     [tic-tac-toe.ai-turn]
+    [tic-tac-toe.human-turn]
     [tic-tac-toe.configc :as configc]))
 
 (def starting-state
@@ -20,15 +21,37 @@
 (defn select-difficulty! [atom choice]
   (swap! atom configc/select-difficulty choice))
 
-#_(defn select-difficulty! [state choice]
-  (let [ai-count (count (filterv #(= :ai %) (:players @state)))
-        updated-difficulties (conj (vec (:difficulties @state)) choice)]
-    (if (< (count updated-difficulties) ai-count)
-      (swap! state assoc :difficulties updated-difficulties
-        :screen :select-difficulty)
+(defn select-game! [atom choice]
+  (swap! atom assoc
+    :players (get configc/select-game choice)
+    :screen :select-board))
+
+(defn select-board-size! [atom choice]
+  (let [next-screen (if (= [:human :human] (:players @atom))
+                      :game
+                      :select-difficulty)
+        size (get configc/select-board-size choice)]
+    (swap! atom assoc
+      :board-size size
+      :screen next-screen
+      :board (board/get-board size))))
+
+(defn ignore-user-input? []
+  (or
+    (= :game-over (:screen @state))
+    (= [:ai :ai] (:players @state))))
+
+(defn handle-click [idx]
+  (when-not (ignore-user-input?)
+    (let [new-state (assoc @state :choice (js/parseInt idx))
+          move (gamec/next-position new-state
+                 [(gamec/current-marker new-state) (gamec/current-player-type new-state)]
+                 nil)
+          marker (if (= "p1" (:turn new-state)) "X" "O")
+          updated-board (assoc (:board new-state) move [marker])]
       (swap! state assoc
-        :difficulties updated-difficulties
-        :screen :game))))
+        :board updated-board
+        :turn (gamec/next-player (:turn new-state))))))
 
 (defn sleep [fn t]
   (js/setTimeout fn t))
@@ -37,16 +60,16 @@
   (when (= :game (:screen new))
     (if (board/check-winner (:board new))
       (reset! state (assoc new :screen :game-over))
-     (let [next-player (gamec/next-player-key new)]
-      (when (= :ai next-player)
-        (let [move (gamec/next-position new
-                     [(gamec/current-marker new) (gamec/current-player-type new)]
-                     (gamec/->difficulties new next-player))]
-          (if (= [:ai :ai] (:players new))
-            (sleep
-              #(reset! state (gamec/next-state new move))
-              500)
-            (reset! state (gamec/next-state new move)))))))))
+      (let [next-player (gamec/next-player-key new)]
+        (when (= :ai next-player)
+          (let [move (gamec/next-position new
+                       [(gamec/current-marker new) (gamec/current-player-type new)]
+                       (gamec/->difficulties new next-player))]
+            (if (= [:ai :ai] (:players new))
+              (sleep
+                #(reset! state (gamec/next-state new move))
+                500)
+              (reset! state (gamec/next-state new move)))))))))
 
 (defn difficulty-text [diff-count]
   (cond

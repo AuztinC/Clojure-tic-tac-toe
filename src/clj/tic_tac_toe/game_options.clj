@@ -14,12 +14,14 @@
 
 (defn select-board [state]
   (printer/print-board-selection)
-  (let [player-choice (read-line)]
-    (cond
-      (= "1" player-choice) (assoc state :board-size :3x3 :screen :select-difficulty)
-      (= "2" player-choice) (assoc state :board-size :4x4 :screen :select-difficulty)
-      (= "3" player-choice) (assoc state :board-size :3x3x3 :screen :select-difficulty)
-      :else (retry-select-board state))))
+  (let [choice (read-line)
+        board-size (get configc/select-board-size (Integer/parseInt choice))]
+    (if board-size
+      (assoc state :board-size board-size
+        :screen :select-difficulty)
+      (do
+        (retry-select-board state)
+        state))))
 
 (declare select-difficulty)
 (defn- retry-difficulty []
@@ -42,7 +44,7 @@
 (defn select-difficulty [state]
   (printer/print-difficulty)
   (loop [state state]
-    (if (= (:difficulty-count state) (count (:difficulties state)))
+    (if (= (count (filterv #(= :ai %) (:players state))) (count (:difficulties state)))
       (final-state! state)
       (do
         (printer/print-difficulty-iteration (count (:difficulties state)))
@@ -60,20 +62,11 @@
 
 (defn select-game [state]
   (printer/print-game-options)
-  (let [choice (read-line)]
-    (case choice
-      "1" (assoc state :players [:human :ai]
-            :screen :select-board
-            :difficulty-count 1)
-      "2" (assoc state :players [:ai :human]
-            :screen :select-board
-            :difficulty-count 1)
-      "3" (assoc state :players [:human :human]
-            :screen :select-board
-            :difficulty-count 0)
-      "4" (assoc state :players [:ai :ai]
-            :screen :select-board
-            :difficulty-count 2)
+  (let [choice (read-line)
+        players (get configc/select-game (Integer/parseInt choice))]
+    (if players
+      (assoc state :players players
+        :screen :select-board)
       (do
         (retry-select-game state)
         state))))
