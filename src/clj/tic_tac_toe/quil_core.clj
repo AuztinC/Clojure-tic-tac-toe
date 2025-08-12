@@ -140,18 +140,6 @@
       (assoc state :board (board/get-board :3x3x3) :board-size :3x3x3 :screen next-screen)
       :else state)))
 
-#_(defmethod setupc/select-difficulty! :gui [state choice]
-  (let [ai-count (count (filterv #(= :ai %) (:players state)))
-        updated-difficulties (conj (vec (:difficulties state)) choice)]
-    (if (< (count updated-difficulties) ai-count)
-      (assoc state :difficulties updated-difficulties)
-      (do
-        (db/clear-active {:store (:store state)})
-        (-> state
-          (assoc :id (db/set-new-game-id {:store (:store state)})
-            :difficulties updated-difficulties
-            :screen :game))))))
-
 (defn select-difficulty! [state choice]
   (let [ai-count (count (filterv #(= :ai %) (:players state)))
         updated-difficulties (conj (vec (:difficulties state)) choice)]
@@ -338,19 +326,19 @@
     (let [player (case (:turn state)
                    "p1" (first (:players state))
                    "p2" (second (:players state)))]
-      (cond
-        (= [:human :human] [(first (:players state)) (second (:players state))])
-        (if (board/check-winner (:board state))
-          (assoc state :screen :game-over)
-          state)
+      (if (board/check-winner (:board state))
+        (assoc state :screen :game-over)
+        (cond
 
-        (= :ai player) (let [difficulty (gamec/->difficulties state player)
-                             move (gamec/next-position state
-                                    [(gamec/current-marker state) (gamec/current-player-type state)]
-                                    difficulty)]
-                        (gamec/next-state state move))
+          (= :ai player) (let [difficulty (gamec/->difficulties state player)
+                               move (gamec/next-position state
+                                      [(gamec/current-marker state) (gamec/current-player-type state)]
+                                      difficulty)
+                               next-state (gamec/next-state state move)]
+                           (db/update-current-game! next-state move)
+                           next-state)
 
-        :else state))
+          :else state)))
 
     :replay
     (watch-replay state)

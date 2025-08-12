@@ -55,10 +55,10 @@
   (with-stubs)
   (before (reset! db/mem-db {}))
 
+  (redefs-around [db/update-current-game! (stub :update-current-game!)])
 
   (context "cli next state"
-   (redefs-around [db/update-current-game! (stub :update-current-game!)
-                  aic/ai-turn (stub :ai-turn {:return 0})
+   (redefs-around [aic/ai-turn (stub :ai-turn {:return 0})
                   read-line (stub :read-line {:return "0"})])
   (it "AI turn cli"
     (let [move (gamec/next-position ai-vs-ai-state
@@ -67,7 +67,8 @@
           new-state (gamec/next-state ai-vs-ai-state move)]
       (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
       (should= "p2" (:turn new-state))
-      (should-have-invoked :update-current-game! {:with [new-state 0]})))
+      #_(should-have-invoked :update-current-game! {:with [new-state 0]})))
+
   (it "Human turn cli"
     (with-out-str
       (let [move (gamec/next-position human-vs-ai-state
@@ -76,39 +77,40 @@
             new-state (gamec/next-state human-vs-ai-state move)]
         (should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board new-state))
         (should= "p2" (:turn new-state))
-        (should-have-invoked :update-current-game! {:with [new-state 0]})))))
+        #_(should-have-invoked :update-current-game! {:with [new-state 0]})))))
 
   (context "Game-loop"
     (tags :slow)
 
-    ;(it "prints board"
-    ;  (with-redefs [printer/display-board (stub :display-board)]
-    ;    (with-out-str
-    ;      (with-in-str "1\n3\n7\n"
-    ;        (sut/game-loop human-vs-ai-state)))
-    ;    (should-have-invoked :display-board {:times 8})))
-    ;
-    ;(it "Human-vs-ai"
-    ;  (should (clojure.string/includes?
-    ;            (with-out-str
-    ;              (with-in-str "0\n3\n7\n"
-    ;                (sut/game-loop
-    ;                  human-vs-ai-state)))
-    ;            "O wins!\n")))
-    ;
-    ;(it "ai-vs-human"
-    ;  (should (clojure.string/includes?
-    ;            (with-out-str
-    ;              (with-in-str "0\n3\n7\n"
-    ;                (sut/game-loop
-    ;                  ai-vs-human-state)))
-    ;            "X wins!\n")))
+    (it "prints board"
+      (with-redefs [printer/display-board (stub :display-board)]
+        (with-out-str
+          (with-in-str "1\n3\n7\n"
+            (sut/game-loop human-vs-ai-state)))
+        (should-have-invoked :display-board {:times 8})))
+
+    (it "Human-vs-ai"
+      (should (clojure.string/includes?
+                (with-out-str
+                  (with-in-str "0\n3\n7\n"
+                    (sut/game-loop
+                      human-vs-ai-state)))
+                "O wins!\n")))
+
+    (it "ai-vs-human"
+      (should (clojure.string/includes?
+                (with-out-str
+                  (with-in-str "0\n3\n7\n"
+                    (sut/game-loop
+                      ai-vs-human-state)))
+                "X wins!\n")))
 
     (it "ai-vs-ai"
       (should (clojure.string/includes?
                 (with-out-str (sut/game-loop
                                 ai-vs-ai-state))
-                "tie"))))
+                "tie"))
+      (should-have-invoked :update-current-game! {:with [(gamec/next-state ai-vs-ai-state 0) 0]})))
 
   (context "game over"
     (it "game over calls game-end!"

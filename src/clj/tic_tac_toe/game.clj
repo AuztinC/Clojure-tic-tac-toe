@@ -1,7 +1,8 @@
 (ns tic-tac-toe.game
   (:require [tic-tac-toe.cli-text :as printer]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.gamec :as gamec]))
+            [tic-tac-toe.gamec :as gamec]
+            [tic-tac-toe.persistence :as db]))
 
 (defn end-game! [{:keys [id board] :as state}]
   (do
@@ -20,7 +21,8 @@
             difficulty (gamec/->difficulties state player-type)
             move (gamec/next-position state
                    [(gamec/current-marker state) player-type]
-                   difficulty)]
-        (prn player-type difficulty)
-        (recur (gamec/next-state state move))))))
+                   difficulty)
+            next-state (gamec/next-state state move)]
+        (db/update-current-game! next-state move)
+        (recur next-state)))))
 

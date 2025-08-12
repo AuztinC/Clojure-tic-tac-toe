@@ -85,7 +85,8 @@
   (context "state changes"
 
     (it "update-state calls game loop if no winner"
-      (with-redefs [gamec/next-state (stub :next-state)]
+      (with-redefs [db/update-current-game! (stub :update-current-game!)
+                    gamec/next-state (stub :next-state)]
         (sut/update-state ai-vs-ai-state)
         (should-have-invoked :next-state)))
 

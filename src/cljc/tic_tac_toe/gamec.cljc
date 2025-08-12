@@ -40,13 +40,9 @@
 (defn next-state [state move]
   (if (board/check-winner (:board state))
     (assoc state :screen :game-over)
-    (let [{board        :board,
-           difficulties :difficulties
-           turn         :turn} state]
-      (let [[marker player-type :as player] (->players state)
-            ;difficulty (->difficulties turn player-type difficulties)
-            ;move (next-position state player difficulty)
-            _ (prn (number? move))
-            next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
-        (db/update-current-game! next-state move)
-        next-state))))
+    (let [{board :board,
+           turn  :turn} state
+          [marker] (->players state)
+          next-state (assoc state :board (assoc board move [marker]) :turn (next-player turn))]
+      #_(db/update-current-game! next-state move)
+      next-state)))
