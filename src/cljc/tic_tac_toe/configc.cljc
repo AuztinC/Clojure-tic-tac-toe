@@ -25,7 +25,6 @@
         (assoc :screen :select-board))
       state)))
 
-
 (def board-sizes
   {1 :3x3
    2 :4x4

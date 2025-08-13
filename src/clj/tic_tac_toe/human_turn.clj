@@ -42,7 +42,7 @@
   (human-turn board marker))
 
 ;; TODO ARC - change quil to accept a position instead of full state
-#_(defmethod gamec/next-position [:human :gui] [{:keys [board] :as _state} [marker _] _]
+(defmethod gamec/next-position [:human :gui] [{:keys [board] :as _state} [marker _] _]
   (let [move (human-turn board marker)]
     move))
 

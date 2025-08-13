@@ -145,18 +145,6 @@
     (db/clear-active {:store (:store new-state)})
     new-state))
 
-#_(defn select-difficulty! [state choice]
-  (let [ai-count (count (filterv #(= :ai %) (:players state)))
-        updated-difficulties (conj (vec (:difficulties state)) choice)]
-    (if (< (count updated-difficulties) ai-count)
-      (assoc state :difficulties updated-difficulties)
-      (do
-        (db/clear-active {:store (:store state)})
-        (-> state
-          (assoc :id (db/set-new-game-id {:store (:store state)})
-            :difficulties updated-difficulties
-            :screen :game))))))
-
 (defmethod mouse-pressed! :select-difficulty [state event]
   (let [{:keys [x y]} event
         difficulty (->difficulty x y)]

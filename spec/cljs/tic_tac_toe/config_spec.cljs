@@ -19,13 +19,24 @@
             [tic-tac-toe.config :as sut]
             [tic-tac-toe.ai-turnc :as aic]))
 
+
+(def human-v-ai
+  {:screen     :game
+   :store      :ratom
+   :ui         :web-cljs
+   :players    [:human :ai]
+   :turn       "p1"
+   :board      (board/get-board :3x3)
+   :board-size :3x3
+   :markers ["X" "O"]})
+
 (describe "game setup"
   (with-stubs)
   ;(redefs-around [sut/auto-advance (stub :auto-advance)])
 
   (before (reset! sut/state {:screen  :select-game-mode
                              :ui      :web-cljs
-                             :store :ratom
+                             :store   :ratom
                              :turn    "p1"
                              :markers ["X" "O"]}))
 
@@ -57,11 +68,38 @@
         (should= :game (:screen out2))
         )))
 
+  (context "handle-click"
+    (it "returns initial state if bad input"
+      (with-redefs [sut/ignore-user-input? (stub :ignore-user-input {:return false})
+                    gamec/empty-space? (stub :empty-space {:return false})]
+        (reset! sut/state human-v-ai)
+        (let [state human-v-ai
+              out (sut/handle-click 0)]
+          (should= state out))))
+
+    (it "swaps atom for good input"
+      (with-redefs [sut/ignore-user-input? (stub :ignore-user-input {:return false})
+                    gamec/empty-space? (stub :empty-space {:return true})
+                    gamec/next-position (stub :next-position {:return 0})]
+        (reset! sut/state human-v-ai)
+        (let [new-state {:screen     :game
+                         :store      :ratom
+                         :ui         :web-cljs
+                         :players    [:human :ai]
+                         :turn       "p2"
+                         :board      [["X"] [""] [""] [""] [""] [""] [""] [""] [""]]
+                         :board-size :3x3
+                         :markers ["X" "O"]}
+              out (sut/handle-click 0)]
+
+          (should= new-state out))))
+    )
+
   (context "auto advance"
     (it "does not advance if it's not the AI's turn"
       (with-redefs [gamec/next-state (stub :next-state)]
         (let [initial-state {:screen     :game
-                             :store   :ratom
+                             :store      :ratom
                              :ui         :web-cljs
                              :players    [:human :ai]
                              :turn       "p1"
@@ -73,10 +111,10 @@
           (should-not-have-invoked :next-state))))
 
     (it "advances immediately when next player is AI but players are human vs AI"
-      (with-redefs [board/check-winner         (constantly false)
-                    gamec/next-position        (constantly 3)
-                    gamec/next-state           (stub :next-state {:return {:screen :game :turn "p1"}})
-                    sut/sleep                  (stub :sleep)]
+      (with-redefs [board/check-winner (constantly false)
+                    gamec/next-position (constantly 3)
+                    gamec/next-state (stub :next-state {:return {:screen :game :turn "p1"}})
+                    sut/sleep (stub :sleep)]
         (let [state {:screen :game :players [:human :ai] :turn "p2" :board (board/get-board :3x3)}]
           (reset! sut/state state)
           (sut/auto-advance :test-key sut/state state state)
@@ -87,10 +125,10 @@
 
 
     (it "performs move when ai v ai (sleep branch)"
-      (with-redefs [board/check-winner         (stub :check-winner {:return false})
-                    gamec/next-position        (stub :next-position {:return 4})
-                    gamec/next-state           (stub :next-state {:return {:screen :game :turn "p1"}})
-                    sut/sleep                   (fn [f ms] (f))]
+      (with-redefs [board/check-winner (stub :check-winner {:return false})
+                    gamec/next-position (stub :next-position {:return 4})
+                    gamec/next-state (stub :next-state {:return {:screen :game :turn "p1"}})
+                    sut/sleep (fn [f ms] (f))]
         (let [state {:screen  :game
                      :store   :ratom
                      :ui      :web-cljs
@@ -105,14 +143,14 @@
     (context "game-over!"
 
       (it "goes to :game-over immediately when board has winner"
-        (with-redefs [board/check-winner    (constantly true)
+        (with-redefs [board/check-winner (constantly true)
                       gamec/next-player-key (stub :next-player-key)
-                      gamec/next-position   (stub :next-position)
-                      gamec/next-state      (stub :next-state)
-                      sut/sleep             (stub :sleep)]
-          (let [state {:screen :game
+                      gamec/next-position (stub :next-position)
+                      gamec/next-state (stub :next-state)
+                      sut/sleep (stub :sleep)]
+          (let [state {:screen  :game
                        :players [:ai :ai]
-                       :board (board/get-board :3x3)}]
+                       :board   (board/get-board :3x3)}]
             (reset! sut/state state)
             (sut/auto-advance :test-key sut/state state state)
             (should= :game-over (:screen @sut/state))
