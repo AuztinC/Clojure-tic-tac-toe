@@ -34,18 +34,14 @@
 
 (defn handle-click [idx]
   (when-not (ignore-user-input?)
-    (if (gamec/empty-space? (:board @state) idx)
-      (let [new-state (assoc @state :choice (js/parseInt idx))
-            marker (gamec/current-marker new-state)
-            player-type (gamec/current-player-type new-state)
-            move (gamec/next-position new-state
-                   [marker player-type]
-                   nil)
-            updated-board (assoc (:board new-state) move [marker])]
-        (swap! state assoc
-          :board updated-board
-          :turn (gamec/next-player (:turn new-state))))
-      @state)))
+    (let [choice-state (assoc @state :last-move (js/parseInt idx))
+          marker (gamec/current-marker choice-state)
+          player-type (gamec/current-player-type choice-state)
+          move (gamec/next-position choice-state
+                 [marker player-type] nil)]
+      (if move
+        (reset! state (gamec/next-state (dissoc choice-state :last-move) move))
+        @state))))
 
 (defn sleep [fn t]
   (js/setTimeout fn t))
@@ -56,9 +52,10 @@
       (reset! state (assoc new :screen :game-over))
       (let [next-player (gamec/next-player-key new)]
         (when (= :ai next-player)
-          (let [move (gamec/next-position new
-                       [(gamec/current-marker new) (gamec/current-player-type new)]
-                       (gamec/->difficulties new next-player))]
+          (let [marker (gamec/current-marker new)
+                player-type (gamec/current-player-type new)
+                diff (gamec/->difficulties new next-player)
+                move (gamec/next-position new [marker player-type] diff)]
             (if (= [:ai :ai] (:players new))
               (sleep
                 #(reset! state (gamec/next-state new move))

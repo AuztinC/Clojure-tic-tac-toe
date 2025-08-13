@@ -3,7 +3,7 @@
                                  with-stubs
                                  context
                                  should-not=
-                                 focus-context
+                                 should-not
                                  should-contain
                                  stub
                                  it
@@ -101,4 +101,30 @@
       (with-redefs [gamec/empty-space? (stub :empty? {:return false})]
         (let [initial-state {:board {0 ["X"]} :turn "p1" :markers ["X" "O"]}]
           (should= initial-state (sut/apply-human-move initial-state 0))))))
+
+  (context "quil gui"
+    (it "returns choice"
+      (let [out (gamec/next-position {:board   (vec (repeat 9 [""]))
+                                     :ui      :gui
+                                     :players [:human :ai]
+                                     :last-move  0
+                                     :markers ["X" "O"]
+                                     :turn    "p1"} ["X" :human] nil)]
+        (should= 0 out)))
+
+    (it "handles bad input; removes choice"
+      (let [out (gamec/next-position {:board   (vec (repeat 9 [""]))
+                                     :ui      :gui
+                                     :players [:human :ai]
+                                     :choice  10
+                                     :markers ["X" "O"]
+                                     :turn    "p1"} ["X" :human] nil)
+            expected-out {:board   (vec (repeat 9 [""]))
+                          :ui      :gui
+                          :players [:human :ai]
+                          :markers ["X" "O"]
+                          :turn    "p1"}]
+        (should-not out)
+        (should-not (:choice expected-out))))
+    )
   )

@@ -15,9 +15,9 @@
 
 (defn ->difficulty [x y]
   (cond
-    (in-button? x y 250 220 70 50) :easy
+    (in-button? x y 50 220 70 50) :easy
     (in-button? x y 150 220 70 50) :medium
-    (in-button? x y 50 220 70 50) :hard
+    (in-button? x y 250 220 70 50) :hard
     :else nil))
 
 (defn click-backspace? [x y pos-x pos-y]
@@ -35,42 +35,36 @@
 (declare setup-2d-game)
 (defmethod handle-in-game-click! :3x3 [state event]
   (let [{:keys [x y]} event
-        {:keys [board turn markers]} state
-        marker (case turn
-                 "p1" (first markers)
-                 "p2" (second markers))
         cell-size (/ (q/width) 3)
         col (int (/ x cell-size))
         row (int (/ y cell-size))
         index (+ (* row 3) col)
-        selection? (and (>= index 0) (< index 9) (= (first (nth board index)) ""))
-        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))]
-    (if selection?
+        choice-state (assoc state :last-move index)
+        marker (gamec/current-marker state)
+        player-type (gamec/current-player-type state)
+        move (gamec/next-position choice-state
+               [marker player-type] nil)]
+    (if move
       (do
-        (db/update-current-game! updated-board index)
-        (-> state
-          (assoc :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))
-          (setup-2d-game)))
+        (db/update-current-game! (gamec/next-state state move) index)
+        (gamec/next-state state move))
       state)))
 
 (defmethod handle-in-game-click! :4x4 [state event]
   (let [{:keys [x y]} event
-        {:keys [board turn markers]} state
-        marker (case turn
-                 "p1" (first markers)
-                 "p2" (second markers))
         cell-size (/ (q/width) 4)
         col (int (/ x cell-size))
         row (int (/ y cell-size))
         index (+ (* row 4) col)
-        selection? (and (>= index 0) (< index 16) (= (first (nth board index)) ""))
-        updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))]
-    (if selection?
+        choice-state (assoc state :last-move index)
+        marker (gamec/current-marker state)
+        player-type (gamec/current-player-type state)
+        move (gamec/next-position choice-state
+               [marker player-type] nil)]
+    (if move
       (do
-        (db/update-current-game! updated-board index)
-        (-> state
-          (assoc :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))
-          (setup-2d-game)))
+        (db/update-current-game! (gamec/next-state state move) index)
+        (gamec/next-state state move))
       state)))
 
 (defn- find-layer [x y square]
@@ -84,12 +78,9 @@
             i)))
       (range 3))))
 
+(declare setup-3d-game)
 (defmethod handle-in-game-click! :3x3x3 [state event]
   (let [{:keys [x y]} event
-        {:keys [board turn markers]} state
-        marker (case turn
-                 "p1" (first markers)
-                 "p2" (second markers))
         cell-size (/ (q/width) 9)
         layer-size (* 3 cell-size)
         layer (find-layer x y layer-size)]
@@ -101,13 +92,15 @@
             col (int (/ local-x cell-size))
             row (int (/ local-y cell-size))
             index (+ (* layer 9) (+ (* row 3) col))
-            selection? (and (>= index 0)
-                         (< index 27)
-                         (= (first (nth board index)) ""))
-            updated-board (assoc state :board (assoc (:board state) index [marker]) :turn (gamec/next-player turn))]
-        (if selection?
-          (let [updated (ht/apply-human-move state index)]
-            (setup-2d-game updated))
+            choice-state (assoc state :last-move index)
+            marker (gamec/current-marker state)
+            player-type (gamec/current-player-type state)
+            move (gamec/next-position choice-state
+                   [marker player-type] nil)]
+        (if move
+          (do
+            (db/update-current-game! (gamec/next-state state move) index)
+            (gamec/next-state state move))
           state))
       state)))
 
@@ -117,27 +110,24 @@
   (let [{:keys [x y]} event]
     (cond
       (in-button? x y 20 220 70 50)
-      (assoc state :players [:human :human] :screen :select-board)
+      (configc/select-game state 1)
       (in-button? x y 120 220 70 50)
-      (assoc state :players [:ai :human] :screen :select-board)
+      (configc/select-game state 2)
       (in-button? x y 220 220 70 50)
-      (assoc state :players [:human :ai] :screen :select-board)
+      (configc/select-game state 3)
       (in-button? x y 320 220 70 50)
-      (assoc state :players [:ai :ai] :screen :select-board)
+      (configc/select-game state 4)
       :else state)))
 
 (defmethod mouse-pressed! :select-board [state event]
-  (let [next-screen (if (= [:human :human] (:players state))
-                      :game
-                      :select-difficulty)
-        {:keys [x y]} event]
+  (let [{:keys [x y]} event]
     (cond
-      (in-button? x y 250 220 70 50)
-      (assoc state :board (board/get-board :3x3) :board-size :3x3 :screen next-screen)
-      (in-button? x y 150 220 70 50)
-      (assoc state :board (board/get-board :4x4) :board-size :4x4 :screen next-screen)
       (in-button? x y 50 220 70 50)
-      (assoc state :board (board/get-board :3x3x3) :board-size :3x3x3 :screen next-screen)
+      (configc/select-board state 1)
+      (in-button? x y 150 220 70 50)
+      (configc/select-board state 2)
+      (in-button? x y 250 220 70 50)
+      (configc/select-board state 3)
       :else state)))
 
 (defn select-difficulty! [state choice]
@@ -323,13 +313,14 @@
         (assoc state :screen :game-over)
         (cond
 
-          (= :ai player) (let [difficulty (gamec/->difficulties state player)
-                               move (gamec/next-position state
-                                      [(gamec/current-marker state) (gamec/current-player-type state)]
-                                      difficulty)
-                               next-state (gamec/next-state state move)]
-                           (db/update-current-game! next-state move)
-                           next-state)
+          (= :ai player)
+          (let [difficulty (gamec/->difficulties state player)
+                marker (gamec/current-marker state)
+                player-type (gamec/current-player-type state)
+                move (gamec/next-position state [marker player-type] difficulty)
+                next-state (gamec/next-state state move)]
+            (db/update-current-game! next-state move)
+            next-state)
 
           :else state)))
 

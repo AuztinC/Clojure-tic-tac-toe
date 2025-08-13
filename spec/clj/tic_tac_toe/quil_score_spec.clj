@@ -2,9 +2,9 @@
   (:require [speclj.core :refer [describe
                                  with-stubs
                                  should
-                                 before
+                                 focus-context
                                  context
-                                 focus-describe
+                                 focus-it
                                  stub
                                  it
                                  should-have-invoked
@@ -35,6 +35,7 @@
 
 (def ai-vs-human-state {:id           123
                         :screen       :game
+                        :ui :gui
                         :board-size   :3x3
                         :board        (board/get-board :3x3)
                         :markers      ["X" "O"]
@@ -46,6 +47,7 @@
 
 (def human-vs-ai-state {:id         123
                         :screen     :game
+                        :ui :gui
                         :board-size :3x3
                         :board      (board/get-board :3x3)
                         :markers    ["X" "O"]
@@ -78,9 +80,9 @@
       (should-not (sut/in-button? 10 20 bx by w h))))
 
   (it "difficulty"
-    (should= :easy (sut/->difficulty 300 230))
+    (should= :easy (sut/->difficulty 100 230))
     (should= :medium (sut/->difficulty 180 221))
-    (should= :hard (sut/->difficulty 100 230))
+    (should= :hard (sut/->difficulty 300 230))
     (should= nil (sut/->difficulty 10 50)))
 
   (context "state changes"
@@ -99,7 +101,7 @@
   (context "mouse pressed"
 
     (it "selects human vs human"
-      (let [event {:x 25 :y 225}
+      (let [event {:x 225 :y 225}
             state {:screen :select-game-mode}
             result (sut/mouse-pressed! state event)]
         (should= [:human :human] (:players result))
@@ -113,7 +115,7 @@
         (should= :select-board (:screen result))))
 
     (it "selects human vs ai"
-      (let [event {:x 225 :y 225}
+      (let [event {:x 25 :y 225}
             state {:screen :select-game-mode}
             result (sut/mouse-pressed! state event)]
         (should= [:human :ai] (:players result))
@@ -127,7 +129,7 @@
         (should= :select-board (:screen result))))
 
     (it "selects board :3x3"
-      (let [event {:x 255 :y 225}
+      (let [event {:x 55 :y 225}
             state {:screen :select-board}
             result (sut/mouse-pressed! state event)]
         (should= :3x3 (:board-size result))
@@ -141,27 +143,27 @@
         (should= :select-difficulty (:screen result))))
 
     (it "selects board :3x3x3"
-      (let [event {:x 55 :y 225}
+      (let [event {:x 255 :y 225}
             state {:screen :select-board}
             result (sut/mouse-pressed! state event)]
         (should= :3x3x3 (:board-size result))
         (should= :select-difficulty (:screen result))))
 
     (it "->difficulty returns a difficulty keyword"
-      (let [x 55
+      (let [x 255
             y 255]
         (should= :hard (sut/->difficulty x y)))
       (let [x 155
             y 255]
         (should= :medium (sut/->difficulty x y)))
-      (let [x 255
+      (let [x 55
             y 255]
         (should= :easy (sut/->difficulty x y))))
 
     (it "selects single difficulty"
       (with-redefs [db/clear-active (stub :clear-active)
                     db/set-new-game-id (stub :set-new-game-id)]
-        (let [event {:x 55 :y 225}
+        (let [event {:x 255 :y 225}
               state {:ui :gui
                      :screen  :select-difficulty
                      :players [:human :ai]}
@@ -171,7 +173,7 @@
     (it "selects two difficulties ai vs ai"
       (with-redefs [db/clear-active (stub :clear-active)
                     db/set-new-game-id (stub :set-new-game-id)]
-        (let [event {:x 55 :y 225}
+        (let [event {:x 255 :y 225}
               state {:ui :gui
                      :screen     :select-difficulty
                      :board-size :3x3
@@ -262,6 +264,7 @@
       (let [event {:x 10 :y 10}]
         (sut/handle-in-game-click! human-vs-ai-state event)
         (should-have-invoked :update-current-game! {:with [{:screen     :game,
+                                                            :ui :gui
                                                             :store      :mem,
                                                             :board-size :3x3,
                                                             :turn       "p2",
@@ -269,8 +272,7 @@
                                                             :id         123,
                                                             :players    [:human :ai],
                                                             :board      [["X"] [""] [""] [""] [""] [""] [""] [""] [""]],
-                                                            :typed-id   ""} 0]})
-        (should-have-invoked :setup-2d-game)))
+                                                            :typed-id   ""} 0]})))
 
     (it "click on taken space returns same state"
       (let [event {:x 10 :y 10}

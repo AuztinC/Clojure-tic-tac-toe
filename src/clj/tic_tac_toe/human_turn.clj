@@ -41,8 +41,8 @@
 (defmethod gamec/next-position [:human :cli] [{:keys [board] :as _state} [marker _] _]
   (human-turn board marker))
 
-;; TODO ARC - change quil to accept a position instead of full state
-(defmethod gamec/next-position [:human :gui] [{:keys [board] :as _state} [marker _] _]
-  (let [move (human-turn board marker)]
-    move))
+(defmethod gamec/next-position [:human :gui] [{:keys [board last-move] :as _state} [marker _] _]
+  (if (gamec/empty-space? board last-move)
+    last-move
+    nil))
 

@@ -15,9 +15,9 @@
   (q/text "Choose your game" (/ (q/width) 2) 20)
   (q/stroke-weight 3)
   (q/stroke 255 0 0 100)
-  (draw-button "Human vs\nAI" 220 220 70 50)
+  (draw-button "Human vs\nAI" 20 220 70 50)
   (draw-button "AI vs\nHuman" 120 220 70 50)
-  (draw-button "Human vs\nHuman" 20 220 70 50)
+  (draw-button "Human vs\nHuman" 220 220 70 50)
   (draw-button "AI vs AI" 320 220 70 50))
 
 (defn draw-select-board [_]
@@ -27,9 +27,9 @@
   (q/text "Choose Your Board" (/ (q/width) 2) 20)
   (q/stroke-weight 3)
   (q/stroke 255 0 0 100)
-  (draw-button "3x3" 250 220 70 50)
+  (draw-button "3x3" 50 220 70 50)
   (draw-button "4x4" 150 220 70 50)
-  (draw-button "3x3x3" 50 220 70 50))
+  (draw-button "3x3x3" 250 220 70 50))
 
 (defn draw-select-difficulty [{:keys [difficulties]}]
   (let [count (inc (count difficulties))
@@ -42,9 +42,9 @@
   (q/text text (/ (q/width) 2) 20)
   (q/stroke-weight 3)
   (q/stroke 255 0 0 100)
-  (draw-button "Hard" 50 220 70 50)
+  (draw-button "Hard" 250 220 70 50)
   (draw-button "Medium" 150 220 70 50)
-  (draw-button "Easy" 250 220 70 50)))
+  (draw-button "Easy" 50 220 70 50)))
 
 (defn draw-replay-screen [_]
   (q/background 200)

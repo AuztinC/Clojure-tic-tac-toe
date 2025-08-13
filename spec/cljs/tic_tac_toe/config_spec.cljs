@@ -70,11 +70,10 @@
 
   (context "handle-click"
     (it "returns initial state if bad input"
-      (with-redefs [sut/ignore-user-input? (stub :ignore-user-input {:return false})
-                    gamec/empty-space? (stub :empty-space {:return false})]
+      (with-redefs [sut/ignore-user-input? (stub :ignore-user-input {:return false})]
         (reset! sut/state human-v-ai)
         (let [state human-v-ai
-              out (sut/handle-click 0)]
+              out (sut/handle-click 10)]
           (should= state out))))
 
     (it "swaps atom for good input"

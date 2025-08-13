@@ -14,10 +14,7 @@
                                    :choice  0
                                    :markers ["X" "O"]
                                    :turn    "p1"} ["X" :human])]
-      (should= 0 out)
-      #_(should= "p2" (:turn out))
-      #_(should= [["X"] [""] [""] [""] [""] [""] [""] [""] [""]] (:board out))
-      #_(should-not (:choice out))))
+      (should= 0 out)))
 
   (it "handles bad input; removes choice"
     (let [out (game/next-position {:board   (vec (repeat 9 [""]))
