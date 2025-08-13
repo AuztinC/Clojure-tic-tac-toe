@@ -25,14 +25,7 @@
   (swap! atom configc/select-game choice))
 
 (defn select-board-size! [atom choice]
-  (let [next-screen (if (= [:human :human] (:players @atom))
-                      :game
-                      :select-difficulty)
-        size (get configc/select-board-size choice)]
-    (swap! atom assoc
-      :board-size size
-      :screen next-screen
-      :board (board/get-board size))))
+  (swap! atom configc/select-board choice))
 
 (defn ignore-user-input? []
   (or

@@ -15,10 +15,9 @@
 (defn select-board [state]
   (printer/print-board-selection)
   (let [choice (read-line)
-        board-size (get configc/select-board-size (Integer/parseInt choice))]
-    (if board-size
-      (assoc state :board-size board-size
-        :screen :select-difficulty)
+        new-state (configc/select-board state (Integer/parseInt choice) )]
+    (if (:board-size new-state)
+      new-state
       (do
         (retry-select-board state)
         state))))
