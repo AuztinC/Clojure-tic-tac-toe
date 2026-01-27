@@ -25,6 +25,7 @@ A feature-rich Tic-Tac-Toe game implementation in Clojure with multiple interfac
 
 - [Clojure](https://clojure.org/guides/install_clojure) (version 1.12+)
 - [Java](https://www.java.com/) (JDK 8 or higher)
+- [Node.js and npm](https://nodejs.org/) (optional, for web interface development server)
 - [PostgreSQL](https://www.postgresql.org/) (optional, for database persistence)
 - [Leiningen](https://leiningen.org/) (optional, for legacy project.clj support)
 
@@ -83,7 +84,13 @@ clj -M:run --gui -psql
 
 To run the web-based version:
 
-1. Build the ClojureScript application:
+1. Install the development server (required):
+
+```bash
+npm install -g http-server
+```
+
+2. Build the ClojureScript application:
 
 ```bash
 clj -M:cljs once
@@ -95,13 +102,13 @@ For development with auto-rebuild:
 clj -M:cljs auto
 ```
 
-2. Start the development server:
+3. Start the development server:
 
 ```bash
 ./bin/server
 ```
 
-3. Open your browser to `http://localhost:8080`
+4. Open your browser to `http://localhost:8080`
 
 ## How to Play
 
