@@ -13,7 +13,6 @@
             [tic-tac-toe.gamec :as gamec]
             [tic-tac-toe.human-turn :as sut]
             [tic-tac-toe.board :as board]
-            [tic-tac-toe.game :as game]
             [tic-tac-toe.persistence :as db]
             [tic-tac-toe.cli-text :as printer]))
 
