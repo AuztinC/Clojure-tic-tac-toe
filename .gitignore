@@ -11,3 +11,5 @@ pom.xml
 .lein-repl-history
 resources/public/cljs/*
 .cpcache/
+.idea/
+.DS_Store
