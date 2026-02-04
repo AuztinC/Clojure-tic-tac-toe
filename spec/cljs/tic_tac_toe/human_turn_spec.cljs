@@ -7,7 +7,7 @@
   (:require [speclj.core]
             [tic-tac-toe.gamec :as game]))
 
-(focus-describe "human turn cljs"
+(describe "human turn cljs"
   (it "returns choice"
     (let [out (game/next-position {:board   (vec (repeat 9 [""]))
                                    :ui      :web-cljs
